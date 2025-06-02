@@ -1,0 +1,11 @@
+query GetProducts {
+    products(first: 5) {
+        edges {
+            node {
+                id
+                title
+                handle
+            }
+        }
+    }
+}

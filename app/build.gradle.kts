@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.apollographql.apollo") version "4.2.0"
+}
+
+apollo {
+    service("service") {
+        packageName.set("com.example.m_commerce")
+    }
 }
 
 android {
@@ -56,4 +63,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.apollo.runtime)
 }

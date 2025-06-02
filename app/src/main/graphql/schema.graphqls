@@ -1,0 +1,175 @@
+type Query {
+  shop: Shop
+  products(first: Int, after: String): ProductConnection
+  productByHandle(handle: String!): Product
+  collections(first: Int, after: String): CollectionConnection
+  collectionByHandle(handle: String!): Collection
+  customer(customerAccessToken: String!): Customer
+  checkout(id: ID!): Checkout
+}
+
+type Shop {
+  name: String
+  description: String
+  moneyFormat: String
+  primaryDomain: Domain
+}
+
+type ProductConnection {
+  edges: [ProductEdge]
+  pageInfo: PageInfo
+}
+
+type ProductEdge {
+  node: Product
+  cursor: String
+}
+
+type Product {
+  id: ID!
+  title: String
+  description: String
+  handle: String
+  images(first: Int): ImageConnection
+  variants(first: Int): ProductVariantConnection
+  priceRange: ProductPriceRange
+}
+
+type ProductPriceRange {
+  minVariantPrice: MoneyV2
+  maxVariantPrice: MoneyV2
+}
+
+type ProductVariantConnection {
+  edges: [ProductVariantEdge]
+}
+
+type ProductVariantEdge {
+  node: ProductVariant
+}
+
+type ProductVariant {
+  id: ID!
+  title: String
+  price: MoneyV2
+  availableForSale: Boolean
+  selectedOptions: [SelectedOption]
+}
+
+type SelectedOption {
+  name: String
+  value: String
+}
+
+type MoneyV2 {
+  amount: String
+  currencyCode: CurrencyCode
+}
+
+enum CurrencyCode {
+  USD
+  EUR
+  GBP
+}
+
+type ImageConnection {
+  edges: [ImageEdge]
+}
+
+type ImageEdge {
+  node: Image
+}
+
+type Image {
+  url: String
+  altText: String
+}
+
+type CollectionConnection {
+  edges: [CollectionEdge]
+  pageInfo: PageInfo
+}
+
+type CollectionEdge {
+  node: Collection
+}
+
+type Collection {
+  id: ID!
+  title: String
+  description: String
+  handle: String
+  products(first: Int): ProductConnection
+}
+
+type Customer {
+  id: ID!
+  email: String
+  firstName: String
+  lastName: String
+  orders(first: Int): OrderConnection
+}
+
+type OrderConnection {
+  edges: [OrderEdge]
+}
+
+type OrderEdge {
+  node: Order
+}
+
+type Order {
+  id: ID!
+  orderNumber: Int
+  totalPrice: MoneyV2
+  processedAt: String
+  lineItems(first: Int): LineItemConnection
+}
+
+type LineItemConnection {
+  edges: [LineItemEdge]
+}
+
+type LineItemEdge {
+  node: LineItem
+}
+
+type LineItem {
+  title: String
+  quantity: Int
+  variant: ProductVariant
+}
+
+type Checkout {
+  id: ID!
+  webUrl: String
+  lineItems(first: Int): CheckoutLineItemConnection
+  subtotalPrice: MoneyV2
+  totalPrice: MoneyV2
+}
+
+type CheckoutLineItemConnection {
+  edges: [CheckoutLineItemEdge]
+}
+
+type CheckoutLineItemEdge {
+  node: CheckoutLineItem
+}
+
+type CheckoutLineItem {
+  id: ID!
+  title: String
+  quantity: Int
+  variant: ProductVariant
+}
+
+type Domain {
+  host: String
+  sslEnabled: Boolean
+  url: String
+}
+
+type PageInfo {
+  hasNextPage: Boolean
+  hasPreviousPage: Boolean
+}
