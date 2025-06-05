@@ -6,18 +6,24 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -26,10 +32,9 @@ import androidx.navigation.compose.rememberNavController
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.ui.theme.MCommerceTheme
 import com.example.m_commerce.ui.view.AccountScreen
-import com.example.m_commerce.ui.view.CategoriesScreen
+import com.example.m_commerce.ui.view.CategoryScreen
 import com.example.m_commerce.ui.view.HomeScreen
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+
 
 private const val TAG = "MainActivity"
 
@@ -82,8 +87,8 @@ fun MainActivity.NavHostSetup(){
             HomeScreen()
         }
 
-        composable<ScreensRoute.Categories>{
-            CategoriesScreen()
+        composable<ScreensRoute.Category>{
+            CategoryScreen()
         }
 
         composable<ScreensRoute.Favorites>{
@@ -108,13 +113,27 @@ fun MainActivity.MainScreen(){
         },
         topBar = {
             TopAppBar(
-                title = { Text("Title") },
+                title = {
+                    Text(
+                    "Title",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge
+                ) },
+                colors = TopAppBarColors(
+                    containerColor = Color.White,
+                    scrolledContainerColor = Color.Black,
+                    navigationIconContentColor = Color.Black,
+                    titleContentColor = Color.Black,
+                    actionIconContentColor = Color.Black,
+                ),
                 actions = {
+
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.Outlined.Search, contentDescription = "Search Product")
+                    }
                     IconButton(onClick = { }) {
                         Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
-                    }
-                    IconButton(onClick = {  }) {
-                        Icon(Icons.Outlined.FavoriteBorder, contentDescription = "FavoriteBorder")
                     }
                 }
             )

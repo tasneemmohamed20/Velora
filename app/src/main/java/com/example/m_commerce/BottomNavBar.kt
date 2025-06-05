@@ -2,12 +2,17 @@ package com.example.m_commerce
 
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -15,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 data class NavigationItem(
@@ -31,12 +37,17 @@ val navigationItems = listOf(
         route = ScreensRoute.Home
     ),
     NavigationItem(
-        title = "Category",
-        icon = Icons.Default.ShoppingCart,
-        route = ScreensRoute.Categories
+        title = "Favorite",
+        icon = Icons.Outlined.FavoriteBorder,
+        route = ScreensRoute.Favorites
     ),
     NavigationItem(
-        title = "Profile",
+        title = "Order",
+        icon = Icons.AutoMirrored.Outlined.List,
+        route = ScreensRoute.Favorites
+    ),
+    NavigationItem(
+        title = "Account",
         icon = Icons.Outlined.Person,
         route = ScreensRoute.Account
     ),
@@ -57,6 +68,7 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
         navigationItems.forEachIndexed { index, navigationItem ->
 
             NavigationBarItem(
+                alwaysShowLabel = true,
                 selected = selectedNavigationIndex == index,
                 onClick = {
                     selectedNavigationIndex = index
@@ -68,6 +80,13 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
                         contentDescription = navigationItem.title,
                     )
                 },
+                label = {
+                    Text(
+                        text = navigationItem.title,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Black
+                    )
+                }
             )
         }
     }

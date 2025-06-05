@@ -13,14 +13,14 @@ import com.example.m_commerce.ScreensRoute
 
 @Preview
 @Composable
-fun CategoriesScreen(){
+fun CategoryScreen(){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
         Text(
-            text = "Categories Screen"
+            text = "Category Screen"
         )
 
     }

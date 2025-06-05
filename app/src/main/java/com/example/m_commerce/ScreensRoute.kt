@@ -9,10 +9,13 @@ sealed class ScreensRoute {
     data object Home: ScreensRoute()
 
     @Serializable
-    data object Categories: ScreensRoute()
+    data object Category: ScreensRoute()
 
     @Serializable
     object Cart: ScreensRoute()
+
+    @Serializable
+    object Order: ScreensRoute()
 
     @Serializable
     object Favorites: ScreensRoute()
