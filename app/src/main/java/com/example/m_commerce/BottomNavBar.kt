@@ -1,13 +1,10 @@
 package com.example.m_commerce
 
-import androidx.annotation.StringRes
+
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -30,7 +27,7 @@ data class NavigationItem(
 val navigationItems = listOf(
     NavigationItem(
         title = "Home",
-        icon = Icons.Default.Home,
+        icon = Icons.Outlined.Home,
         route = ScreensRoute.Home
     ),
     NavigationItem(
@@ -40,7 +37,7 @@ val navigationItems = listOf(
     ),
     NavigationItem(
         title = "Profile",
-        icon = Icons.Default.Person,
+        icon = Icons.Outlined.Person,
         route = ScreensRoute.Account
     ),
 )

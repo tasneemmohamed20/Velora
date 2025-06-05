@@ -6,10 +6,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,59 +67,62 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun NavHostSetup(){
-        NavHost(
-            navController = navHostController,
-            startDestination = ScreensRoute.Home
-        ){
-            composable<ScreensRoute.Home>{
-                HomeScreen()
-            }
 
-            composable<ScreensRoute.Categories>{
-                CategoriesScreen()
-            }
 
-            composable<ScreensRoute.Favorites>{
 
-            }
+}
 
-            composable<ScreensRoute.Account>{
-                AccountScreen()
-            }
+@Composable
+fun MainActivity.NavHostSetup(){
+    NavHost(
+        navController = navHostController,
+        startDestination = ScreensRoute.Home
+    ){
+        composable<ScreensRoute.Home>{
+            HomeScreen()
+        }
+
+        composable<ScreensRoute.Categories>{
+            CategoriesScreen()
+        }
+
+        composable<ScreensRoute.Favorites>{
+
+        }
+
+        composable<ScreensRoute.Account>{
+            AccountScreen()
         }
     }
+}
 
-    @Composable
-    fun MainScreen(){
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainActivity.MainScreen(){
 
-        Scaffold(
-            bottomBar = {
-                BottomNavigationBar {
-                    navHostController.navigate(it.route)
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar {
+                navHostController.navigate(it.route)
+            }
+        },
+        topBar = {
+            TopAppBar(
+                title = { Text("Title") },
+                actions = {
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
+                    }
+                    IconButton(onClick = {  }) {
+                        Icon(Icons.Outlined.FavoriteBorder, contentDescription = "FavoriteBorder")
+                    }
                 }
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
-                NavHostSetup()
-            }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            NavHostSetup()
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MCommerceTheme {
-        Greeting("Android")
-    }
-}
