@@ -30,8 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 
-
-
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
