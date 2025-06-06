@@ -1,0 +1,14 @@
+
+query GetBrands {
+    collections(first: 12) {
+        edges {
+            node {
+                id
+                title
+                image {
+                    url
+                }
+            }
+        }
+    }
+}

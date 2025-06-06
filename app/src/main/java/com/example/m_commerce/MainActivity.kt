@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,16 +23,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.apollographql.apollo.ApolloClient
+import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSourceImp
+import com.example.m_commerce.data.repo_imp.ProductsRepositoryImp
 import com.example.m_commerce.ui.theme.MCommerceTheme
 import com.example.m_commerce.ui.view.AccountScreen
-import com.example.m_commerce.ui.view.CategoryScreen
-import com.example.m_commerce.ui.view.HomeScreen
+import com.example.m_commerce.ui.category.CategoryScreen
+import com.example.m_commerce.ui.home.HomeScreen
+import com.example.m_commerce.ui.home.HomeViewModel
+import com.example.m_commerce.ui.home.HomeViewModelFactory
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 
 private const val TAG = "MainActivity"
@@ -47,6 +52,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
+//        val remote = ProductRemoteDataSourceImp()
+//        GlobalScope.launch {
+//            remote.getBrands().catch {  }.collect {
+//                Log.d(TAG, it.toString())
+//            }
+//        }
 
 //        GlobalScope.launch {
 //            val apolloClient = ApolloClient.Builder()
@@ -115,7 +126,11 @@ fun MainActivity.NavHostSetup(){
         startDestination = ScreensRoute.Home
     ){
         composable<ScreensRoute.Home>{
-            HomeScreen()
+            HomeScreen(ViewModelProvider(
+                this@NavHostSetup,
+                HomeViewModelFactory(ProductsRepositoryImp(ProductRemoteDataSourceImp()))
+               )
+                [HomeViewModel::class.java])
         }
 
         composable<ScreensRoute.Category>{

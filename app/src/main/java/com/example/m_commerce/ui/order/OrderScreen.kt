@@ -1,4 +1,4 @@
-package com.example.m_commerce.ui.view
+package com.example.m_commerce.ui.order
 
 import androidx.compose.runtime.Composable
 
