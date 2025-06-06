@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun SignUpScreen(navController: NavController) {
+fun SignUpScreen(onButtonClicked: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -119,7 +119,7 @@ fun SignUpScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Already have an account?")
-            TextButton(onClick = { navController.popBackStack() }) {
+            TextButton(onClick = onButtonClicked) {
                 Text("Login", color = Color(0xFF0F6FB0))
             }
         }

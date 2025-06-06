@@ -36,15 +36,11 @@ val navigationItems = listOf(
         icon = Icons.Outlined.Home,
         route = ScreensRoute.Home
     ),
-    NavigationItem(
-        title = "Favorite",
-        icon = Icons.Outlined.FavoriteBorder,
-        route = ScreensRoute.Favorites
-    ),
+
     NavigationItem(
         title = "Order",
         icon = Icons.AutoMirrored.Outlined.List,
-        route = ScreensRoute.Favorites
+        route = ScreensRoute.Order
     ),
     NavigationItem(
         title = "Account",
@@ -90,7 +86,6 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
             )
         }
     }
-
 }
 
 

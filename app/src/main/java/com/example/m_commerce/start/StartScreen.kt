@@ -30,7 +30,7 @@ import com.example.m_commerce.ScreensRoute
 
 
 @Composable
-fun StartScreen(navController: NavController) {
+fun StartScreen(onEmailClicked : () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,9 +58,7 @@ fun StartScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
             SocialButton("Continue as Guest", icon = R.drawable.ic_person) {}
-            SocialButton("Continue with Email", icon = R.drawable.ic_gmail) {
-                navController.navigate(ScreensRoute.Login.route)
-            }
+            SocialButton("Continue with Email", icon = R.drawable.ic_gmail, onClick = onEmailClicked)
             SocialButton("Continue with Google", icon = R.drawable.ic_google) {}
         }
     }

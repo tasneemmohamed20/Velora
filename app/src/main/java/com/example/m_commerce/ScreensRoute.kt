@@ -3,14 +3,32 @@ package com.example.m_commerce
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class ScreensRoute(val route: String) {
-    @Serializable data object Start : ScreensRoute("start")
-    @Serializable data object Login : ScreensRoute("login")
-    @Serializable data object SignUp : ScreensRoute("signup")
-    @Serializable data object Home : ScreensRoute("home")
-    @Serializable data object Category : ScreensRoute("category")
-    @Serializable data object Cart : ScreensRoute("cart")
-    @Serializable data object Order : ScreensRoute("order")
-    @Serializable data object Favorites : ScreensRoute("favorites")
-    @Serializable data object Account : ScreensRoute("account")
+sealed class ScreensRoute {
+
+
+    @Serializable
+    data object Home: ScreensRoute()
+
+    @Serializable
+    data object Category: ScreensRoute()
+
+    @Serializable
+    object Cart: ScreensRoute()
+
+    @Serializable
+    object Order: ScreensRoute()
+
+    @Serializable
+    object Favorites: ScreensRoute()
+
+    @Serializable
+    object Account: ScreensRoute()
+
+    @Serializable
+    data object Start : ScreensRoute()
+    @Serializable
+    data object Login : ScreensRoute()
+    @Serializable
+    data object SignUp : ScreensRoute()
+
 }

@@ -42,12 +42,11 @@ import com.example.m_commerce.ui.theme.MCommerceTheme
 import com.example.m_commerce.ui.view.AccountScreen
 import com.example.m_commerce.ui.view.CategoryScreen
 import com.example.m_commerce.ui.view.HomeScreen
+import com.example.m_commerce.ui.view.OrderScreen
 
 
 private const val TAG = "MainActivity"
-
 class MainActivity : ComponentActivity() {
-
     lateinit var navHostController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,88 +55,94 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            navHostController = rememberNavController()
             MCommerceTheme {
-                navHostController = rememberNavController()
                 MainScreen()
             }
         }
     }
-}
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun MainScreen() {
 
-@Composable
-fun MainActivity.NavHostSetup() {
-    NavHost(
-        navController = navHostController,
-        startDestination = ScreensRoute.Home.route
-    ) {
-        composable(ScreensRoute.Start.route) {
-            StartScreen(navHostController)
-        }
-        composable(ScreensRoute.Login.route) {
-            LoginScreen(navHostController)
-        }
-        composable(ScreensRoute.SignUp.route) {
-            SignUpScreen(navHostController)
-        }
-
-        composable(ScreensRoute.Home.route) {
-            HomeScreen()
-        }
-        composable(ScreensRoute.Category.route) {
-            CategoryScreen()
-        }
-        composable(ScreensRoute.Favorites.route) {
-        }
-        composable(ScreensRoute.Account.route) {
-            AccountScreen()
-        }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainActivity.MainScreen(){
-
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar {
-                navHostController.navigate(it.route)
-            }
-        },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                    "Title",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge
-                ) },
-                colors = TopAppBarColors(
-                    containerColor = Color.White,
-                    scrolledContainerColor = Color.Black,
-                    navigationIconContentColor = Color.Black,
-                    titleContentColor = Color.Black,
-                    actionIconContentColor = Color.Black,
-                ),
-                actions = {
-
-                    IconButton(onClick = {  }) {
-                        Icon(Icons.Outlined.Search, contentDescription = "Search Product")
-                    }
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
-                    }
+        Scaffold(
+            bottomBar = {
+                BottomNavigationBar {
+                    navHostController.navigate(it.route)
                 }
-            )
+            },
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "Title",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    colors = TopAppBarColors(
+                        containerColor = Color.White,
+                        scrolledContainerColor = Color.Black,
+                        navigationIconContentColor = Color.Black,
+                        titleContentColor = Color.Black,
+                        actionIconContentColor = Color.Black,
+                    ),
+                    actions = {
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Outlined.Search, contentDescription = "Search Product")
+                        }
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                NavHostSetup()
+            }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            NavHostSetup()
+    }
+
+    @Composable
+    fun MainActivity.NavHostSetup(){
+        NavHost(
+            navController = navHostController,
+            startDestination = ScreensRoute.Start
+        ){
+            composable<ScreensRoute.Home>{
+                HomeScreen()
+            }
+
+            composable<ScreensRoute.Category>{
+                CategoryScreen()
+            }
+
+            composable<ScreensRoute.Order>{
+                OrderScreen()
+            }
+
+            composable<ScreensRoute.Account>{
+                AccountScreen()
+            }
+
+            composable<ScreensRoute.Start> {
+                StartScreen(onEmailClicked = {
+                    navHostController.navigate(ScreensRoute.Login)
+                })
+            }
+            composable<ScreensRoute.Login> {
+                LoginScreen(onButtonClicked = {
+                    navHostController.navigate(ScreensRoute.SignUp)
+                })
+            }
+            composable<ScreensRoute.SignUp> {
+                SignUpScreen(onButtonClicked = {
+                    navHostController.navigate(ScreensRoute.Login)
+                })
+            }
         }
     }
 }
-
-

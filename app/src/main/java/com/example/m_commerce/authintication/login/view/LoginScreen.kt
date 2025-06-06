@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(onButtonClicked: () -> Unit ){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -96,7 +96,7 @@ fun LoginScreen(navController: NavController) {
         ) {
             Text("Don't have an account?")
             TextButton(
-                onClick = { navController.navigate("signup") }) {
+                onClick = onButtonClicked) {
                 Text("Sign Up", color = Color(0xFF0F6FB0)
                 )
             }
