@@ -1,10 +1,12 @@
 package com.example.m_commerce
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,7 +41,6 @@ import com.example.m_commerce.ui.view.HomeScreen
 private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
-
 
     lateinit var navHostController: NavHostController
 
@@ -97,6 +98,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MCommerceTheme {
+
                 navHostController = rememberNavController()
                 MainScreen()
             }
