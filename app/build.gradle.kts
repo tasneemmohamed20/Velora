@@ -67,4 +67,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation(libs.apollo.runtime)
+    //nav
+    implementation ("androidx.navigation:navigation-compose:2.7.0")
 }
