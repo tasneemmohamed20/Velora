@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.m_commerce.R
-import com.example.m_commerce.Routes
+import com.example.m_commerce.ScreensRoute
 
 
 @Composable
@@ -59,7 +59,7 @@ fun StartScreen(navController: NavController) {
         ) {
             SocialButton("Continue as Guest", icon = R.drawable.ic_person) {}
             SocialButton("Continue with Email", icon = R.drawable.ic_gmail) {
-                navController.navigate(Routes.LOGIN.route)
+                navController.navigate(ScreensRoute.Login.route)
             }
             SocialButton("Continue with Google", icon = R.drawable.ic_google) {}
         }
