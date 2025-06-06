@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.apollographql.apollo") version "4.2.0"
+    kotlin("plugin.serialization") version "2.1.10"
 }
 
 apollo {
@@ -67,4 +68,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation(libs.apollo.runtime)
+
+    // Navigation compose
+    implementation (libs.androidx.navigation.compose)
+    //Serialization for NavArgs
+    implementation (libs.kotlinx.serialization.json)
 }
