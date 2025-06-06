@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.apollographql.apollo") version "4.2.0"
+    kotlin("plugin.serialization") version "2.1.10"
 }
 
 apollo {
@@ -64,13 +65,23 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
+    implementation(libs.okhttp)
+    implementation (libs.retrofit)
+    implementation (libs.retrofit2.converter.gson)
     implementation(libs.apollo.runtime)
+
     //nav
     implementation ("androidx.navigation:navigation-compose:2.7.0")
 
     //icons
     implementation ("androidx.compose.material:material-icons-extended:1.4.3")
+
+
+
+
+    // Navigation compose
+    implementation (libs.androidx.navigation.compose)
+    //Serialization for NavArgs
+    implementation (libs.kotlinx.serialization.json)
 
 }
