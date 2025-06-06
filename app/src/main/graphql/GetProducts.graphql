@@ -1,11 +1,41 @@
 query GetProducts {
-    products(first: 5) {
+    products(first: 20) {
         edges {
             node {
-                id
-                title
+                availableForSale
+                createdAt
+                description
+                descriptionHtml
+                encodedVariantAvailability
+                encodedVariantExistence
                 handle
+                id
+                isGiftCard
+                onlineStoreUrl
+                productType
+                publishedAt
+                requiresSellingPlan
+                tags
+                title
+                totalInventory
+                trackingParameters
+                updatedAt
+                vendor
             }
         }
     }
 }
+
+query GetLocalizationOptions {
+    localization {
+        availableCountries {
+            isoCode
+            name
+            unitSystem
+            availableLanguages {
+                name
+            }
+        }
+    }
+}
+

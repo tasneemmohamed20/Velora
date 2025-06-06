@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-        Log.i(TAG, "onCreate: ")
+
 //        GlobalScope.launch {
 //            val apolloClient = ApolloClient.Builder()
 //                .serverUrl("https://and2-ism-mad45.myshopify.com/api/2025-04/graphql.json")
@@ -64,6 +64,37 @@ class MainActivity : ComponentActivity() {
 //                Log.e(TAG, "Failed: ${e.message}")
 //            }
 //        }
+
+
+//         GlobalScope.launch {
+//             val apolloClient = ApolloClient.Builder()
+//                 .serverUrl("https://and2-ism-mad45.myshopify.com/api/2025-04/graphql")
+//                 .addHttpHeader("X-Shopify-Storefront-Access-Token", "da2a10babb2984a38271fe2d887ed128")
+// //                .addHttpHeader("Content-Type", "application/json")
+//                 .build()
+//             try {
+//                 val response = apolloClient.query(GetProductsQuery()).execute()
+//                 val products = response.data?.products?.edges?.map { it?.node }
+//                 products?.forEach {
+//                     Log.d(TAG, it?.title ?: "No title")
+//                 }
+
+//                 val ress = apolloClient.query(GetLocalizationOptionsQuery()).execute()
+//                 val localizationOptions = ress.data?.localization?.availableCountries?.map { it.availableLanguages }
+//                 if (localizationOptions != null) {
+//                 localizationOptions?.forEach { languages ->
+//                     languages?.forEach { language ->
+//                         Log.d(TAG, "Language: ${language?.name} ")
+//                     }
+//                 }
+//                 }else{
+//                     Log.d(TAG, "No localization options found")
+//                 }
+//             } catch (e: Exception) {
+//                 Log.e(TAG, "Failed: ${e.message}")
+//             }
+//         }
+
         setContent {
             MCommerceTheme {
                 navHostController = rememberNavController()
