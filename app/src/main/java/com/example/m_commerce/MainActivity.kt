@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +33,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.ui.theme.MCommerceTheme
 import com.example.m_commerce.ui.view.AccountScreen
@@ -99,9 +102,21 @@ class MainActivity : ComponentActivity() {
         setContent {
             MCommerceTheme {
 
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Greeting(
+//                        name = "Android",
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
+
+
                 navHostController = rememberNavController()
                 MainScreen()
+
             }
+
+            AuthAppNav()
+
         }
     }
 
@@ -109,6 +124,23 @@ class MainActivity : ComponentActivity() {
 
 
 }
+
+
+//@Composable
+//fun Greeting(name: String, modifier: Modifier = Modifier) {
+//    Text(
+//        text = "Hello $name!",
+//        modifier = modifier
+//    )
+//}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    MCommerceTheme {
+//        Greeting("Android")
+//    }
+//}
 
 @Composable
 fun MainActivity.NavHostSetup(){
@@ -177,4 +209,5 @@ fun MainActivity.MainScreen(){
         }
     }
 }
+
 

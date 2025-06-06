@@ -70,9 +70,18 @@ dependencies {
     implementation (libs.retrofit2.converter.gson)
     implementation(libs.apollo.runtime)
 
+    //nav
+    implementation ("androidx.navigation:navigation-compose:2.7.0")
+
+    //icons
+    implementation ("androidx.compose.material:material-icons-extended:1.4.3")
+
+
+
 
     // Navigation compose
     implementation (libs.androidx.navigation.compose)
     //Serialization for NavArgs
     implementation (libs.kotlinx.serialization.json)
+
 }
