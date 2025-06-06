@@ -23,4 +23,7 @@ sealed class ScreensRoute {
     @Serializable
     object Account: ScreensRoute()
 
+    @Serializable
+    object Settings: ScreensRoute()
+
 }
