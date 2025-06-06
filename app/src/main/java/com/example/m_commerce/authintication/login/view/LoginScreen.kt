@@ -27,13 +27,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+
 
 
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -58,12 +62,26 @@ fun LoginScreen(navController: NavController) {
             onValueChange = { password = it },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = if (passwordVisible)
+                androidx.compose.ui.text.input.VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
+            trailingIcon = {
+                val icon = if (passwordVisible)
+                    androidx.compose.material.icons.Icons.Default.Visibility
+                else
+                    androidx.compose.material.icons.Icons.Default.VisibilityOff
+
+                val desc = if (passwordVisible) "Hide password" else "Show password"
+
+                androidx.compose.material3.IconButton(onClick = {
+                    passwordVisible = !passwordVisible
+                }) {
+                    androidx.compose.material3.Icon(imageVector = icon, contentDescription = desc)
+                }
+            }
         )
-
         Spacer(modifier = Modifier.height(16.dp))
-
-
         Button(
             onClick = {},
             modifier = Modifier.fillMaxWidth(),
