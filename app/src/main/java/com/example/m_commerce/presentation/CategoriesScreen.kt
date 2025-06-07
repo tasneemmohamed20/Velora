@@ -1,4 +1,4 @@
-package com.example.m_commerce.ui.view
+package com.example.m_commerce.presentation
 
 
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.m_commerce.ScreensRoute
 
 @Preview
 @Composable

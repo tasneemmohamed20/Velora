@@ -1,4 +1,4 @@
-package com.example.m_commerce.ui.theme
+package com.example.m_commerce.presentation.utils.theme
 
 import androidx.compose.ui.graphics.Color
 

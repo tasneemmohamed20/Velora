@@ -1,4 +1,4 @@
-package com.example.m_commerce.settings.view_model
+package com.example.m_commerce.presentation.Account.settings.view_model
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

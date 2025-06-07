@@ -25,9 +25,15 @@ sealed class ScreensRoute {
     object Account: ScreensRoute()
 
     @Serializable
+
+    object Settings: ScreensRoute()
+    
+    @Serializable
     data object Start : ScreensRoute()
+    
     @Serializable
     data object Login : ScreensRoute()
+    
     @Serializable
     data object SignUp : ScreensRoute()
 

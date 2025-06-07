@@ -1,19 +1,14 @@
 package com.example.m_commerce
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-
-
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,12 +23,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
+import com.example.m_commerce.data.remote_data_source.RemoteDataSourceImp
+import com.example.m_commerce.data.repository.RepositoryImp
+import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
+import com.example.m_commerce.presentation.Account.settings.view.SettingsScreen
+import com.example.m_commerce.presentation.Account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
+import com.example.m_commerce.presentation.Account.AccountScreen
+import com.example.m_commerce.presentation.CategoryScreen
+import com.example.m_commerce.presentation.HomeScreen
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.authintication.login.view.LoginScreen
 import com.example.m_commerce.authintication.signUp.view.SignUpScreen
@@ -43,6 +45,7 @@ import com.example.m_commerce.ui.view.AccountScreen
 import com.example.m_commerce.ui.view.CategoryScreen
 import com.example.m_commerce.ui.view.HomeScreen
 import com.example.m_commerce.ui.view.OrderScreen
+
 
 
 private const val TAG = "MainActivity"
@@ -112,37 +115,54 @@ class MainActivity : ComponentActivity() {
             navController = navHostController,
             startDestination = ScreensRoute.Start
         ){
-            composable<ScreensRoute.Home>{
-                HomeScreen()
-            }
+            
+          composable<ScreensRoute.Home>{HomeScreen()}
+        
+          composable<ScreensRoute.Cart>{}
 
-            composable<ScreensRoute.Category>{
-                CategoryScreen()
-            }
+          composable<ScreensRoute.Settings>{
+              SettingsScreen(
+                  viewModel = SettingsViewModel(
+                      currencyExchangeUsecase = CurrencyExchangeUsecase(
+                          repository = RepositoryImp(
+                              remoteDataSource = RemoteDataSourceImp()
+                          )
+                      )
+                  )
+              )
+          }
 
-            composable<ScreensRoute.Order>{
-                OrderScreen()
-            }
+        composable<ScreensRoute.Account>{
+            AccountScreen(
+                onSettingsClick = {
+                    navHostController.navigate(ScreensRoute.Settings)
+                }
+            )
+        }
+  
+        composable<ScreensRoute.Category>{
+            CategoryScreen()
+        }
 
-            composable<ScreensRoute.Account>{
-                AccountScreen()
-            }
+        composable<ScreensRoute.Order>{
+            OrderScreen()
+        }
 
-            composable<ScreensRoute.Start> {
-                StartScreen(onEmailClicked = {
-                    navHostController.navigate(ScreensRoute.Login)
-                })
-            }
-            composable<ScreensRoute.Login> {
-                LoginScreen(onButtonClicked = {
-                    navHostController.navigate(ScreensRoute.SignUp)
-                })
-            }
-            composable<ScreensRoute.SignUp> {
-                SignUpScreen(onButtonClicked = {
-                    navHostController.navigate(ScreensRoute.Login)
-                })
-            }
+
+        composable<ScreensRoute.Start> {
+            StartScreen(onEmailClicked = {
+                navHostController.navigate(ScreensRoute.Login)
+            })
+        }
+        composable<ScreensRoute.Login> {
+            LoginScreen(onButtonClicked = {
+                navHostController.navigate(ScreensRoute.SignUp)
+            })
+        }
+        composable<ScreensRoute.SignUp> {
+            SignUpScreen(onButtonClicked = {
+                navHostController.navigate(ScreensRoute.Login)
+            })
         }
     }
 }

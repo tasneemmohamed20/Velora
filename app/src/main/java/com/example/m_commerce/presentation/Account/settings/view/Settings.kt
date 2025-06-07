@@ -1,4 +1,4 @@
-package com.example.m_commerce.settings.view
+package com.example.m_commerce.presentation.Account.settings.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +14,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -31,11 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.m_commerce.data.remote_data_source.RemoteDataSourceImp
-import com.example.m_commerce.data.repository.RepositoryImp
-import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
-import com.example.m_commerce.settings.view_model.SettingsViewModel
-import com.example.m_commerce.ui.components.CustomTopAppBar
+import com.example.m_commerce.presentation.Account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 
 
 enum class SettingsIcon {

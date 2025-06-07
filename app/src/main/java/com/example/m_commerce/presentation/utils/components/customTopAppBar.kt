@@ -1,4 +1,4 @@
-package com.example.m_commerce.ui.components
+package com.example.m_commerce.presentation.utils.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
