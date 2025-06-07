@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,17 +35,10 @@ import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.Account.AccountScreen
 import com.example.m_commerce.presentation.CategoryScreen
 import com.example.m_commerce.presentation.HomeScreen
-import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.authintication.login.view.LoginScreen
 import com.example.m_commerce.authintication.signUp.view.SignUpScreen
+import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.start.StartScreen
-import com.example.m_commerce.ui.theme.MCommerceTheme
-import com.example.m_commerce.ui.view.AccountScreen
-import com.example.m_commerce.ui.view.CategoryScreen
-import com.example.m_commerce.ui.view.HomeScreen
-import com.example.m_commerce.ui.view.OrderScreen
-
-
 
 private const val TAG = "MainActivity"
 class MainActivity : ComponentActivity() {
@@ -165,4 +157,5 @@ class MainActivity : ComponentActivity() {
             })
         }
     }
+}
 }
