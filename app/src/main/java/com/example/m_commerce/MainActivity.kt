@@ -22,7 +22,9 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -32,13 +34,11 @@ import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSo
 import com.example.m_commerce.data.repo_imp.ProductsRepositoryImp
 import com.example.m_commerce.ui.theme.MCommerceTheme
 import com.example.m_commerce.ui.view.AccountScreen
-import com.example.m_commerce.ui.category.CategoryScreen
+import com.example.m_commerce.ui.category.ProductsScreen
 import com.example.m_commerce.ui.home.HomeScreen
 import com.example.m_commerce.ui.home.HomeViewModel
 import com.example.m_commerce.ui.home.HomeViewModelFactory
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
+
 
 
 private const val TAG = "MainActivity"
@@ -52,59 +52,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-//        val remote = ProductRemoteDataSourceImp()
-//        GlobalScope.launch {
-//            remote.getBrands().catch {  }.collect {
-//                Log.d(TAG, it.toString())
-//            }
-//        }
-
-//        GlobalScope.launch {
-//            val apolloClient = ApolloClient.Builder()
-//                .serverUrl("https://and2-ism-mad45.myshopify.com/api/2025-04/graphql.json")
-//                .addHttpHeader("X-Shopify-Storefront-Access-Token", "da2a10babb2984a38271fe2d887ed128")
-//                .addHttpHeader("Content-Type", "application/json")
-//                .build()
-//            try {
-//                val response = apolloClient.query(GetProductsQuery()).execute()
-//                val products = response.data?.products?.edges?.map { it?.node }
-//                products?.forEach {
-//                    Log.d(TAG, it?.title ?: "No title")
-//                }
-//            } catch (e: Exception) {
-//                Log.e(TAG, "Failed: ${e.message}")
-//            }
-//        }
-
-
-//         GlobalScope.launch {
-//             val apolloClient = ApolloClient.Builder()
-//                 .serverUrl("https://and2-ism-mad45.myshopify.com/api/2025-04/graphql")
-//                 .addHttpHeader("X-Shopify-Storefront-Access-Token", "da2a10babb2984a38271fe2d887ed128")
-// //                .addHttpHeader("Content-Type", "application/json")
-//                 .build()
-//             try {
-//                 val response = apolloClient.query(GetProductsQuery()).execute()
-//                 val products = response.data?.products?.edges?.map { it?.node }
-//                 products?.forEach {
-//                     Log.d(TAG, it?.title ?: "No title")
-//                 }
-
-//                 val ress = apolloClient.query(GetLocalizationOptionsQuery()).execute()
-//                 val localizationOptions = ress.data?.localization?.availableCountries?.map { it.availableLanguages }
-//                 if (localizationOptions != null) {
-//                 localizationOptions?.forEach { languages ->
-//                     languages?.forEach { language ->
-//                         Log.d(TAG, "Language: ${language?.name} ")
-//                     }
-//                 }
-//                 }else{
-//                     Log.d(TAG, "No localization options found")
-//                 }
-//             } catch (e: Exception) {
-//                 Log.e(TAG, "Failed: ${e.message}")
-//             }
-//         }
 
         setContent {
             MCommerceTheme {
@@ -113,8 +60,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
 
 
 }
@@ -133,8 +78,8 @@ fun MainActivity.NavHostSetup(){
                 [HomeViewModel::class.java])
         }
 
-        composable<ScreensRoute.Category>{
-            CategoryScreen()
+        composable<ScreensRoute.Products>{
+            ProductsScreen()
         }
 
         composable<ScreensRoute.Favorites>{
@@ -162,9 +107,9 @@ fun MainActivity.MainScreen(){
                 title = {
                     Text(
                     "Title",
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(start = 60.dp),
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
                 ) },
                 colors = TopAppBarColors(
                     containerColor = Color.White,
@@ -174,7 +119,6 @@ fun MainActivity.MainScreen(){
                     actionIconContentColor = Color.Black,
                 ),
                 actions = {
-
                     IconButton(onClick = {  }) {
                         Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                     }

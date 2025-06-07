@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
@@ -103,7 +104,7 @@ fun HomeScreen(viewModel: HomeViewModel){
 fun Categories(modifier: Modifier = Modifier){
     Text(
         text = "Categories",
-        style = MaterialTheme.typography.titleLarge
+        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
     )
     Spacer(Modifier.height(10.dp))
     Row(
@@ -158,7 +159,7 @@ fun CategoryItem(type: String, @DrawableRes id: Int, modifier: Modifier = Modifi
 fun Brands(brands: List<Brand>){
     Text(
         text = "Brands",
-        style = MaterialTheme.typography.titleLarge
+        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
     )
     Spacer(Modifier.height(10.dp))
     LazyHorizontalGrid(
@@ -192,25 +193,14 @@ fun BrandItem(brand: Brand, modifier: Modifier = Modifier){
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ){
-//            AsyncImage(
-//                model = brand.imageUrl,
-//                contentDescription = "Network Image with Coil",
-//                modifier = Modifier.size(150.dp),
-//                contentScale = ContentScale.Crop,
-//                // You need to have placeholder_image and error_image in your drawables
-//                // placeholder = painterResource(id = R.drawable.placeholder_image),
-//                // error = painterResource(id = R.drawable.error_image)
-//            )
             SubcomposeAsyncImage(
                 model = brand.imageUrl,
                 loading = {
                     CircularProgressIndicator(modifier = Modifier.size(50.dp))
                 },
                 error = {
-                    // painterResource(id = R.drawable.error_image)
-                    Text("Error loading image")
                 },
-                contentDescription = "Network Image with Coil (Subcompose)",
+                contentDescription = "Network Image with Coil (Sub compose)",
                 modifier = Modifier.size(80.dp),
                 contentScale = ContentScale.Inside
             )
