@@ -84,4 +84,9 @@ dependencies {
     //Serialization for NavArgs
     implementation (libs.kotlinx.serialization.json)
 
+    // Glide
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
+    implementation(libs.coil.compose)
+
 }

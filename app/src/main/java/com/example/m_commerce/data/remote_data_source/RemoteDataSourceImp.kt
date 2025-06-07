@@ -1,7 +1,7 @@
 package com.example.m_commerce.data.remote_data_source
 
 import android.util.Log
-import com.example.m_commerce.data.models.CurrencyExchangeResponse
+import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

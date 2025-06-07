@@ -3,7 +3,7 @@ package com.example.m_commerce.presentation.Account.settings.view_model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.m_commerce.data.models.CurrencyExchangeResponse
+import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow

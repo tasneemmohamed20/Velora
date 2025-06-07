@@ -1,4 +1,4 @@
-package com.example.m_commerce.authintication.login.view
+package com.example.m_commerce.presentation.authintication.login.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

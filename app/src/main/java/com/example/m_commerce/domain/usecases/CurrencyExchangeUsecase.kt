@@ -1,7 +1,7 @@
 package com.example.m_commerce.domain.usecases
 
-import com.example.m_commerce.data.models.CurrencyExchangeResponse
-import com.example.m_commerce.data.repository.RepositoryContract
+import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
+import com.example.m_commerce.domain.repository.RepositoryContract
 import kotlinx.coroutines.flow.Flow
 
 class CurrencyExchangeUsecase(private val repository: RepositoryContract) {

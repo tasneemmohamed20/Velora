@@ -1,6 +1,6 @@
-package com.example.m_commerce.data.repository
+package com.example.m_commerce.domain.repository
 
-import com.example.m_commerce.data.models.CurrencyExchangeResponse
+import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import kotlinx.coroutines.flow.Flow
 
 interface RepositoryContract {

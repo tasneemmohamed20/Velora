@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.models
+package com.example.m_commerce.domain.entities
 
 data class CurrencyExchangeResponse(
     val base: String,
