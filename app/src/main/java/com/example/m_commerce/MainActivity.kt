@@ -1,6 +1,7 @@
 package com.example.m_commerce
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,6 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -73,37 +77,66 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainActivity.MainScreen(){
 
+    val showBottomNavBar = remember { mutableStateOf(true) }
+    val showTopAppBar = remember { mutableStateOf(true) }
+
+    LaunchedEffect(navHostController) {
+        navHostController.addOnDestinationChangedListener { _, destination, _ ->
+            when(destination.route){
+                "com.example.m_commerce.ScreensRoute.Start",
+                "com.example.m_commerce.ScreensRoute.Login",
+                "com.example.m_commerce.ScreensRoute.SignUp"
+                    -> {
+                        showBottomNavBar.value = false
+                        showTopAppBar.value = false
+                    }
+                "com.example.m_commerce.ScreensRoute.Settings",
+                "com.example.m_commerce.ScreensRoute.Account"-> showTopAppBar.value = false
+                else ->{
+                    showBottomNavBar.value = true
+                    showTopAppBar.value = true
+                }
+            }
+        }
+    }
+
     Scaffold(
         bottomBar = {
-            BottomNavigationBar {
-                navHostController.navigate(it.route)
+            if(showBottomNavBar.value){
+                BottomNavigationBar {
+                    navHostController.navigate(it.route)
+                }
             }
         },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Title",
-                        modifier = Modifier.fillMaxWidth().padding(start = 60.dp),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
-                    ) },
-                colors = TopAppBarColors(
-                    containerColor = Color.White,
-                    scrolledContainerColor = Color.Black,
-                    navigationIconContentColor = Color.Black,
-                    titleContentColor = Color.Black,
-                    actionIconContentColor = Color.Black,
-                ),
-                actions = {
-                    IconButton(onClick = {  }) {
-                        Icon(Icons.Outlined.Search, contentDescription = "Search Product")
+            if(showTopAppBar.value){
+                TopAppBar(
+                    title = {
+                        Text(
+                            "Title",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 60.dp),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
+                        ) },
+                    colors = TopAppBarColors(
+                        containerColor = Color.White,
+                        scrolledContainerColor = Color.Black,
+                        navigationIconContentColor = Color.Black,
+                        titleContentColor = Color.Black,
+                        actionIconContentColor = Color.Black,
+                    ),
+                    actions = {
+                        IconButton(onClick = {  }) {
+                            Icon(Icons.Outlined.Search, contentDescription = "Search Product")
+                        }
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
+                        }
                     }
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
-                    }
-                }
-            )
+                )
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
