@@ -1,7 +1,6 @@
 package com.example.m_commerce
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,7 +45,7 @@ import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScre
 import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
 import com.example.m_commerce.presentation.OrderScreen
-import com.example.m_commerce.presentation.ProductsScreen
+import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.home.HomeViewModel
 import com.example.m_commerce.presentation.home.HomeViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
@@ -150,7 +149,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Start
+        startDestination = ScreensRoute.Home
     ){
 
         composable<ScreensRoute.Home>{
@@ -158,8 +157,10 @@ fun MainActivity.NavHostSetup(){
                 ViewModelProvider(
                     this@NavHostSetup,
                     HomeViewModelFactory(ProductsRepositoryImp(ProductRemoteDataSourceImp()))
-                )
-                    [HomeViewModel::class.java])
+                )[HomeViewModel::class.java],
+                {
+                    navHostController.navigate(ScreensRoute.Products(""))
+                })
         }
 
         composable<ScreensRoute.Cart>{}
