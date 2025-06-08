@@ -1,6 +1,6 @@
-package com.example.m_commerce.data.repository_imp.products_repo
+package com.example.m_commerce.data.graphql.repository_imp.products_repo
 
-import com.example.m_commerce.data.datasource.remote.product.IProductRemoteDataSource
+import com.example.m_commerce.data.graphql.data_source.remote.product.IProductRemoteDataSource
 import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.domain.repository.IProductsRepository
 import kotlinx.coroutines.flow.Flow

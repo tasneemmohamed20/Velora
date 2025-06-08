@@ -1,4 +1,4 @@
-package com.example.m_commerce.presentation.Account.settings.view
+package com.example.m_commerce.presentation.account.settings.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.m_commerce.presentation.Account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 
 
@@ -48,6 +48,7 @@ enum class Currency {
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     onAddressClick: () -> Unit,
+    onBackClick: () -> Unit
     ){
 
     var selectedCurrency by remember { mutableStateOf(Currency.USD) }
@@ -57,7 +58,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            CustomTopAppBar("Settings", onBackClick = {})
+            CustomTopAppBar("Settings", onBackClick = onBackClick)
         },
     ) { padding ->
         Column(

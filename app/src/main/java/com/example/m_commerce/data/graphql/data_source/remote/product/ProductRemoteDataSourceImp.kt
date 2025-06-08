@@ -1,9 +1,7 @@
-package com.example.m_commerce.data.datasource.remote.product
+package com.example.m_commerce.data.graphql.data_source.remote.product
 
-import android.util.Log
-import com.apollographql.apollo.exception.ApolloException
 import com.example.m_commerce.GetBrandsQuery
-import com.example.m_commerce.data.datasource.remote.ApolloHelper.shopifyService
+import com.example.m_commerce.data.graphql.data_source.remote.ApolloHelper.shopifyService
 import com.example.m_commerce.domain.entities.Brand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

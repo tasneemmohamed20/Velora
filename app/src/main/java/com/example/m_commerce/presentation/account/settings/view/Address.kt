@@ -1,4 +1,4 @@
-package com.example.m_commerce.presentation.Account.settings.view
+package com.example.m_commerce.presentation.account.settings.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,7 +40,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.m_commerce.presentation.Account.settings.view_model.AddressesViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 
 
@@ -87,6 +87,7 @@ private val sampleAddresses = listOf(
 fun AddressesScreen(
     viewModel: AddressesViewModel = viewModel(),
     onBack: () -> Unit,
+    onAddClicked: () -> Unit
 ) {
     val addresses by viewModel.addresses
     val isBottomSheetVisible by viewModel.isBottomSheetVisible
@@ -124,7 +125,7 @@ fun AddressesScreen(
                         fontWeight = FontWeight.Medium,
                         fontSize = 18.sp,
                         modifier = Modifier
-                            .clickable { viewModel.showBottomSheet() }
+                            .clickable { onAddClicked() }
                             .padding(horizontal = 8.dp)
                     )
                 }

@@ -1,9 +1,9 @@
-package com.example.m_commerce.presentation.Account.settings.view_model
+package com.example.m_commerce.presentation.account.settings.view_model
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.m_commerce.presentation.Account.settings.view.Address
-import com.example.m_commerce.presentation.Account.settings.view.AddressType
+import com.example.m_commerce.presentation.account.settings.view.Address
+import com.example.m_commerce.presentation.account.settings.view.AddressType
 
 class AddressesViewModel : ViewModel() {
     private val _addresses = mutableStateOf<List<Address>>(emptyList())

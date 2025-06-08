@@ -40,4 +40,7 @@ sealed class ScreensRoute {
     @Serializable
     data object Addresses : ScreensRoute()
 
+    @Serializable
+    data object AddressMap : ScreensRoute()
+
 }

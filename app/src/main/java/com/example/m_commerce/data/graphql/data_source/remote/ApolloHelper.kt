@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.datasource.remote
+package com.example.m_commerce.data.graphql.data_source.remote
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.http.HttpHeader

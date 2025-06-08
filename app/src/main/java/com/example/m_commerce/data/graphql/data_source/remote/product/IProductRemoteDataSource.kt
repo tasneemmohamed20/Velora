@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.datasource.remote.product
+package com.example.m_commerce.data.graphql.data_source.remote.product
 
 import com.example.m_commerce.domain.entities.Brand
 import kotlinx.coroutines.flow.Flow

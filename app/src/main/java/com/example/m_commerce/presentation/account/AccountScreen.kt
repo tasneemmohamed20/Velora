@@ -1,4 +1,4 @@
-package com.example.m_commerce.presentation.Account
+package com.example.m_commerce.presentation.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
