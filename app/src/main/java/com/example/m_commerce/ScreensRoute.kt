@@ -43,4 +43,7 @@ sealed class ScreensRoute {
     @Serializable
     data object AddressMap : ScreensRoute()
 
+    @Serializable
+    data object MapSearch : ScreensRoute()
+
 }

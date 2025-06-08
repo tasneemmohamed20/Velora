@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.play.services.maps)
     implementation (libs.maps.compose)
+    implementation(libs.places)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,6 +74,8 @@ dependencies {
     implementation (libs.retrofit)
     implementation (libs.retrofit2.converter.gson)
     implementation(libs.apollo.runtime)
+    implementation (libs.material)
+
 
     //nav
     implementation (libs.androidx.navigation.compose.v290)

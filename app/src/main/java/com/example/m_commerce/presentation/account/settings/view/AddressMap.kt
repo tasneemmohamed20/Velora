@@ -56,6 +56,8 @@ import com.example.m_commerce.data.restful.repository_imp.GeoCodingRepositoryImp
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.Places
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -109,25 +111,33 @@ fun AddressMapToolbar(
 fun AddressMap(
     onBackClick: () -> Unit = {},
     onConfirmLocation: (String) -> Unit = {},
-    viewModel: AddressMapViewModel = viewModel(
-        factory = AddressMapViewModel.Factory(
-            LocalContext.current,
-            GeoCodingRepositoryImp(RemoteDataSourceImp())
-        )
-    )
+    viewModel: AddressMapViewModel,
+    onSearchClicked: () -> Unit
 ) {
     val locationState by viewModel.locationState.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
     val address by viewModel.address.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-
     val defaultLocation = LatLng(30.0444, 31.2357)
     var isMapIdle by remember { mutableStateOf(true) }
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            currentLocation ?: defaultLocation,
+            15f
+        )
+    }
+
+    LaunchedEffect(currentLocation) {
+        currentLocation?.let {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         AddressMapToolbar(
             onBackClick = onBackClick,
-            onSearchClicked = {},
+            onSearchClicked = onSearchClicked
         )
 
         Box(modifier = Modifier.weight(1f)) {
@@ -137,6 +147,7 @@ fun AddressMap(
                 }
                 is ResponseState.Success -> {
                     MapContent(
+                        cameraPositionState = cameraPositionState,
                         currentLocation = currentLocation,
                         defaultLocation = defaultLocation,
                         isLoading = isLoading,
@@ -158,7 +169,7 @@ fun AddressMap(
 
         BottomBar(
             onConfirmClick = { onConfirmLocation(address) },
-            isEnabled = isMapIdle
+            isEnabled = isMapIdle && address.isNotEmpty()
         )
     }
 }
@@ -166,18 +177,13 @@ fun AddressMap(
 
 @Composable
 private fun MapContent(
+    cameraPositionState: CameraPositionState,
     currentLocation: LatLng?,
     defaultLocation: LatLng,
     isLoading: Boolean,
     onLocationClick: (LatLng) -> Unit,
     onMapIdle: (Boolean) -> Unit
 ) {
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(
-            currentLocation ?: defaultLocation,
-            15f
-        )
-    }
 
     LaunchedEffect(cameraPositionState.isMoving) {
         onMapIdle(!cameraPositionState.isMoving)
@@ -191,7 +197,6 @@ private fun MapContent(
         }
     }
 
-    // Log when current location changes
     LaunchedEffect(currentLocation) {
         currentLocation?.let {
             Log.d("MapContent", "Current Location Updated - Lat: ${it.latitude}, Lng: ${it.longitude}")

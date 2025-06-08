@@ -25,10 +25,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,14 +47,19 @@ import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
 import com.example.m_commerce.data.graphql.data_source.remote.product.ProductRemoteDataSourceImp
 import com.example.m_commerce.data.graphql.repository_imp.products_repo.ProductsRepositoryImp
+import com.example.m_commerce.data.restful.repository_imp.GeoCodingRepositoryImp
+import com.example.m_commerce.domain.repository.IGeoCodingRepository
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.ProductsScreen
+import com.example.m_commerce.presentation.account.settings.view.MapSearch
+import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.home.HomeViewModel
 import com.example.m_commerce.presentation.home.HomeViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.start.StartScreen
+import com.google.android.libraries.places.api.Places
 
 private const val TAG = "MainActivity"
 
@@ -81,14 +88,30 @@ fun MainActivity.MainScreen(){
 
     val showBottomNavBar = remember { mutableStateOf(true) }
     val showTopAppBar = remember { mutableStateOf(true) }
-
+    val context = LocalContext.current
+    val placesClient = remember {
+        try {
+            Places.createClient(context)
+        } catch (_: IllegalStateException) {
+            Places.initialize(context, context.resources.getString(R.string.MAPS_API_KEY))
+            Places.createClient(context)
+        }
+    }
+    val mapsViewModel: AddressMapViewModel = viewModel(
+        factory = AddressMapViewModel.Factory(
+            context,
+            GeoCodingRepositoryImp(RemoteDataSourceImp()),
+            placesClient
+        )
+    )
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
             when(destination.route){
                 "com.example.m_commerce.ScreensRoute.Start",
                 "com.example.m_commerce.ScreensRoute.Login",
                 "com.example.m_commerce.ScreensRoute.SignUp",
-                "com.example.m_commerce.ScreensRoute.AddressMap" 
+                "com.example.m_commerce.ScreensRoute.AddressMap" ,
+                "com.example.m_commerce.ScreensRoute.MapSearch"
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
@@ -144,18 +167,20 @@ fun MainActivity.MainScreen(){
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            NavHostSetup()
+            NavHostSetup(mapsViewModel = mapsViewModel)
         }
     }
 }
 
 
 @Composable
-fun MainActivity.NavHostSetup(){
+fun MainActivity.NavHostSetup(mapsViewModel: AddressMapViewModel ){
     NavHost(
         navController = navHostController,
         startDestination = ScreensRoute.Home
     ){
+
+
 
         composable<ScreensRoute.Home>{
             HomeScreen(
@@ -235,7 +260,28 @@ fun MainActivity.NavHostSetup(){
         }
 
         composable<ScreensRoute.AddressMap> {
-            AddressMap()
+
+            AddressMap(
+                onSearchClicked = {
+                    navHostController.navigate(ScreensRoute.MapSearch)
+                },
+                onBackClick = {
+                    navHostController.popBackStack()
+                },
+                onConfirmLocation = {},
+                viewModel = mapsViewModel
+            )
+        }
+
+        composable<ScreensRoute.MapSearch> {
+            MapSearch(
+                onBack = { navHostController.popBackStack() },
+                onResultClick = { latLng ->
+                    mapsViewModel.updateCurrentLocation(latLng)
+                    navHostController.popBackStack()
+                },
+                viewModel = mapsViewModel,
+            )
         }
     }
 }
