@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -23,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +42,7 @@ import com.example.m_commerce.presentation.Account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.Account.settings.view_model.SettingsViewModel
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.Account.AccountScreen
-import com.example.m_commerce.presentation.HomeScreen
+import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
 import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSourceImp
@@ -110,6 +113,7 @@ fun MainActivity.MainScreen(){
         topBar = {
             if(showTopAppBar.value){
                 TopAppBar(
+                    modifier = Modifier.shadow(elevation = 6.dp),
                     title = {
                         Text(
                             "Title",
@@ -138,7 +142,7 @@ fun MainActivity.MainScreen(){
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             NavHostSetup()
         }
     }
@@ -149,7 +153,8 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home
+        startDestination = ScreensRoute.Home,
+        modifier = Modifier.background(color = Color.White)
     ){
 
         composable<ScreensRoute.Home>{

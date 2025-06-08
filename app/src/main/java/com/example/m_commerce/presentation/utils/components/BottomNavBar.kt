@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -52,7 +54,8 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
 
     NavigationBar(
         containerColor = Color.White,
-        tonalElevation = 30.dp
+        tonalElevation = 30.dp,
+        modifier = Modifier.shadow(elevation = 8.dp),
     ){
         var selectedNavigationIndex by rememberSaveable {
             mutableIntStateOf(0)
@@ -79,7 +82,8 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.Black
                     )
-                }
+                },
+
             )
         }
     }

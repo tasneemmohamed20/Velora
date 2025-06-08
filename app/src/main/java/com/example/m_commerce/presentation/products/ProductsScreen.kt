@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 
@@ -20,12 +21,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +45,34 @@ import com.example.m_commerce.R
 @Composable
 fun ProductsScreen(){
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().padding(top = 16.dp)
     ) {
+        Box(modifier = Modifier.padding(bottom = 16.dp)){
+            OutlinedTextField(
+                value = "",
+                onValueChange = {},
+                label = {
+                    Text(text = "Search Product Name")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                trailingIcon = {
+                    Icon(imageVector = Icons.Default.Search,
+                        contentDescription = "Add to favorites",
+                        tint = Color.Black,
+                        modifier = Modifier.size(20.dp
+                        )
+                    )
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xfff9f9f9),
+                    unfocusedContainerColor = Color(0xfff9f9f9),
+                    disabledContainerColor = Color(0xfff9f9f9)
+                )
+            )
+        }
         ProductsList()
     }
 
@@ -49,11 +80,12 @@ fun ProductsScreen(){
 }
 
 @Composable
-fun ProductsList(){
+fun ProductsList(modifier: Modifier = Modifier){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.background(color = Color(0xfff9f9f9)).padding(top = 16.dp)
     ) {
         items(16){
             ProductCard()
@@ -65,7 +97,7 @@ fun ProductsList(){
 fun ProductCard(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
-            .wrapContentSize(),
+            .wrapContentSize().padding(bottom = 8.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -125,7 +157,7 @@ fun ProductCard(modifier: Modifier = Modifier) {
 }
 
 
-@Preview(showBackground = true, showSystemUi = true)
+
 @Composable
 fun ProductCardPreview() {
     MaterialTheme {
