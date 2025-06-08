@@ -37,4 +37,7 @@ sealed class ScreensRoute {
     @Serializable
     data object SignUp : ScreensRoute()
 
+    @Serializable
+    data object Addresses : ScreensRoute()
+
 }

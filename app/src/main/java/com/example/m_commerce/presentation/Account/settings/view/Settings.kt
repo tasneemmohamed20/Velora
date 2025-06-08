@@ -45,7 +45,10 @@ enum class Currency {
 }
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel){
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onAddressClick: () -> Unit,
+    ){
 
     var selectedCurrency by remember { mutableStateOf(Currency.USD) }
     var showDropdown by remember { mutableStateOf(false) }
@@ -64,7 +67,7 @@ fun SettingsScreen(viewModel: SettingsViewModel){
                 .background(Color.White)
         ) {
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
-            SettingsItemRow(label = "Adresses", onClick = {}, icon = SettingsIcon.ARROW_RIGHT)
+            SettingsItemRow(label = "Addresses", onClick = onAddressClick, icon = SettingsIcon.ARROW_RIGHT)
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
 
             Box {

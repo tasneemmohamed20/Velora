@@ -1,5 +1,6 @@
 package com.example.m_commerce
 
+import com.example.m_commerce.presentation.Account.settings.view.AddressesScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -41,6 +42,7 @@ import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
 import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
+import com.example.m_commerce.presentation.Account.settings.view_model.AddressesViewModel
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.ProductsScreen
 import com.example.m_commerce.presentation.home.HomeViewModel
@@ -139,7 +141,10 @@ fun MainActivity.NavHostSetup(){
                             remoteDataSource = RemoteDataSourceImp()
                         )
                     )
-                )
+                ),
+                onAddressClick = {
+                    navHostController.navigate(ScreensRoute.Addresses)
+                },
             )
         }
 
@@ -174,6 +179,15 @@ fun MainActivity.NavHostSetup(){
             SignUpScreen(onButtonClicked = {
                 navHostController.navigate(ScreensRoute.Login)
             })
+        }
+
+        composable<ScreensRoute.Addresses> {
+            AddressesScreen(
+                viewModel = AddressesViewModel(),
+                onBack = {
+                    navHostController.popBackStack()
+                }
+            )
         }
     }
 }
