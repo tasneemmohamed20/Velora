@@ -27,6 +27,8 @@ fun SignUpScreen(
 ) {
     val context = LocalContext.current
 
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -48,6 +50,19 @@ fun SignUpScreen(
         Text("Create your account", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
+        OutlinedTextField(
+            value = firstName,
+            onValueChange = { firstName = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("First Name") }
+        )
+
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = { lastName = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Last Name") }
+        )
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -86,7 +101,9 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.signUp(email, password, confirmPassword) },
+            onClick = {
+                viewModel.signUp(email, password, confirmPassword, firstName, lastName)
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6FB0), contentColor = Color.White),
             shape = RoundedCornerShape(8.dp)
@@ -105,7 +122,6 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-
         when (signUpState) {
             is ResponseState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -116,7 +132,6 @@ fun SignUpScreen(
         LaunchedEffect(successMessage) {
             successMessage?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-
                 onButtonClicked()
             }
         }
@@ -126,6 +141,6 @@ fun SignUpScreen(
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
         }
-
     }
 }
+

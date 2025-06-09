@@ -27,6 +27,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.launch
+
 @Composable
 fun StartScreen(
     onEmailClicked: () -> Unit,
@@ -36,6 +42,9 @@ fun StartScreen(
     val context = LocalContext.current
     val signInState by viewModel.googleSignInState.collectAsStateWithLifecycle()
     val webClientId = stringResource(id = R.string.web_client_id)
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -61,64 +70,77 @@ fun StartScreen(
     }
 
     LaunchedEffect(signInState) {
-        if (signInState is ResponseState.Success) {
-            viewModel.clearGoogleSignInState()
-            onGoogleSuccess()
+        when (signInState) {
+            is ResponseState.Success -> {
+                viewModel.clearGoogleSignInState()
+                onGoogleSuccess()
+            }
+            is ResponseState.Failure -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Sign-in failed. Please try again.",
+                        withDismissAction = true
+                    )
+                }
+            }
+            else -> Unit
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(120.dp))
-
-        Text("Velora", color = Color(0xFF0F6FB0), fontSize = 56.sp, fontWeight = FontWeight.Bold)
-        Text("Your Best Shop", fontSize = 14.sp, color = Color.Gray)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Image(
-            painter = painterResource(id = R.drawable.start_img),
-            contentDescription = "start image",
-            modifier = Modifier.size(300.dp),
-            contentScale = ContentScale.Fit
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth()
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SocialButton("Continue as Guest", R.drawable.ic_person) {}
-            SocialButton("Continue with Email", R.drawable.ic_gmail, onClick = onEmailClicked)
-            SocialButton("Continue with Google", R.drawable.ic_google) {
-                launcher.launch(googleSignInClient.signInIntent)
+            Spacer(modifier = Modifier.height(120.dp))
+
+            Text("Velora", color = Color(0xFF0F6FB0), fontSize = 56.sp, fontWeight = FontWeight.Bold)
+            Text("Your Best Shop", fontSize = 14.sp, color = Color.Gray)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.start_img),
+                contentDescription = "start image",
+                modifier = Modifier.size(300.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CustomButton("Continue as Guest", R.drawable.ic_person) {}
+                CustomButton("Continue with Email", R.drawable.ic_gmail, onClick = onEmailClicked)
+                CustomButton("Continue with Google", R.drawable.ic_google) {
+                    launcher.launch(googleSignInClient.signInIntent)
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
         if (signInState is ResponseState.Loading) {
-            CircularProgressIndicator()
-        }
-
-        if (signInState is ResponseState.Failure) {
-            Text(
-                text = "Sign-in Failed: ${(signInState as ResponseState.Failure).err.message}",
-                color = Color.Red,
-                fontWeight = FontWeight.Bold
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
             )
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
+
 @Composable
-fun SocialButton(text: String, icon: Int, onClick: () -> Unit) {
+fun CustomButton(text: String, icon: Int, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier

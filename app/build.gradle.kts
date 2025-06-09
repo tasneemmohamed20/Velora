@@ -115,4 +115,8 @@ dependencies {
     implementation(libs.google.firebase.analytics)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
+
+
+    implementation ("com.google.code.gson:gson:2.10.1")
+
 }
