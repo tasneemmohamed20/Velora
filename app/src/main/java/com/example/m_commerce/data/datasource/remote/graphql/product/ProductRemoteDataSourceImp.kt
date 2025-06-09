@@ -11,8 +11,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ProductRemoteDataSourceImp() : IProductRemoteDataSource {
+class ProductRemoteDataSourceImp @Inject constructor() : IProductRemoteDataSource {
 
 
     override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{

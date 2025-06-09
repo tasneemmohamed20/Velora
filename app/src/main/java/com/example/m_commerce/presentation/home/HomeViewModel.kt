@@ -5,13 +5,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.repository.IProductsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel(private val productsRepository: IProductsRepository) : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(private val productsRepository: IProductsRepository) : ViewModel() {
 
     private val _mutableBrandsList: MutableStateFlow<ResponseState> =
         MutableStateFlow(ResponseState.Loading)
