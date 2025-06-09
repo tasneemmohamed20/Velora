@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.apollographql.apollo") version "4.2.0"
     kotlin("plugin.serialization") version "2.1.10"
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
+
 }
 
 apollo {
@@ -98,5 +101,12 @@ dependencies {
 
     // work manager
     implementation(libs.androidx.work.runtime.ktx)
+
+    //Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    // Hilt Navigation Compose
+    implementation(libs.androidx.hilt.navigation.compose)
 
 }

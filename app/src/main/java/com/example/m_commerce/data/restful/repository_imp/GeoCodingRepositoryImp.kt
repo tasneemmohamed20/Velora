@@ -3,8 +3,9 @@ package com.example.m_commerce.data.restful.repository_imp
 import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceContract
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class GeoCodingRepositoryImp(
+class GeoCodingRepositoryImp @Inject constructor(
     private val remoteDataSource: RemoteDataSourceContract,
 
     ): IGeoCodingRepository {

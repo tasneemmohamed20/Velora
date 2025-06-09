@@ -1,4 +1,4 @@
-package com.example.m_commerce
+package com.example.m_commerce.presentation.utils.routes
 
 import kotlinx.serialization.Serializable
 
@@ -27,13 +27,13 @@ sealed class ScreensRoute {
     @Serializable
 
     object Settings: ScreensRoute()
-    
+
     @Serializable
     data object Start : ScreensRoute()
-    
+
     @Serializable
     data object Login : ScreensRoute()
-    
+
     @Serializable
     data object SignUp : ScreensRoute()
 

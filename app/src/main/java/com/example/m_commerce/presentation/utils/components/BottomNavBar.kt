@@ -18,7 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.m_commerce.ScreensRoute
+import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 
 data class NavigationItem(
     val title: String,

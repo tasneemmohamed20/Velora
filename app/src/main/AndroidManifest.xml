@@ -16,6 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MCommerce"
         android:usesCleartextTraffic="true"
+        android:name=".VeloraApplication"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"

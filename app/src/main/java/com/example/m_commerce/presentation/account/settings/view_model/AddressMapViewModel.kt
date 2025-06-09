@@ -3,7 +3,6 @@ package com.example.m_commerce.presentation.account.settings.view_model
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -13,22 +12,25 @@ import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.services.location.LocationWorker
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class AddressMapViewModel(
-    context: Context,
+@HiltViewModel
+class AddressMapViewModel @Inject constructor (
+    @ApplicationContext context: Context,
     private val geoCodingRepository: IGeoCodingRepository,
     private val placesClient: PlacesClient
 ) : ViewModel() {
@@ -183,7 +185,7 @@ class AddressMapViewModel(
         _searchResults.value = emptyList()
     }
 
-    class Factory(
+/*    class Factory(
         private val context: Context,
         private val geoCodingRepository: IGeoCodingRepository,
         private val placesClient: PlacesClient
@@ -195,5 +197,5 @@ class AddressMapViewModel(
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
-    }
+    }*/
 }

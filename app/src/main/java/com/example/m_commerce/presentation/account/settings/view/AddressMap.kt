@@ -42,21 +42,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.m_commerce.R
 import com.example.m_commerce.ResponseState
-import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceImp
-import com.example.m_commerce.data.restful.repository_imp.GeoCodingRepositoryImp
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
@@ -67,7 +62,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun AddressMapToolbar(
     onBackClick: () -> Unit,
-    onSearchClicked: () -> Unit
+    onSearchClicked: () -> Unit,
 ) {
     TopAppBar(
         title = {
@@ -106,12 +101,12 @@ fun AddressMapToolbar(
     )
 }
 
-
 @Composable
 fun AddressMap(
     onBackClick: () -> Unit = {},
     onConfirmLocation: (String) -> Unit = {},
     viewModel: AddressMapViewModel,
+//    = hiltViewModel(),
     onSearchClicked: () -> Unit
 ) {
     val locationState by viewModel.locationState.collectAsState()

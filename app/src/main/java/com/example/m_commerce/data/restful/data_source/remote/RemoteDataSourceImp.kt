@@ -8,8 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import javax.inject.Inject
 
-class RemoteDataSourceImp : RemoteDataSourceContract {
+class RemoteDataSourceImp @Inject constructor(): RemoteDataSourceContract {
     private val apiServices: ApiServices = RetrofitClient.getRetrofit().create(ApiServices::class.java)
     private val geocodingApi: ApiServices = RetrofitGeoHelper.getRetrofit().create(ApiServices::class.java)
 

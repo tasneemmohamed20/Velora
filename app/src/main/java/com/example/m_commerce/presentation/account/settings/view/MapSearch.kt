@@ -16,12 +16,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,23 +32,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceImp
-import com.example.m_commerce.data.restful.repository_imp.GeoCodingRepositoryImp
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
-import kotlin.text.compareTo
-import kotlin.toString
 
 @Composable
 fun MapSearch(
     onBack: () -> Unit,
     onResultClick: (LatLng) -> Unit,
     viewModel: AddressMapViewModel
+//    = hiltViewModel()
 
 ) {
     val query = viewModel.searchQuery.collectAsState().value
@@ -131,7 +122,9 @@ fun MapSearch(
                     title = prediction.getPrimaryText(null).toString(),
                     description = prediction.getSecondaryText(null).toString(),
                     onClick = {
+
                         viewModel.getPlaceDetails(prediction.placeId) { latLng ->
+                            viewModel.updateCurrentLocation(latLng)
                             onResultClick(latLng)
                         }
                     }

@@ -1,10 +1,10 @@
 package com.example.m_commerce
 
-import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,47 +25,45 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.m_commerce.data.graphql.data_source.remote.product.ProductRemoteDataSourceImp
+import com.example.m_commerce.data.graphql.repository_imp.products_repo.ProductsRepositoryImp
 import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceImp
 import com.example.m_commerce.data.restful.repository_imp.RepositoryImp
 import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
-import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
-import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
-import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
-import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.HomeScreen
-import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
-import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
-import com.example.m_commerce.data.graphql.data_source.remote.product.ProductRemoteDataSourceImp
-import com.example.m_commerce.data.graphql.repository_imp.products_repo.ProductsRepositoryImp
-import com.example.m_commerce.data.restful.repository_imp.GeoCodingRepositoryImp
-import com.example.m_commerce.domain.repository.IGeoCodingRepository
-import com.example.m_commerce.presentation.account.settings.view.AddressMap
-import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.ProductsScreen
+import com.example.m_commerce.presentation.account.AccountScreen
+import com.example.m_commerce.presentation.account.settings.view.AddressMap
+import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
+import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
+import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
 import com.example.m_commerce.presentation.home.HomeViewModel
 import com.example.m_commerce.presentation.home.HomeViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
+import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.start.StartScreen
-import com.google.android.libraries.places.api.Places
+import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainActivity"
 
+@AndroidEntryPoint // marks this activity for Hilt dependency injection
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -78,8 +76,8 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,37 +86,22 @@ fun MainActivity.MainScreen(){
 
     val showBottomNavBar = remember { mutableStateOf(true) }
     val showTopAppBar = remember { mutableStateOf(true) }
-    val context = LocalContext.current
-    val placesClient = remember {
-        try {
-            Places.createClient(context)
-        } catch (_: IllegalStateException) {
-            Places.initialize(context, context.resources.getString(R.string.MAPS_API_KEY))
-            Places.createClient(context)
-        }
-    }
-    val mapsViewModel: AddressMapViewModel = viewModel(
-        factory = AddressMapViewModel.Factory(
-            context,
-            GeoCodingRepositoryImp(RemoteDataSourceImp()),
-            placesClient
-        )
-    )
+
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
             when(destination.route){
-                "com.example.m_commerce.ScreensRoute.Start",
-                "com.example.m_commerce.ScreensRoute.Login",
-                "com.example.m_commerce.ScreensRoute.SignUp",
-                "com.example.m_commerce.ScreensRoute.AddressMap" ,
-                "com.example.m_commerce.ScreensRoute.MapSearch"
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap" ,
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch"
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
                     }
-                "com.example.m_commerce.ScreensRoute.Settings",
-                "com.example.m_commerce.ScreensRoute.Account",
-                "com.example.m_commerce.ScreensRoute.Addresses"-> showTopAppBar.value = false
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"-> showTopAppBar.value = false
                 else ->{
                     showBottomNavBar.value = true
                     showTopAppBar.value = true
@@ -167,20 +150,18 @@ fun MainActivity.MainScreen(){
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            NavHostSetup(mapsViewModel = mapsViewModel)
+            NavHostSetup()
         }
     }
 }
 
-
 @Composable
-fun MainActivity.NavHostSetup(mapsViewModel: AddressMapViewModel ){
+fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
         startDestination = ScreensRoute.Home
     ){
-
-
+        val viewModel : AddressMapViewModel by viewModels()
 
         composable<ScreensRoute.Home>{
             HomeScreen(
@@ -269,7 +250,7 @@ fun MainActivity.NavHostSetup(mapsViewModel: AddressMapViewModel ){
                     navHostController.popBackStack()
                 },
                 onConfirmLocation = {},
-                viewModel = mapsViewModel
+                viewModel = viewModel
             )
         }
 
@@ -277,10 +258,10 @@ fun MainActivity.NavHostSetup(mapsViewModel: AddressMapViewModel ){
             MapSearch(
                 onBack = { navHostController.popBackStack() },
                 onResultClick = { latLng ->
-                    mapsViewModel.updateCurrentLocation(latLng)
                     navHostController.popBackStack()
                 },
-                viewModel = mapsViewModel,
+                viewModel = viewModel
+
             )
         }
     }
