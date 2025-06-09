@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.apollographql.apollo") version "4.2.0"
     kotlin("plugin.serialization") version "2.1.10"
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
+
 }
 
 apollo {
@@ -58,6 +61,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.play.services.maps)
+    implementation (libs.maps.compose)
+    implementation(libs.places)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,12 +77,14 @@ dependencies {
     implementation (libs.retrofit)
     implementation (libs.retrofit2.converter.gson)
     implementation(libs.apollo.runtime)
+    implementation (libs.material)
+
 
     //nav
-    implementation ("androidx.navigation:navigation-compose:2.7.0")
+    implementation (libs.androidx.navigation.compose.v290)
 
     //icons
-    implementation ("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation (libs.androidx.material.icons.extended)
 
 
 
@@ -85,8 +95,18 @@ dependencies {
     implementation (libs.kotlinx.serialization.json)
 
     // Glide
-    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+    implementation(libs.compose)
 
     implementation(libs.coil.compose)
+
+    // work manager
+    implementation(libs.androidx.work.runtime.ktx)
+
+    //Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    // Hilt Navigation Compose
+    implementation(libs.androidx.hilt.navigation.compose)
 
 }

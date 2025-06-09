@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">M-Commerce</string>
+    <string name="MAPS_API_KEY">AIzaSyB9cRwZcC2Kirk3Fy2sCEtPUv3zIqRn6Jk</string>
 </resources>
+

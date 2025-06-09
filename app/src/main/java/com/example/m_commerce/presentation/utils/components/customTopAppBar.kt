@@ -18,7 +18,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CustomTopAppBar(
     title: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    actions: @Composable (() -> Unit)? = null
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -27,7 +28,7 @@ fun CustomTopAppBar(
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Normal,
                 fontSize = 20.sp,
-                color = Color.Blue
+                color = Color.Black
             )
         },
         navigationIcon = {
@@ -35,6 +36,7 @@ fun CustomTopAppBar(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
+        actions = { actions?.invoke() },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = Color.White
         )

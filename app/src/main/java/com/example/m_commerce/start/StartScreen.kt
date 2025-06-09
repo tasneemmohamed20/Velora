@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.m_commerce.R
-import com.example.m_commerce.ScreensRoute
+import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 
 
 @Composable
