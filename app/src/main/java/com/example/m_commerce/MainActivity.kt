@@ -1,6 +1,7 @@
 package com.example.m_commerce
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,6 +36,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.data.remote_data_source.RemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.RepositoryImp
 import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
@@ -47,12 +50,17 @@ import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
 import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
+import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.home.HomeViewModel
 import com.example.m_commerce.presentation.home.HomeViewModelFactory
+import com.example.m_commerce.presentation.products.ProductsViewModel
+import com.example.m_commerce.presentation.products.ProductsViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.start.StartScreen
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivity"
 
@@ -63,7 +71,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-
+//        GlobalScope.launch {
+//            val apolloClient = ApolloClient.Builder()
+//                .serverUrl("https://and2-ism-mad45.myshopify.com/api/2025-04/graphql.json")
+//                .addHttpHeader("X-Shopify-Storefront-Access-Token", "da2a10babb2984a38271fe2d887ed128")
+//                .addHttpHeader("Content-Type", "application/json")
+//                .build()
+//            try {
+//                val response = apolloClient.query(GetProductsByHandleQuery("vans")).execute()
+//
+//                val products = response.data?.collection?.products?.edges?.map { it?.node }
+//                products?.forEach {
+//                    Log.d(TAG, it?.title ?: "No title")
+//                }
+//            } catch (e: Exception) {
+//                Log.e(TAG, "Failed: ${e.message}")
+//            }
+//        }
         setContent {
             navHostController = rememberNavController()
             MCommerceTheme {
@@ -162,10 +186,10 @@ fun MainActivity.NavHostSetup(){
                 ViewModelProvider(
                     this@NavHostSetup,
                     HomeViewModelFactory(ProductsRepositoryImp(ProductRemoteDataSourceImp()))
-                )[HomeViewModel::class.java],
-                {
-                    navHostController.navigate(ScreensRoute.Products(""))
-                })
+                )[HomeViewModel::class.java]
+            ) {
+                type -> navHostController.navigate(ScreensRoute.Products(type))
+            }
         }
 
         composable<ScreensRoute.Cart>{}
@@ -190,8 +214,14 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
-        composable<ScreensRoute.Products>{
-            ProductsScreen()
+        composable<ScreensRoute.Products>{  backStackEntry->
+            val entry = backStackEntry.toRoute<ScreensRoute.Products>()
+            val type = entry.type
+
+            ProductsScreen(ViewModelProvider(
+                this@NavHostSetup,
+                ProductsViewModelFactory(GetProductsByTypeUseCase(ProductsRepositoryImp(ProductRemoteDataSourceImp())))
+            )[ProductsViewModel::class.java],type)
         }
 
         composable<ScreensRoute.Order>{

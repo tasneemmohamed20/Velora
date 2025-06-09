@@ -10,7 +10,7 @@ sealed class ScreensRoute {
     data object Home: ScreensRoute()
 
     @Serializable
-    class Products(val handle: String): ScreensRoute()
+    class Products(val type: String): ScreensRoute()
 
     @Serializable
     object Cart: ScreensRoute()

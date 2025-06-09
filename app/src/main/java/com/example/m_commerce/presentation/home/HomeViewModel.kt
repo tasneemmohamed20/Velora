@@ -11,23 +11,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val productsRepository: IProductsRepository): ViewModel() {
+class HomeViewModel(private val productsRepository: IProductsRepository) : ViewModel() {
 
-    private val _mutableBrandsList : MutableStateFlow<ResponseState> = MutableStateFlow(ResponseState.Loading)
-    val  brandsList: StateFlow<ResponseState> = _mutableBrandsList.asStateFlow()
+    private val _mutableBrandsList: MutableStateFlow<ResponseState> =
+        MutableStateFlow(ResponseState.Loading)
+    val brandsList: StateFlow<ResponseState> = _mutableBrandsList.asStateFlow()
 
-        fun getBrands(){
-            viewModelScope.launch {
-                val result = productsRepository.getBrands()
-                result
-                    .catch {
-                        _mutableBrandsList.value = ResponseState.Failure(it)
-                    }
-                    .collect{
-                        _mutableBrandsList.value = ResponseState.Success(it)
-                    }
-            }
+    fun getBrands() {
+        viewModelScope.launch {
+            val result = productsRepository.getBrands()
+            result
+                .catch {
+                    _mutableBrandsList.value = ResponseState.Failure(it)
+                }
+                .collect {
+                    _mutableBrandsList.value = ResponseState.Success(it)
+                }
         }
+    }
 
 }
 

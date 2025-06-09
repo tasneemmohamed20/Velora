@@ -43,7 +43,7 @@ import com.example.m_commerce.domain.entities.Brand
 
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, onItemClicked: () -> Unit){
+fun HomeScreen(viewModel: HomeViewModel, onItemClicked: (String) -> Unit){
     val scrollState = rememberScrollState()
     lateinit var successData: List<Brand>
 
@@ -76,11 +76,10 @@ fun HomeScreen(viewModel: HomeViewModel, onItemClicked: () -> Unit){
         Spacer(Modifier.height(15.dp))
         when(brandsState){
             is ResponseState.Failure -> {
-                Text(text = "Failure")
+
             }
             is ResponseState.Success -> {
                 successData = (brandsState as ResponseState.Success).data as List<Brand>
-                Log.i("MainActivity", "HomeScreen: $successData")
                 Brands(successData, onItemClicked)
             }
             is ResponseState.Loading -> {
@@ -99,7 +98,7 @@ fun HomeScreen(viewModel: HomeViewModel, onItemClicked: () -> Unit){
 }
 
 @Composable
-fun Categories(onItemClicked: () -> Unit, modifier: Modifier = Modifier){
+fun Categories(onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Text(
         text = "Categories",
         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
@@ -117,7 +116,7 @@ fun Categories(onItemClicked: () -> Unit, modifier: Modifier = Modifier){
 }
 
 @Composable
-fun CategoryItem(type: String, onItemClicked: () -> Unit, @DrawableRes id: Int, modifier: Modifier = Modifier){
+fun CategoryItem(type: String, onItemClicked: (String) -> Unit, @DrawableRes id: Int, modifier: Modifier = Modifier){
 
     val boxColor: Color = when(type){
         "Women" -> Color.Green.copy(alpha = 0.2F)
@@ -129,7 +128,7 @@ fun CategoryItem(type: String, onItemClicked: () -> Unit, @DrawableRes id: Int, 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.clickable {
-            onItemClicked()
+            onItemClicked(type)
         }
     ) {
         Box(
@@ -156,7 +155,7 @@ fun CategoryItem(type: String, onItemClicked: () -> Unit, @DrawableRes id: Int, 
 }
 
 @Composable
-fun Brands(brands: List<Brand>, onItemClicked: () -> Unit){
+fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
     Text(
         text = "Brands",
         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
@@ -176,11 +175,11 @@ fun Brands(brands: List<Brand>, onItemClicked: () -> Unit){
 
 
 @Composable
-fun BrandItem(brand: Brand, onItemClicked: () -> Unit, modifier: Modifier = Modifier){
+fun BrandItem(brand: Brand, onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.clickable {
-            onItemClicked()
+            brand.title?.let { onItemClicked(it) }
         }
     ) {
         Box(
