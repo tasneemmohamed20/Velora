@@ -1,11 +1,12 @@
 
-package com.example.m_commerce.presentation
+package com.example.m_commerce.presentation.home
 
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,20 +33,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.example.m_commerce.R
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.Brand
-import com.example.m_commerce.presentation.home.HomeViewModel
 
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel){
+fun HomeScreen(viewModel: HomeViewModel, onItemClicked: (String) -> Unit){
     val scrollState = rememberScrollState()
     lateinit var successData: List<Brand>
 
@@ -54,10 +52,9 @@ fun HomeScreen(viewModel: HomeViewModel){
     }
     val brandsState by viewModel.brandsList.collectAsStateWithLifecycle()
 
-
-
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .padding(start = 20.dp, top = 10.dp, end = 20.dp)
             .verticalScroll(scrollState)
     ) {
@@ -75,16 +72,15 @@ fun HomeScreen(viewModel: HomeViewModel){
             )
         }
         Spacer(Modifier.height(15.dp))
-        Categories()
+        Categories(onItemClicked)
         Spacer(Modifier.height(15.dp))
         when(brandsState){
             is ResponseState.Failure -> {
-                Text(text = "Failure")
+
             }
             is ResponseState.Success -> {
                 successData = (brandsState as ResponseState.Success).data as List<Brand>
-                Log.i("MainActivity", "HomeScreen: $successData")
-                Brands(successData)
+                Brands(successData, onItemClicked)
             }
             is ResponseState.Loading -> {
                 Box(
@@ -101,9 +97,8 @@ fun HomeScreen(viewModel: HomeViewModel){
 
 }
 
-@Preview
 @Composable
-fun Categories(modifier: Modifier = Modifier){
+fun Categories(onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Text(
         text = "Categories",
         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
@@ -113,15 +108,15 @@ fun Categories(modifier: Modifier = Modifier){
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier.fillMaxWidth()
     ){
-        CategoryItem("Women", id = R.drawable.women)
-        CategoryItem("Men", id = R.drawable.men)
-        CategoryItem("Kid", id = R.drawable.kid)
-        CategoryItem("Sale", id = R.drawable.sale)
+        CategoryItem(type = "Women", id = R.drawable.women, onItemClicked = onItemClicked)
+        CategoryItem(type ="Men", id = R.drawable.men, onItemClicked = onItemClicked)
+        CategoryItem(type ="Kid", id = R.drawable.kid, onItemClicked = onItemClicked )
+        CategoryItem(type ="Sale", id = R.drawable.sale, onItemClicked = onItemClicked)
     }
 }
 
 @Composable
-fun CategoryItem(type: String, @DrawableRes id: Int, modifier: Modifier = Modifier){
+fun CategoryItem(type: String, onItemClicked: (String) -> Unit, @DrawableRes id: Int, modifier: Modifier = Modifier){
 
     val boxColor: Color = when(type){
         "Women" -> Color.Green.copy(alpha = 0.2F)
@@ -132,7 +127,9 @@ fun CategoryItem(type: String, @DrawableRes id: Int, modifier: Modifier = Modifi
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier.clickable {
+            onItemClicked(type)
+        }
     ) {
         Box(
             modifier = Modifier
@@ -158,7 +155,7 @@ fun CategoryItem(type: String, @DrawableRes id: Int, modifier: Modifier = Modifi
 }
 
 @Composable
-fun Brands(brands: List<Brand>){
+fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
     Text(
         text = "Brands",
         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
@@ -171,17 +168,19 @@ fun Brands(brands: List<Brand>){
         modifier = Modifier.height(280.dp)
     ) {
         items(brands.size){
-            BrandItem(brands[it])
+            BrandItem(brands[it], onItemClicked)
         }
     }
 }
 
 
 @Composable
-fun BrandItem(brand: Brand, modifier: Modifier = Modifier){
+fun BrandItem(brand: Brand, onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier.clickable {
+            brand.title?.let { onItemClicked(it) }
+        }
     ) {
         Box(
             modifier = Modifier

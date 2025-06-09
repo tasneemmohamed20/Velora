@@ -1,14 +1,48 @@
-package com.example.m_commerce.data.graphql.data_source.remote.product
+package com.example.m_commerce.data.datasource.remote.product
 
+import android.util.Log
+import com.apollographql.apollo.exception.ApolloException
 import com.example.m_commerce.GetBrandsQuery
-import com.example.m_commerce.data.graphql.data_source.remote.ApolloHelper.shopifyService
+import com.example.m_commerce.GetProductsByHandleQuery
+import com.example.m_commerce.data.datasource.remote.ApolloHelper.shopifyService
 import com.example.m_commerce.domain.entities.Brand
+import com.example.m_commerce.domain.entities.Price
+import com.example.m_commerce.domain.entities.PriceDetails
+import com.example.m_commerce.domain.entities.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class ProductRemoteDataSourceImp() : IProductRemoteDataSource {
+
+
+    override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{
+
+        val response = withContext(Dispatchers.IO){
+            shopifyService.query(GetProductsByHandleQuery(handle)).execute()
+        }
+
+        val products = response.data?.collection?.products?.edges
+            ?.map { it.node }
+            ?.map {
+                node ->
+                Product(
+                    id = node.id,
+                    title = node.title,
+                    description = node.description,
+                    price = PriceDetails(
+                        minVariantPrice = Price(
+                            amount = node.priceRange.minVariantPrice.amount.toString(),
+                            currencyCode = node.priceRange.minVariantPrice.currencyCode.name
+                        ),),
+                    image = node.images.edges[0].node.url.toString(),
+                )
+
+            } ?: emptyList()
+        emit(products)
+    }
+
     override suspend fun getBrands(): Flow<List<Brand>> = flow {
             val response = withContext(Dispatchers.IO) {
                 shopifyService.query(GetBrandsQuery()).execute()

@@ -5,7 +5,10 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -37,8 +40,22 @@ import com.example.m_commerce.data.graphql.data_source.remote.product.ProductRem
 import com.example.m_commerce.data.graphql.repository_imp.products_repo.ProductsRepositoryImp
 import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceImp
 import com.example.m_commerce.data.restful.repository_imp.RepositoryImp
+import androidx.navigation.toRoute
+import com.apollographql.apollo.ApolloClient
+import com.example.m_commerce.data.remote_data_source.RemoteDataSourceImp
+import com.example.m_commerce.data.repository_imp.RepositoryImp
 import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
 import com.example.m_commerce.presentation.HomeScreen
+import com.example.m_commerce.presentation.Account.settings.view.SettingsScreen
+import com.example.m_commerce.presentation.Account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
+import com.example.m_commerce.presentation.Account.AccountScreen
+import com.example.m_commerce.presentation.home.HomeScreen
+import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
+import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
+import com.example.m_commerce.data.datasource.remote.product.ProductRemoteDataSourceImp
+import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
+import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.ProductsScreen
 import com.example.m_commerce.presentation.account.AccountScreen
@@ -53,6 +70,8 @@ import com.example.m_commerce.presentation.authintication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authintication.signUp.view.SignUpScreen
 import com.example.m_commerce.presentation.home.HomeViewModel
 import com.example.m_commerce.presentation.home.HomeViewModelFactory
+import com.example.m_commerce.presentation.products.ProductsViewModel
+import com.example.m_commerce.presentation.products.ProductsViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
@@ -67,7 +86,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        enableEdgeToEdge()
+        enableEdgeToEdge()
 
         setContent {
             navHostController = rememberNavController()
@@ -76,6 +95,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 
@@ -121,6 +141,7 @@ fun MainActivity.MainScreen(){
         topBar = {
             if(showTopAppBar.value){
                 TopAppBar(
+                    modifier = Modifier.shadow(elevation = 6.dp),
                     title = {
                         Text(
                             "Title",
@@ -149,7 +170,7 @@ fun MainActivity.MainScreen(){
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             NavHostSetup()
         }
     }
@@ -159,7 +180,8 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home
+        startDestination = ScreensRoute.Home,
+        modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
 
@@ -168,8 +190,10 @@ fun MainActivity.NavHostSetup(){
                 ViewModelProvider(
                     this@NavHostSetup,
                     HomeViewModelFactory(ProductsRepositoryImp(ProductRemoteDataSourceImp()))
-                )
-                    [HomeViewModel::class.java])
+                )[HomeViewModel::class.java]
+            ) {
+                type -> navHostController.navigate(ScreensRoute.Products(type))
+            }
         }
 
         composable<ScreensRoute.Cart>{}
@@ -200,8 +224,14 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
-        composable<ScreensRoute.Products>{
-            ProductsScreen()
+        composable<ScreensRoute.Products>{  backStackEntry->
+            val entry = backStackEntry.toRoute<ScreensRoute.Products>()
+            val type = entry.type
+
+            ProductsScreen(ViewModelProvider(
+                this@NavHostSetup,
+                ProductsViewModelFactory(GetProductsByTypeUseCase(ProductsRepositoryImp(ProductRemoteDataSourceImp())))
+            )[ProductsViewModel::class.java],type)
         }
 
         composable<ScreensRoute.Order>{
