@@ -1,8 +1,8 @@
-package com.example.m_commerce.data.di
+package com.example.m_commerce.di
 
 import android.content.Context
-import com.example.m_commerce.data.restful.data_source.remote.PlacesClientHelper
-import com.example.m_commerce.data.restful.data_source.remote.RetrofitClient
+import com.example.m_commerce.data.datasource.remote.restful.PlacesClientHelper
+import com.example.m_commerce.data.datasource.remote.restful.RetrofitClient
 
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module

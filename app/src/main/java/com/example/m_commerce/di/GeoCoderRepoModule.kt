@@ -1,8 +1,8 @@
-package com.example.m_commerce.data.di
+package com.example.m_commerce.di
 
-import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceContract
-import com.example.m_commerce.data.restful.data_source.remote.RemoteDataSourceImp
-import com.example.m_commerce.data.restful.repository_imp.GeoCodingRepositoryImp
+import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceContract
+import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceImp
+import com.example.m_commerce.data.repository_imp.settings_repo.GeoCodingRepositoryImp
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
 import dagger.Binds
 import dagger.Module

@@ -4,13 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
-import com.example.m_commerce.domain.usecases.CurrencyExchangeUsecase
+import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val currencyExchangeUsecase: CurrencyExchangeUsecase
+    private val currencyExchangeUsecase: CurrencyExchangeUseCase
 ) : ViewModel() {
 
     private val _currencyExchange = MutableSharedFlow<CurrencyExchangeResponse>()

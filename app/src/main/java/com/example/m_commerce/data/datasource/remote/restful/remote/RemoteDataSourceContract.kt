@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.restful.data_source.remote
+package com.example.m_commerce.data.datasource.remote.restful.remote
 
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import kotlinx.coroutines.flow.Flow

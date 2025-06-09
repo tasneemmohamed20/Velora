@@ -1,4 +1,4 @@
-package com.example.m_commerce.presentation.authintication.signUp.view
+package com.example.m_commerce.presentation.authentication.signUp.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,7 +32,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 
 @Composable
 fun SignUpScreen(onButtonClicked: () -> Unit) {

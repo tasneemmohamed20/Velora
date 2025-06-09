@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.graphql.data_source.remote
+package com.example.m_commerce.data.datasource.remote.graphql
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.http.HttpHeader
@@ -17,6 +17,8 @@ object ApolloHelper {
             ),
         )
 
-    val shopifyService: ApolloClient = ApolloClient.Builder().httpHeaders(headers).serverUrl(BASE_URL).build()
+    val shopifyService: ApolloClient = ApolloClient.Builder().httpHeaders(headers).serverUrl(
+        BASE_URL
+    ).build()
 
 }

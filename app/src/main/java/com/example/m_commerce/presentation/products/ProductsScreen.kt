@@ -1,6 +1,7 @@
 
 package com.example.m_commerce.presentation.products
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,8 +48,6 @@ import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
 
 @Composable
 fun ProductsScreen(viewModel: ProductsViewModel, type: String){
-
-    lateinit var productsData: List<Product>
 
     LaunchedEffect(Unit) {
         viewModel.getProductsByType(type)
@@ -110,13 +108,12 @@ fun ProductsScreen(viewModel: ProductsViewModel, type: String){
                 }
             }
             is ResponseState.Success -> {
-                productsData = (productsState as ResponseState.Success).data as List<Product>
+                val productsData = (productsState as ResponseState.Success).data as List<Product>
                 ProductsList(productsData)
             }
         }
 
     }
-
 
 }
 
@@ -184,7 +181,9 @@ fun ProductCard(productDetails: Product, modifier: Modifier = Modifier) {
                 }
             }
 
-            Box(modifier = Modifier.padding(10.dp).height(80.dp)) {
+            Box(modifier = Modifier
+                .padding(10.dp)
+                .height(80.dp)) {
                 Column {
                     Text(
                         text = brand,

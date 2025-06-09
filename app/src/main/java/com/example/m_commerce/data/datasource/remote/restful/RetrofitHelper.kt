@@ -1,7 +1,6 @@
-package com.example.m_commerce.data.restful.data_source.remote
+package com.example.m_commerce.data.datasource.remote.restful
 
 import android.content.Context
-import androidx.compose.runtime.remember
 import com.example.m_commerce.R
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient

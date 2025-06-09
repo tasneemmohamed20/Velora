@@ -1,6 +1,8 @@
-package com.example.m_commerce.data.restful.data_source.remote
+package com.example.m_commerce.data.datasource.remote.restful.remote
 
 import android.util.Log
+import com.example.m_commerce.data.datasource.remote.restful.RetrofitClient
+import com.example.m_commerce.data.datasource.remote.restful.RetrofitGeoHelper
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.domain.entities.GeocodingResponse
 import kotlinx.coroutines.Dispatchers

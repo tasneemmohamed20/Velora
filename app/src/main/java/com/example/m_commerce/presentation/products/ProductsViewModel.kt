@@ -20,6 +20,8 @@ class ProductsViewModel(private val productsUseCase: GetProductsByTypeUseCase): 
 
     fun getProductsByType(type: String) {
         viewModelScope.launch {
+            _mutableProductsList.value = ResponseState.Loading
+
             val result = productsUseCase.invoke(type)
             result
                 .catch {
