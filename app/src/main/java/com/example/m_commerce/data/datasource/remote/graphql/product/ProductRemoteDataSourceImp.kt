@@ -2,7 +2,6 @@ package com.example.m_commerce.data.datasource.remote.graphql.product
 
 import com.example.m_commerce.GetBrandsQuery
 import com.example.m_commerce.GetProductsByHandleQuery
-import com.example.m_commerce.data.datasource.remote.graphql.ApolloHelper.shopifyService
 import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
@@ -11,8 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ProductRemoteDataSourceImp() : IProductRemoteDataSource {
+class ProductRemoteDataSourceImp @Inject constructor() : IProductRemoteDataSource {
 
 
     override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{

@@ -32,13 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
 import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.settings_repo.RepositoryImp
 import androidx.navigation.toRoute
@@ -49,8 +47,6 @@ import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.authentication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.view.SignUpScreen
-import com.example.m_commerce.data.datasource.remote.graphql.product.ProductRemoteDataSourceImp
-import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
@@ -60,11 +56,9 @@ import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
-import com.example.m_commerce.presentation.home.HomeViewModel
-import com.example.m_commerce.presentation.home.HomeViewModelFactory
+
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.products.ProductsViewModel
-import com.example.m_commerce.presentation.products.ProductsViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.start.StartScreen
@@ -179,10 +173,6 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Home>{
             HomeScreen(
-                ViewModelProvider(
-                    this@NavHostSetup,
-                    HomeViewModelFactory(ProductsRepositoryImp(ProductRemoteDataSourceImp()))
-                )[HomeViewModel::class.java]
             ) {
                 type -> navHostController.navigate(ScreensRoute.Products(type))
             }
@@ -219,15 +209,9 @@ fun MainActivity.NavHostSetup(){
         composable<ScreensRoute.Products>{  backStackEntry->
             val entry = backStackEntry.toRoute<ScreensRoute.Products>()
             val type = entry.type
-
-            ProductsScreen(ViewModelProvider(
-                this@NavHostSetup,
-                ProductsViewModelFactory(GetProductsByTypeUseCase(
-                    ProductsRepositoryImp(
-                    ProductRemoteDataSourceImp()
-                )
-                ))
-            )[ProductsViewModel::class.java],type)
+            ProductsScreen(
+                type = type
+            )
         }
 
         composable<ScreensRoute.Order>{
