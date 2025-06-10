@@ -10,6 +10,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.services.location.LocationWorker
+import com.example.m_commerce.domain.entities.Address
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.AutocompletePrediction
@@ -22,6 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -58,6 +60,17 @@ class AddressMapViewModel @Inject constructor (
     private val _selectedLocation = MutableStateFlow<LatLng?>(null)
     val selectedLocation: StateFlow<LatLng?> = _selectedLocation
 
+    private val _addresses = MutableStateFlow<List<Address>>(emptyList())
+    val addresses: StateFlow<List<Address>> = _addresses
+
+    private val _phoneNumber = MutableStateFlow("")
+    val phoneNumber: StateFlow<String> = _phoneNumber
+
+    private val _isPhoneValid = MutableStateFlow(true)
+    val isPhoneValid: StateFlow<Boolean> = _isPhoneValid
+
+    private val _editingAddress = MutableStateFlow<Address?>(null)
+    val editingAddress: StateFlow<Address?> = _editingAddress
 
 
     init {
@@ -185,17 +198,47 @@ class AddressMapViewModel @Inject constructor (
         _searchResults.value = emptyList()
     }
 
-/*    class Factory(
-        private val context: Context,
-        private val geoCodingRepository: IGeoCodingRepository,
-        private val placesClient: PlacesClient
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(AddressMapViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return AddressMapViewModel(context, geoCodingRepository, placesClient) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
+    fun addAddressFromInfo(address: Address) {
+        _addresses.update { currentList -> currentList + address }
+    }
+
+    fun validateAndUpdatePhone(newValue: String) {
+        if (newValue.isEmpty() || (newValue.all { it.isDigit() } && newValue.length <= 11)) {
+            _phoneNumber.value = newValue
+            _isPhoneValid.value = newValue.isEmpty() || newValue.matches("^01[0125][0-9]{8}$".toRegex())
         }
-    }*/
+    }
+
+    fun isValidEgyptianMobileNumber(number: String): Boolean {
+        return number.matches("^01[0125][0-9]{8}$".toRegex())
+    }
+
+    fun setEditingAddress(address: Address?) {
+        _editingAddress.value = address
+        address?.let {
+            _currentLocation.value = LatLng(it.latitude, it.longitude)
+        }
+    }
+
+    fun updateSelectedLocation(latLng: LatLng) {
+        _selectedLocation.value = latLng
+        fetchAddress("${latLng.latitude},${latLng.longitude}")
+    }
+
+    fun updateOrAddAddress(newAddress: Address) {
+        _addresses.update { currentList ->
+            val existingAddress = _editingAddress.value
+            if (existingAddress != null) {
+                // Replace existing address
+                currentList.map { address ->
+                    if (address == existingAddress) newAddress else address
+                }
+            } else {
+                // Add new address
+                currentList + newAddress
+            }
+        }
+        // Clear editing state
+        _editingAddress.value = null
+    }
 }

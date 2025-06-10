@@ -81,7 +81,6 @@ dependencies {
     implementation(libs.apollo.runtime)
     implementation (libs.material)
 
-
     //nav
     implementation (libs.androidx.navigation.compose.v290)
 
@@ -110,6 +109,10 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // country code picker
+    implementation(libs.compose.country.code.picker)
+
 
     // Firebase
     implementation(libs.google.firebase.analytics)

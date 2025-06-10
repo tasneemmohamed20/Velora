@@ -1,7 +1,9 @@
 [versions]
 agp = "8.8.2"
 apolloRuntime = "4.2.0"
+ccp = "2.7.3"
 compose = "1.0.0-beta01"
+composeCountryCodePicker = "0.5.1"
 converterGson = "3.0.0"
 converterName = "3.0.0"
 coilCompose = "2.6.0"
@@ -42,7 +44,9 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-navigation-compose-v290 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 apollo-runtime = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apolloRuntime" }
+ccp = { module = "com.hbb20:ccp", version.ref = "ccp" }
 compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
+compose-country-code-picker = { module = "com.eygraber:compose-country-code-picker", version.ref = "composeCountryCodePicker" }
 converter-name = { module = "com.squareup.retrofit2:converter-name", version.ref = "converterName" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
