@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class ProductsViewModel @Inject constructor(private val productsUseCase: GetProductsByTypeUseCase): ViewModel() {
     private val _mutableProductsList : MutableStateFlow<ResponseState> = MutableStateFlow(

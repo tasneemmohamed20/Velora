@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class DataProviderModule {
+object DataProviderModule {
 
     @Provides
     fun provideGeoRetrofit(): Retrofit {
