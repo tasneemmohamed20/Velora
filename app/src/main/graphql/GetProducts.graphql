@@ -1,70 +1,11 @@
 query GetProducts {
-    products(first: 20) {
+    products(first: 5) {
         edges {
             node {
-                availableForSale
-                createdAt
-                description
-                descriptionHtml
-                encodedVariantAvailability
-                encodedVariantExistence
-                handle
                 id
-                isGiftCard
-                onlineStoreUrl
-                productType
-                publishedAt
-                requiresSellingPlan
-                tags
                 title
-                totalInventory
-                trackingParameters
-                updatedAt
-                vendor
+                handle
             }
         }
     }
 }
-
-query GetProductsByHandle($handle: String!) {
-    collection(handle: $handle) {
-            title
-            products(first: 50) {
-                edges{
-                    node {
-                        id
-                        title
-                        description
-                        priceRange {
-                            minVariantPrice {
-                                amount
-                                currencyCode
-                            }
-                        }
-                        images(first: 1) {
-                            edges {
-                                node {
-                                    url
-                                    altText
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-    }
-}
-
-query GetLocalizationOptions {
-    localization {
-        availableCountries {
-            isoCode
-            name
-            unitSystem
-            availableLanguages {
-                name
-            }
-        }
-    }
-}
-
