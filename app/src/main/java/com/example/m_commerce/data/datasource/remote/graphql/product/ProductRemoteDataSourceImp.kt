@@ -1,5 +1,6 @@
 package com.example.m_commerce.data.datasource.remote.graphql.product
 
+import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.GetBrandsQuery
 import com.example.m_commerce.GetProductsByHandleQuery
 import com.example.m_commerce.domain.entities.Brand
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class ProductRemoteDataSourceImp @Inject constructor() : IProductRemoteDataSource {
+class ProductRemoteDataSourceImp @Inject constructor(private val shopifyService: ApolloClient) : IProductRemoteDataSource {
 
 
     override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{

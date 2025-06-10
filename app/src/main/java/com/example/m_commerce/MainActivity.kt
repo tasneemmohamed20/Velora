@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,8 +25,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -92,9 +95,12 @@ fun MainActivity.MainScreen(){
 
     val showBottomNavBar = remember { mutableStateOf(true) }
     val showTopAppBar = remember { mutableStateOf(true) }
+    var topAppBarTitleState by remember { mutableStateOf("Velora") }
+    var showBackButton by remember { mutableStateOf(false) }
 
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
+            Log.i(TAG, "MainScreen: route ${destination.route}")
             when(destination.route){
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
@@ -104,13 +110,22 @@ fun MainActivity.MainScreen(){
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
+                        showBackButton = false
                     }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"-> showTopAppBar.value = false
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" -> {
+                    showBottomNavBar.value = false
+                    showTopAppBar.value = true
+                    topAppBarTitleState = "Products"
+                    showBackButton = true
+                }
                 else ->{
                     showBottomNavBar.value = true
                     showTopAppBar.value = true
+                    topAppBarTitleState = "Velora"
+                    showBackButton = false
                 }
             }
         }
@@ -130,7 +145,7 @@ fun MainActivity.MainScreen(){
                     modifier = Modifier.shadow(elevation = 6.dp),
                     title = {
                         Text(
-                            "Title",
+                            topAppBarTitleState,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 60.dp),
@@ -144,6 +159,13 @@ fun MainActivity.MainScreen(){
                         titleContentColor = Color.Black,
                         actionIconContentColor = Color.Black,
                     ),
+                    navigationIcon = {
+                        if(showBackButton){
+                            IconButton(onClick = { navHostController.popBackStack() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                        } else null
+                    },
                     actions = {
                         IconButton(onClick = {  }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
@@ -156,7 +178,9 @@ fun MainActivity.MainScreen(){
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()) {
             NavHostSetup()
         }
     }
