@@ -53,12 +53,12 @@ import com.example.m_commerce.data.datasource.remote.graphql.product.ProductRemo
 import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
+import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
-import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 import com.example.m_commerce.presentation.home.HomeViewModel
 import com.example.m_commerce.presentation.home.HomeViewModelFactory
@@ -68,6 +68,7 @@ import com.example.m_commerce.presentation.products.ProductsViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.start.StartScreen
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainActivity"
@@ -78,7 +79,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
 
         setContent {
             navHostController = rememberNavController()
@@ -106,7 +107,8 @@ fun MainActivity.MainScreen(){
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap" ,
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch"
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo"
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
@@ -162,7 +164,9 @@ fun MainActivity.MainScreen(){
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()) {
             NavHostSetup()
         }
     }
@@ -255,13 +259,20 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Addresses> {
             AddressesScreen(
-                viewModel = AddressesViewModel(),
+                viewModel = viewModel,
                 onBack = {
                     navHostController.popBackStack()
                 },
                 onAddClicked = {
                     navHostController.navigate(ScreensRoute.AddressMap)
                     Log.d(TAG, "NavHostSetup: $it")
+                },
+                onAddressClick = { address ->
+                    viewModel.setEditingAddress(address)
+                    viewModel.updateCurrentLocation(
+                        LatLng(address.latitude, address.longitude)
+                    )
+                    navHostController.navigate(ScreensRoute.AddressInfo)
                 }
             )
         }
@@ -275,12 +286,15 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {},
+                onConfirmLocation = {
+                    navHostController.navigate(ScreensRoute.AddressInfo)
+                },
                 viewModel = viewModel
             )
         }
 
         composable<ScreensRoute.MapSearch> {
+
             MapSearch(
                 onBack = { navHostController.popBackStack() },
                 onResultClick = { latLng ->
@@ -288,6 +302,20 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
+            )
+        }
+
+        composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.updateOrAddAddress(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
             )
         }
     }

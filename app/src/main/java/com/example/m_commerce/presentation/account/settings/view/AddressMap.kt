@@ -78,7 +78,8 @@ fun AddressMapToolbar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = "Back",
+                    tint = Color.Blue
                 )
             }
 
@@ -93,7 +94,8 @@ fun AddressMapToolbar(
             }
         },
 
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .shadow(elevation = 4.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White,
             titleContentColor = Color.Black
@@ -106,7 +108,6 @@ fun AddressMap(
     onBackClick: () -> Unit = {},
     onConfirmLocation: (String) -> Unit = {},
     viewModel: AddressMapViewModel,
-//    = hiltViewModel(),
     onSearchClicked: () -> Unit
 ) {
     val locationState by viewModel.locationState.collectAsState()
@@ -149,7 +150,8 @@ fun AddressMap(
                         onLocationClick = { latLng ->
                             viewModel.fetchAddress("${latLng.latitude},${latLng.longitude}")
                         },
-                        onMapIdle = { idle -> isMapIdle = idle }
+                        onMapIdle = { idle -> isMapIdle = idle },
+                        viewModel = viewModel
                     )
                 }
                 is ResponseState.Failure -> {
@@ -177,7 +179,8 @@ private fun MapContent(
     defaultLocation: LatLng,
     isLoading: Boolean,
     onLocationClick: (LatLng) -> Unit,
-    onMapIdle: (Boolean) -> Unit
+    onMapIdle: (Boolean) -> Unit,
+    viewModel: AddressMapViewModel
 ) {
 
     LaunchedEffect(cameraPositionState.isMoving) {
@@ -185,6 +188,7 @@ private fun MapContent(
         if (!cameraPositionState.isMoving) {
             val targetLocation = cameraPositionState.position.target
             Log.d("MapContent", "Location Changed - Lat: ${targetLocation.latitude}, Lng: ${targetLocation.longitude}")
+            viewModel.updateSelectedLocation(targetLocation)
             Log.d("MapContent", "Map State: Idle")
             onLocationClick(targetLocation)
         } else {
@@ -275,7 +279,7 @@ fun BottomBar(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-        ) {
+            ) {
             Button(
                 onClick = onConfirmClick,
                 modifier = Modifier
