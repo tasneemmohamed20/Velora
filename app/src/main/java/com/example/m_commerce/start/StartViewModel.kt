@@ -39,7 +39,9 @@ class StartViewModel : ViewModel() {
                 createShopifyCustomer(name, email)
             }
             .addOnFailureListener {
+                Log.e("GoogleSignIn", "Sign in failed", it)
                 _googleSignInState.value = ResponseState.Failure(it)
+
             }
     }
 

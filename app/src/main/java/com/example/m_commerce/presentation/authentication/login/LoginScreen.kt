@@ -23,7 +23,8 @@ import com.example.m_commerce.ResponseState
 @Composable
 fun LoginScreen(
     onButtonClicked: () -> Unit,
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel = viewModel(),
+    onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -89,6 +90,7 @@ fun LoginScreen(
                 LaunchedEffect(Unit) {
                     Toast.makeText(context, (loginState as ResponseState.Success).data as String, Toast.LENGTH_SHORT).show()
                     // i will put here the navigation to the home screen later onn
+                    onLoginSuccess()
                 }
             }
             is ResponseState.Failure -> {

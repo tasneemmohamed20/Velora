@@ -261,9 +261,14 @@ fun MainActivity.NavHostSetup(){
 
 
         composable<ScreensRoute.Login> {
-            LoginScreen(onButtonClicked = {
-                navHostController.navigate(ScreensRoute.SignUp)
-            })
+            LoginScreen(
+                onButtonClicked = { navHostController.navigate(ScreensRoute.SignUp)},
+                onLoginSuccess = {
+                    navHostController.navigate(ScreensRoute.Home) {
+                        popUpTo(ScreensRoute.Start) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable<ScreensRoute.SignUp> {
