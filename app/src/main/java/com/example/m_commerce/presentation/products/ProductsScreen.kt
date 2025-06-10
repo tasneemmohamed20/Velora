@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.example.m_commerce.ResponseState
@@ -47,7 +48,7 @@ import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
 
 @Composable
-fun ProductsScreen(viewModel: ProductsViewModel, type: String){
+fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String){
 
     LaunchedEffect(Unit) {
         viewModel.getProductsByType(type)

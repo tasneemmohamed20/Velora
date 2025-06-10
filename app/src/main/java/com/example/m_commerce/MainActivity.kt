@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,21 +25,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
 import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.settings_repo.RepositoryImp
 import androidx.navigation.toRoute
@@ -47,8 +48,9 @@ import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 
 import com.example.m_commerce.presentation.home.HomeScreen
-import com.example.m_commerce.presentation.authentication.login.view.LoginScreen
-import com.example.m_commerce.presentation.authentication.signUp.view.SignUpScreen
+
+import com.example.m_commerce.presentation.authentication.login.LoginScreen
+import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.data.datasource.remote.graphql.product.ProductRemoteDataSourceImp
 import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
 import com.example.m_commerce.presentation.OrderScreen
@@ -60,11 +62,9 @@ import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
-import com.example.m_commerce.presentation.home.HomeViewModel
-import com.example.m_commerce.presentation.home.HomeViewModelFactory
+
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.products.ProductsViewModel
-import com.example.m_commerce.presentation.products.ProductsViewModelFactory
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.start.StartScreen
@@ -99,9 +99,12 @@ fun MainActivity.MainScreen(){
 
     val showBottomNavBar = remember { mutableStateOf(true) }
     val showTopAppBar = remember { mutableStateOf(true) }
+    var topAppBarTitleState by remember { mutableStateOf("Velora") }
+    var showBackButton by remember { mutableStateOf(false) }
 
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
+            Log.i(TAG, "MainScreen: route ${destination.route}")
             when(destination.route){
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
@@ -112,13 +115,22 @@ fun MainActivity.MainScreen(){
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
+                        showBackButton = false
                     }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"-> showTopAppBar.value = false
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" -> {
+                    showBottomNavBar.value = false
+                    showTopAppBar.value = true
+                    topAppBarTitleState = "Products"
+                    showBackButton = true
+                }
                 else ->{
                     showBottomNavBar.value = true
                     showTopAppBar.value = true
+                    topAppBarTitleState = "Velora"
+                    showBackButton = false
                 }
             }
         }
@@ -138,7 +150,7 @@ fun MainActivity.MainScreen(){
                     modifier = Modifier.shadow(elevation = 6.dp),
                     title = {
                         Text(
-                            "Title",
+                            topAppBarTitleState,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 60.dp),
@@ -152,6 +164,13 @@ fun MainActivity.MainScreen(){
                         titleContentColor = Color.Black,
                         actionIconContentColor = Color.Black,
                     ),
+                    navigationIcon = {
+                        if(showBackButton){
+                            IconButton(onClick = { navHostController.popBackStack() }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                        } else null
+                    },
                     actions = {
                         IconButton(onClick = {  }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
@@ -176,17 +195,13 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home,
+        startDestination = ScreensRoute.Start,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
 
         composable<ScreensRoute.Home>{
             HomeScreen(
-                ViewModelProvider(
-                    this@NavHostSetup,
-                    HomeViewModelFactory(ProductsRepositoryImp(ProductRemoteDataSourceImp()))
-                )[HomeViewModel::class.java]
             ) {
                 type -> navHostController.navigate(ScreensRoute.Products(type))
             }
@@ -223,15 +238,9 @@ fun MainActivity.NavHostSetup(){
         composable<ScreensRoute.Products>{  backStackEntry->
             val entry = backStackEntry.toRoute<ScreensRoute.Products>()
             val type = entry.type
-
-            ProductsScreen(ViewModelProvider(
-                this@NavHostSetup,
-                ProductsViewModelFactory(GetProductsByTypeUseCase(
-                    ProductsRepositoryImp(
-                    ProductRemoteDataSourceImp()
-                )
-                ))
-            )[ProductsViewModel::class.java],type)
+            ProductsScreen(
+                type = type
+            )
         }
 
         composable<ScreensRoute.Order>{
@@ -240,10 +249,16 @@ fun MainActivity.NavHostSetup(){
 
 
         composable<ScreensRoute.Start> {
-            StartScreen(onEmailClicked = {
-                navHostController.navigate(ScreensRoute.Login)
-            })
+            StartScreen(
+                onEmailClicked = { navHostController.navigate(ScreensRoute.Login) },
+                onGoogleSuccess = {
+                    navHostController.navigate(ScreensRoute.Home) {
+                        popUpTo(ScreensRoute.Start) { inclusive = true }
+                    }
+                }
+            )
         }
+
 
         composable<ScreensRoute.Login> {
             LoginScreen(onButtonClicked = {
@@ -253,7 +268,7 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.SignUp> {
             SignUpScreen(onButtonClicked = {
-                navHostController.navigate(ScreensRoute.Login)
+                navHostController.popBackStack()
             })
         }
 
