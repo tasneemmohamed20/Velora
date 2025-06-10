@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.example.m_commerce.R
@@ -43,7 +44,7 @@ import com.example.m_commerce.domain.entities.Brand
 
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, onItemClicked: (String) -> Unit){
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (String) -> Unit){
     val scrollState = rememberScrollState()
     lateinit var successData: List<Brand>
 

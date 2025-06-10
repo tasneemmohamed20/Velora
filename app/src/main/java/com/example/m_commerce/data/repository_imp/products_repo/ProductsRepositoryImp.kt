@@ -5,8 +5,9 @@ import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.repository.IProductsRepository
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class ProductsRepositoryImp(private val productRemote: IProductRemoteDataSource) : IProductsRepository {
+class ProductsRepositoryImp @Inject constructor(private val productRemote: IProductRemoteDataSource) : IProductsRepository {
     override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> {
         return productRemote.getProductsByHandle(handle)
     }
