@@ -6,6 +6,7 @@ plugins {
     kotlin("plugin.serialization") version "2.1.10"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 
 }
 
@@ -66,6 +67,7 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation (libs.maps.compose)
     implementation(libs.places)
+    implementation(libs.androidx.espresso.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -108,5 +110,13 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // Firebase
+    implementation(libs.google.firebase.analytics)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth)
+
+
+    implementation ("com.google.code.gson:gson:2.10.1")
 
 }

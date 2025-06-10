@@ -48,8 +48,11 @@ import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 
 import com.example.m_commerce.presentation.home.HomeScreen
-import com.example.m_commerce.presentation.authentication.login.view.LoginScreen
-import com.example.m_commerce.presentation.authentication.signUp.view.SignUpScreen
+
+import com.example.m_commerce.presentation.authentication.login.LoginScreen
+import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
+import com.example.m_commerce.data.datasource.remote.graphql.product.ProductRemoteDataSourceImp
+import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
 import com.example.m_commerce.presentation.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
@@ -190,7 +193,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home,
+        startDestination = ScreensRoute.Start,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -244,10 +247,16 @@ fun MainActivity.NavHostSetup(){
 
 
         composable<ScreensRoute.Start> {
-            StartScreen(onEmailClicked = {
-                navHostController.navigate(ScreensRoute.Login)
-            })
+            StartScreen(
+                onEmailClicked = { navHostController.navigate(ScreensRoute.Login) },
+                onGoogleSuccess = {
+                    navHostController.navigate(ScreensRoute.Home) {
+                        popUpTo(ScreensRoute.Start) { inclusive = true }
+                    }
+                }
+            )
         }
+
 
         composable<ScreensRoute.Login> {
             LoginScreen(onButtonClicked = {
@@ -257,7 +266,7 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.SignUp> {
             SignUpScreen(onButtonClicked = {
-                navHostController.navigate(ScreensRoute.Login)
+                navHostController.popBackStack()
             })
         }
 
