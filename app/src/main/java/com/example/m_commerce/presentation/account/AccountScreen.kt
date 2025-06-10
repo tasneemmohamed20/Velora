@@ -46,7 +46,7 @@ fun AccountScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp, 24.dp, 16.dp, 16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -66,7 +66,7 @@ fun AccountScreen(
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(2f)) {
-                Text("Hi Guest", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                Text("Hi Guest", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                     Icon(

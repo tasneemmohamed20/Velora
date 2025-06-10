@@ -72,6 +72,7 @@ class AddressMapViewModel @Inject constructor (
     private val _editingAddress = MutableStateFlow<Address?>(null)
     val editingAddress: StateFlow<Address?> = _editingAddress
 
+
     init {
         startLocationUpdates()
         observeLocationUpdates()

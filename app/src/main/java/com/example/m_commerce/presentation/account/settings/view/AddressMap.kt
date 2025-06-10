@@ -117,6 +117,7 @@ fun AddressMap(
     val defaultLocation = LatLng(30.0444, 31.2357)
     var isMapIdle by remember { mutableStateOf(true) }
 
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             currentLocation ?: defaultLocation,

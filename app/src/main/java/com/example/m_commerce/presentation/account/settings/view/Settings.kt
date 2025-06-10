@@ -55,26 +55,30 @@ fun SettingsScreen(
     var showDropdown by remember { mutableStateOf(false) }
 
 
-
-    Scaffold(
-        topBar = {
-            CustomTopAppBar("Settings", onBackClick = onBackClick)
-        },
-    ) { padding ->
+    Column {
+        CustomTopAppBar(
+            title = "Settings",
+            onBackClick = onBackClick,
+        )
         Column(
             modifier = Modifier
-                .padding(padding)
+                //                .padding(padding)
                 .fillMaxSize()
                 .background(Color.White)
         ) {
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
-            SettingsItemRow(label = "Addresses", onClick = onAddressClick, icon = SettingsIcon.ARROW_RIGHT)
+            SettingsItemRow(
+                label = "Addresses",
+                onClick = onAddressClick,
+                icon = SettingsIcon.ARROW_RIGHT
+            )
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
 
             Box {
                 SettingsItemRow(
                     label = "Currency",
-                    value = viewModel.currencyExchange.collectAsState(initial = null).value?.rates?.EGP ?: selectedCurrency.name,
+                    value = viewModel.currencyExchange.collectAsState(initial = null).value?.rates?.EGP
+                        ?: selectedCurrency.name,
                     onClick = { showDropdown = true },
                     icon = SettingsIcon.ARROW_DROP_DOWN
 
@@ -99,10 +103,16 @@ fun SettingsScreen(
 
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
             SettingsItemRow(label = "Contact Us", onClick = {}, icon = SettingsIcon.ARROW_RIGHT)
-            SettingsItemRow(label = "About Us", value = "", onClick = {}, icon = SettingsIcon.ARROW_RIGHT)
+            SettingsItemRow(
+                label = "About Us",
+                value = "",
+                onClick = {},
+                icon = SettingsIcon.ARROW_RIGHT
+            )
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
         }
     }
+
 }
 
 @Composable
