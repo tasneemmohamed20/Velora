@@ -64,7 +64,7 @@ import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.products.ProductsViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
-import com.example.m_commerce.start.StartScreen
+import com.example.m_commerce.presentation.start.StartScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainActivity"

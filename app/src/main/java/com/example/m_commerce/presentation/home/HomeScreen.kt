@@ -1,7 +1,6 @@
 
 package com.example.m_commerce.presentation.home
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -102,7 +103,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
 fun Categories(onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Text(
         text = "Categories",
-        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
     Row(
@@ -159,7 +160,7 @@ fun CategoryItem(type: String, onItemClicked: (String) -> Unit, @DrawableRes id:
 fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
     Text(
         text = "Brands",
-        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
     LazyHorizontalGrid(
@@ -216,3 +217,4 @@ fun BrandItem(brand: Brand, onItemClicked: (String) -> Unit, modifier: Modifier 
         )
     }
 }
+

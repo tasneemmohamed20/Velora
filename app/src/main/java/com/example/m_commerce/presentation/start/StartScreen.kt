@@ -1,4 +1,4 @@
-package com.example.m_commerce.start
+package com.example.m_commerce.presentation.start
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image

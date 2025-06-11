@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.utils.Functions
 
 import android.util.Log
+import com.example.m_commerce.domain.entities.Product
 
 fun formatTitleAndBrand(title: String): Pair<String, String> {
     val parts = title.split(" | ").map { it.trim() }
@@ -12,3 +13,8 @@ fun formatTitleAndBrand(title: String): Pair<String, String> {
         "" to title
     }
 }
+
+
+fun filterProductsBySubType(products: MutableList<Product>?, subType: String) =
+    products?.filter { it.productType == subType }
+

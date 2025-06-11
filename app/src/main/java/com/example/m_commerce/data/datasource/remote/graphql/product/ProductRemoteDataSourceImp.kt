@@ -29,6 +29,7 @@ class ProductRemoteDataSourceImp @Inject constructor(private val shopifyService:
                 Product(
                     id = node.id,
                     title = node.title,
+                    productType = node.productType,
                     description = node.description,
                     price = PriceDetails(
                         minVariantPrice = Price(
