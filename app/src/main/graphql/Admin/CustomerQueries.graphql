@@ -1,0 +1,16 @@
+query GetCustomerData($id: ID!) {
+    customer(id: $id) {
+        displayName
+        email
+        firstName
+        id
+        lastName
+        addresses {
+            address1
+            address2
+            formatted
+        }
+    }
+}
+
+
