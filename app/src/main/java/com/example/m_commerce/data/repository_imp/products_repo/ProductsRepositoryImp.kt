@@ -15,4 +15,8 @@ class ProductsRepositoryImp @Inject constructor(private val productRemote: IProd
     override suspend fun getBrands(): Flow<List<Brand>> {
         return productRemote.getBrands()
     }
+
+    override suspend fun getAllProducts(): Flow<List<Product>> {
+        return productRemote.getAllProducts()
+    }
 }
