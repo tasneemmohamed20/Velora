@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.ResponseState
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,12 +13,17 @@ import kotlinx.coroutines.launch
 import okhttp3.*
 import com.google.gson.JsonObject
 import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class SignUpViewModel : ViewModel() {
+@HiltViewModel
+class SignUpViewModel@Inject constructor(
+    private val sharedPreferencesHelper: SharedPreferencesHelper
+) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
 
@@ -67,6 +73,7 @@ class SignUpViewModel : ViewModel() {
                                     auth.currentUser?.updateProfile(profileUpdates)
 
                                     createShopifyCustomer(email, firstName, lastName)
+
 
                                 } else {
                                     Log.d("SignUpViewModel", "Failed to send verification email")
@@ -166,6 +173,7 @@ class SignUpViewModel : ViewModel() {
                             }
                         } else {
                             Log.d("SignUpViewModel", "Unknown error creating Shopify customer")
+                            Log.d("SignUpViewModel", "Response Body: $responseBody")
                             withContext(Dispatchers.Main) {
                                 _signUpState.value = ResponseState.Failure(Throwable("Unknown error creating customer"))
                             }
@@ -179,4 +187,6 @@ class SignUpViewModel : ViewModel() {
             }
         }
     }
+
 }
+

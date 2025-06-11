@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.ResponseState
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +18,13 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import javax.inject.Inject
+import kotlin.text.get
 
-class LoginViewModel : ViewModel() {
+@HiltViewModel
+class LoginViewModel  @Inject constructor(
+    private val sharedPreferencesHelper: SharedPreferencesHelper
+) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
     private val _loginState = MutableStateFlow<ResponseState>(ResponseState.Loading)
@@ -110,6 +117,8 @@ class LoginViewModel : ViewModel() {
                         if (customers.size() > 0) {
                             val customer = customers[0].asJsonObject
                                 .getAsJsonObject("node")
+                            val customerId = customer.get("id").asString
+                            sharedPreferencesHelper.saveCustomerId(customerId)
                             Log.d("LoginSuccess", "Full customer data: ${customer.toString()}")
                         }
                         else {

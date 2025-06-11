@@ -14,6 +14,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import javax.inject.Singleton
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -37,5 +39,10 @@ object DataProviderModule {
         ).build()
     }
 
+    @Provides
+    @Singleton
+    fun provideSharedPreferencesHelper(@ApplicationContext context: Context): SharedPreferencesHelper {
+        return SharedPreferencesHelper(context)
+    }
 
 }

@@ -1,12 +1,13 @@
 package com.example.m_commerce.data.datasource.remote.graphql.product
 
 import com.apollographql.apollo.ApolloClient
-import com.example.m_commerce.GetBrandsQuery
-import com.example.m_commerce.GetProductsByHandleQuery
+
 import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product
+import com.example.m_commerce.service2.GetBrandsQuery
+import com.example.m_commerce.service2.GetProductsByHandleQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
