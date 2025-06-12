@@ -17,7 +17,7 @@ object Constants {
             ),
         )
 
-    const val ADMIN_URL = "https://and2-ism-mad45.myshopify.com/admin/api/2024-10/graphql.json"
+    const val ADMIN_URL = "https://and2-ism-mad45.myshopify.com/admin/api/2025-04/graphql.json"
 
     val adminHeaders =
         listOf(
@@ -30,5 +30,4 @@ object Constants {
                 "application/json",
             ),
         )
-
 }

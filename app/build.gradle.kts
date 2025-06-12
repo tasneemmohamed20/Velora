@@ -6,11 +6,11 @@ plugins {
     kotlin("plugin.serialization") version "2.1.10"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services")
 
 }
 
 apollo {
+
     service("service1") {
         packageName.set("com.example.m_commerce.service1")
         schemaFile.set(file("src/main/graphql/Admin/AdminSchema.graphqls"))
@@ -75,7 +75,6 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation (libs.maps.compose)
     implementation(libs.places)
-    implementation(libs.androidx.espresso.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -88,6 +87,7 @@ dependencies {
     implementation (libs.retrofit2.converter.gson)
     implementation(libs.apollo.runtime)
     implementation (libs.material)
+
 
     //nav
     implementation (libs.androidx.navigation.compose.v290)
@@ -117,20 +117,5 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
-
-    // country code picker
-    implementation(libs.compose.country.code.picker)
-
-
-    // Firebase
-    implementation(libs.google.firebase.analytics)
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.play.services.auth)
-
-
-    implementation ("com.google.code.gson:gson:2.10.1")
-
-    //slider
-    implementation("androidx.compose.material:material:1.9.0-alpha04")
 
 }

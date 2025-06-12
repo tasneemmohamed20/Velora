@@ -1,4 +1,4 @@
-package com.example.m_commerce.start
+package com.example.m_commerce.presentation.start
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult

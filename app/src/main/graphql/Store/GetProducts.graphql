@@ -1,31 +1,3 @@
-#query GetProducts {
-#    products(first: 20) {
-#        edges {
-#            node {
-#                availableForSale
-#                createdAt
-#                description
-#                descriptionHtml
-#                encodedVariantAvailability
-#                encodedVariantExistence
-#                handle
-#                id
-#                isGiftCard
-#                onlineStoreUrl
-#                productType
-#                publishedAt
-#                requiresSellingPlan
-#                tags
-#                title
-#                totalInventory
-#                trackingParameters
-#                updatedAt
-#                vendor
-#            }
-#        }
-#    }
-#}
-
 query GetProductsByHandle($handle: String!) {
     collection(handle: $handle) {
             title
@@ -34,6 +6,7 @@ query GetProductsByHandle($handle: String!) {
                     node {
                         id
                         title
+                        productType
                         description
                         priceRange {
                             minVariantPrice {
@@ -54,3 +27,17 @@ query GetProductsByHandle($handle: String!) {
             }
     }
 }
+
+query GetLocalizationOptions {
+    localization {
+        availableCountries {
+            isoCode
+            name
+            unitSystem
+            availableLanguages {
+                name
+            }
+        }
+    }
+}
+

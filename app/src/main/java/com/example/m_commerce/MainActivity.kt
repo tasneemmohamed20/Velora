@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,9 @@ import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.OrderScreen
+import com.example.m_commerce.presentation.authentication.login.view.LoginScreen
+import com.example.m_commerce.presentation.authentication.signUp.view.SignUpScreen
+import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
@@ -51,8 +55,11 @@ import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.AddressesViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
+
 import com.example.m_commerce.presentation.products.ProductsScreen
-import com.example.m_commerce.presentation.search.SearchScreen
+import com.example.m_commerce.presentation.products.ProductsViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.start.StartScreen
@@ -107,7 +114,10 @@ fun MainActivity.MainScreen(){
                     }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"-> showTopAppBar.value = false
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"->{
+                    showBottomNavBar.value = true
+                    showTopAppBar.value = false
+                }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
@@ -160,7 +170,7 @@ fun MainActivity.MainScreen(){
                         } else null
                     },
                     actions = {
-                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
+                        IconButton(onClick = {  }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
                         IconButton(onClick = { }) {
@@ -183,7 +193,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Start,
+        startDestination = ScreensRoute.Home,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -199,6 +209,13 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Settings>{
             SettingsScreen(
+                viewModel = SettingsViewModel(
+                    currencyExchangeUsecase = CurrencyExchangeUseCase(
+                        repository = RepositoryImp(
+                            remoteDataSource = RemoteDataSourceImp()
+                        )
+                    )
+                ),
                 onAddressClick = {
                     navHostController.navigate(ScreensRoute.Addresses)
                 },
@@ -230,50 +247,32 @@ fun MainActivity.NavHostSetup(){
 
 
         composable<ScreensRoute.Start> {
-            StartScreen(
-                onEmailClicked = { navHostController.navigate(ScreensRoute.Login) },
-                onGoogleSuccess = {
-                    navHostController.navigate(ScreensRoute.Home) {
-                        popUpTo(ScreensRoute.Start) { inclusive = true }
-                    }
-                }
-            )
+            StartScreen(onEmailClicked = {
+                navHostController.navigate(ScreensRoute.Login)
+            })
         }
 
-
         composable<ScreensRoute.Login> {
-            LoginScreen(
-                onButtonClicked = { navHostController.navigate(ScreensRoute.SignUp)},
-                onLoginSuccess = {
-                    navHostController.navigate(ScreensRoute.Home) {
-                        popUpTo(ScreensRoute.Start) { inclusive = true }
-                    }
-                }
-            )
+            LoginScreen(onButtonClicked = {
+                navHostController.navigate(ScreensRoute.SignUp)
+            })
         }
 
         composable<ScreensRoute.SignUp> {
             SignUpScreen(onButtonClicked = {
-                navHostController.popBackStack()
+                navHostController.navigate(ScreensRoute.Login)
             })
         }
 
         composable<ScreensRoute.Addresses> {
             AddressesScreen(
-                viewModel = viewModel,
+                viewModel = AddressesViewModel(),
                 onBack = {
                     navHostController.popBackStack()
                 },
                 onAddClicked = {
                     navHostController.navigate(ScreensRoute.AddressMap)
                     Log.d(TAG, "NavHostSetup: $it")
-                },
-                onAddressClick = { address ->
-                    viewModel.setEditingAddress(address)
-                    viewModel.updateCurrentLocation(
-                        LatLng(address.latitude, address.longitude)
-                    )
-                    navHostController.navigate(ScreensRoute.AddressInfo)
                 }
             )
         }
@@ -287,15 +286,12 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {
-                    navHostController.navigate(ScreensRoute.AddressInfo)
-                },
+                onConfirmLocation = {},
                 viewModel = viewModel
             )
         }
 
         composable<ScreensRoute.MapSearch> {
-
             MapSearch(
                 onBack = { navHostController.popBackStack() },
                 onResultClick = { latLng ->
@@ -303,26 +299,6 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
-            )
-        }
-
-        composable<ScreensRoute.AddressInfo> {
-            AddressInfo(
-                onBack = { navHostController.popBackStack() },
-                onSave = { address ->
-                    viewModel.saveAddressToCustomer(address)
-                    navHostController.popBackStack(
-                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
-                        inclusive = false
-                    )
-                },
-                viewModel = viewModel,
-            )
-        }
-
-        composable<ScreensRoute.Search> {
-            SearchScreen(
-                onBack = { navHostController.popBackStack() }
             )
         }
     }

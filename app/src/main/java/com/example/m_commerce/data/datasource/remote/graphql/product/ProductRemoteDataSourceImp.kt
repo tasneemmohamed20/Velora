@@ -18,7 +18,7 @@ import javax.inject.Inject
 class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val shopifyService: ApolloClient) : IProductRemoteDataSource {
 
 
-    override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{
+    override fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{
 
         val response = withContext(Dispatchers.IO){
             shopifyService.query(GetProductsByHandleQuery(handle)).execute()
@@ -31,6 +31,7 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                 Product(
                     id = node.id,
                     title = node.title,
+                    productType = node.productType,
                     description = node.description,
                     price = PriceDetails(
                         minVariantPrice = Price(
@@ -44,12 +45,12 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
         emit(products)
     }
 
-    override suspend fun getBrands(): Flow<List<Brand>> = flow {
+    override fun getBrands(): Flow<List<Brand>> = flow {
             val response = withContext(Dispatchers.IO) {
                 shopifyService.query(GetBrandsQuery()).execute()
             }
             val brands = response.data?.collections?.edges
-                ?.mapNotNull { it?.node }
+                ?.map { it.node }
                 ?.map { node ->
                     Brand(
                         id = node.id,

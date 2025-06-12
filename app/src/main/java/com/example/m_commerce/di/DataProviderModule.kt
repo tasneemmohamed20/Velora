@@ -4,6 +4,8 @@ import android.content.Context
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.data.datasource.remote.restful.PlacesClientHelper
 import com.example.m_commerce.data.datasource.remote.restful.RetrofitClient
+import com.example.m_commerce.presentation.utils.Constants
+
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
 import dagger.Provides
@@ -49,4 +51,6 @@ object DataProviderModule {
     fun provideSharedPreferencesHelper(@ApplicationContext context: Context): SharedPreferencesHelper {
         return SharedPreferencesHelper(context)
     }
+
+
 }

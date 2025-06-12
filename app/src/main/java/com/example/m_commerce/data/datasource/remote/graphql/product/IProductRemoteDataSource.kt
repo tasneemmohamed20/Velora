@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface IProductRemoteDataSource {
 
-    suspend fun getProductsByHandle(handle: String): Flow<List<Product>>
-    suspend fun getBrands(): Flow<List<Brand>>
+    fun getProductsByHandle(handle: String): Flow<List<Product>>
+    fun getBrands(): Flow<List<Brand>>
     suspend fun getAllProducts(): Flow<List<Product>>
+
 }
