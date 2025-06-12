@@ -49,5 +49,4 @@ object DataProviderModule {
     fun provideSharedPreferencesHelper(@ApplicationContext context: Context): SharedPreferencesHelper {
         return SharedPreferencesHelper(context)
     }
-
 }

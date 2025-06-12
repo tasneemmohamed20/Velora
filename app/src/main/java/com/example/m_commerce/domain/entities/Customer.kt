@@ -14,3 +14,9 @@ data class CustomerAddresses(
     val address2: String?,
     val formatted: String?
 )
+
+data class CustomerUpdateInput(
+    val id: String,
+    val phone: String?,
+    val addresses: List<CustomerAddresses>?
+)

@@ -44,16 +44,18 @@ class SharedPreferencesHelper(context: Context) {
     }
 
     // currency exchange
-    fun saveCurrencyExchangeRate(isEGP: Boolean) {
+    fun isUSD(isUSD: Boolean) : Boolean {
         prefs.edit().apply {
-            putBoolean(CURRENCY_KEY, isEGP)
+            putBoolean(CURRENCY_KEY, isUSD)
             apply()
         }
-        Log.d(TAG, "Saved currency preference: EGP = $isEGP")
+        Log.d(TAG, "Shared Pref: $isUSD")
+        return isUSD
     }
 
-    fun getCurrencyIsEGP(): Boolean {
-        return prefs.getBoolean(CURRENCY_KEY, true) // Default to EGP
+    fun getCurrencyPreference(): Boolean {
+        return prefs.getBoolean(CURRENCY_KEY, false)
     }
+
 
 }

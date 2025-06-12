@@ -4,8 +4,9 @@ import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceContract
 import com.example.m_commerce.domain.repository.ICurrencyExchangeRepository
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class RepositoryImp(
+class CurrencyExchangeRepositoryImp @Inject constructor(
     private val remoteDataSource: RemoteDataSourceContract
 ) : ICurrencyExchangeRepository {
 

@@ -13,4 +13,26 @@ query GetCustomerData($id: ID!) {
     }
 }
 
+mutation CustomerUpdate($input: CustomerInput!) {
+    customerUpdate(input: $input) {
+        customer {
+            id
+            phone
+            firstName
+            lastName
+            email
+            displayName
+            addresses {
+                address1
+                address2
+                company
+                formatted
+                formattedArea
+                id
+            }
+        }
+    }
+}
+
+
 
