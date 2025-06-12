@@ -46,7 +46,7 @@ class ProductsViewModel @Inject constructor(private val productsUseCase: GetProd
                 }
                 .collect {
                     _mutableProductsList.value = ResponseState.Success(it)
-                    products = ResponseState.Success(it).data as MutableList<Product>
+                    if(it.isNotEmpty()) products = ResponseState.Success(it).data as MutableList<Product>
                 }
         }
     }
@@ -65,11 +65,4 @@ class ProductsViewModel @Inject constructor(private val productsUseCase: GetProd
         } ?: ResponseState.Success(emptyList<String>()))
     }
 
-}
-
-
-class ProductsViewModelFactory(private val productsUseCase: GetProductsByTypeUseCase): ViewModelProvider.Factory{
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ProductsViewModel(productsUseCase) as T
-    }
 }

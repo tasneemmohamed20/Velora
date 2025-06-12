@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,7 +49,7 @@ import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.authentication.login.view.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.view.SignUpScreen
-import com.example.m_commerce.presentation.OrderScreen
+import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
@@ -61,7 +60,6 @@ import com.example.m_commerce.presentation.account.settings.view_model.Addresses
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 
 import com.example.m_commerce.presentation.products.ProductsScreen
-import com.example.m_commerce.presentation.products.ProductsViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.presentation.start.StartScreen
@@ -75,7 +73,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
 
         setContent {
             navHostController = rememberNavController()
@@ -114,11 +112,20 @@ fun MainActivity.MainScreen(){
                     }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"-> showTopAppBar.value = false
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"->{
+                    showBottomNavBar.value = true
+                    showTopAppBar.value = false
+                }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Products"
+                    showBackButton = true
+                }
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order" -> {
+                    showBottomNavBar.value = false
+                    showTopAppBar.value = true
+                    topAppBarTitleState = "Orders"
                     showBackButton = true
                 }
                 else ->{
@@ -226,11 +233,14 @@ fun MainActivity.NavHostSetup(){
             AccountScreen(
                 onSettingsClick = {
                     navHostController.navigate(ScreensRoute.Settings)
+                },
+                onOrderClick = {
+                    navHostController.navigate(ScreensRoute.Order)
                 }
             )
         }
 
-        composable<ScreensRoute.Products>{  backStackEntry->
+        composable<ScreensRoute.Products>{ backStackEntry->
             val entry = backStackEntry.toRoute<ScreensRoute.Products>()
             val type = entry.type
             ProductsScreen(

@@ -10,8 +10,17 @@ plugins {
 }
 
 apollo {
-    service("service") {
-        packageName.set("com.example.m_commerce")
+
+    service("service1") {
+        packageName.set("com.example.m_commerce.service1")
+        schemaFile.set(file("src/main/graphql/Admin/AdminSchema.graphqls"))
+        sourceFolder.set("Admin")
+        generateKotlinModels.set(true)
+    }
+    service("service2") {
+        packageName.set("com.example.m_commerce.service2")
+        schemaFile.set(file("src/main/graphql/Store/schema.graphqls"))
+        sourceFolder.set("Store")
         generateKotlinModels.set(true)
     }
 }

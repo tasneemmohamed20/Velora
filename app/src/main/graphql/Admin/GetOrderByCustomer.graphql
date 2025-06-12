@@ -1,0 +1,25 @@
+query GetOrdersByCustomer($customerId: String!) {
+    orders(first: 10, query: $customerId) {
+        edges {
+            node {
+                id
+                name
+                createdAt
+                totalPriceSet {
+                    shopMoney {
+                        amount
+                        currencyCode
+                    }
+                }
+                lineItems(first: 5) {
+                    edges {
+                        node {
+                            name
+                            quantity
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

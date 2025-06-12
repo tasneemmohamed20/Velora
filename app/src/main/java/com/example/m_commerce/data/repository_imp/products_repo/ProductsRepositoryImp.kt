@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ProductsRepositoryImp @Inject constructor(private val productRemote: IProductRemoteDataSource) : IProductsRepository {
-    override suspend fun getProductsByHandle(handle: String): Flow<List<Product>> {
+    override fun getProductsByHandle(handle: String): Flow<List<Product>> {
         return productRemote.getProductsByHandle(handle)
     }
 
-    override suspend fun getBrands(): Flow<List<Brand>> {
+    override fun getBrands(): Flow<List<Brand>> {
         return productRemote.getBrands()
     }
 }
