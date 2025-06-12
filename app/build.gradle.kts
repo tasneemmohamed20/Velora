@@ -130,4 +130,7 @@ dependencies {
 
     implementation ("com.google.code.gson:gson:2.10.1")
 
+    //slider
+    implementation("androidx.compose.material:material:1.9.0-alpha04")
+
 }

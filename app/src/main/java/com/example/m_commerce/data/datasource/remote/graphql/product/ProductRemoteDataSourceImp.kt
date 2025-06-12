@@ -2,7 +2,7 @@ package com.example.m_commerce.data.datasource.remote.graphql.product
 
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.di.StoreApollo
-
+import com.example.m_commerce.GetAllProductsQuery
 import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
@@ -60,4 +60,27 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
             emit(brands)
     }
 
+    override suspend fun getAllProducts(): Flow<List<Product>> = flow {
+        val response = withContext(Dispatchers.IO) {
+            shopifyService.query(GetAllProductsQuery()).execute()
+        }
+
+        val products = response.data?.products?.edges
+            ?.map { it.node }
+            ?.map { node ->
+                Product(
+                    id = node.id,
+                    title = node.title,
+                    description = node.description,
+                    price = PriceDetails(
+                        minVariantPrice = Price(
+                            amount = node.priceRange.minVariantPrice.amount.toString(),
+                            currencyCode = node.priceRange.minVariantPrice.currencyCode.name
+                        )
+                    ),
+                    image = node.images.edges.firstOrNull()?.node?.url.toString()
+                )
+            } ?: emptyList()
+        emit(products)
+    }
 }

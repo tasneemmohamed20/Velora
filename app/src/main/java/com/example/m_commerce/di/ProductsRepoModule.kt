@@ -25,6 +25,4 @@ abstract class ProductsRepoModule {
     @Singleton
     abstract fun bindIProductRepository(productRepo: ProductsRepositoryImp): IProductsRepository
 
-
-
 }

@@ -38,13 +38,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
 import androidx.navigation.toRoute
-
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
-
 import com.example.m_commerce.presentation.home.HomeScreen
-
 import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.OrderScreen
@@ -55,8 +51,8 @@ import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
-
 import com.example.m_commerce.presentation.products.ProductsScreen
+import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.start.StartScreen
@@ -164,7 +160,7 @@ fun MainActivity.MainScreen(){
                         } else null
                     },
                     actions = {
-                        IconButton(onClick = {  }) {
+                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
                         IconButton(onClick = { }) {
@@ -321,6 +317,12 @@ fun MainActivity.NavHostSetup(){
                     )
                 },
                 viewModel = viewModel,
+            )
+        }
+
+        composable<ScreensRoute.Search> {
+            SearchScreen(
+                onBack = { navHostController.popBackStack() }
             )
         }
     }

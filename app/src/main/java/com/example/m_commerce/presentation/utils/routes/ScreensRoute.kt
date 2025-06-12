@@ -49,4 +49,7 @@ sealed class ScreensRoute {
     @Serializable
     data object AddressInfo : ScreensRoute()
 
+    @Serializable
+    data object Search : ScreensRoute()
+
 }
