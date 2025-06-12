@@ -13,7 +13,14 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+annotation class StorefrontClient
+
+@Qualifier
+annotation class AdminClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,12 +37,20 @@ object DataProviderModule {
     }
 
     @Provides
+    @StorefrontClient
     @Singleton
-    fun provideApolloClient(): ApolloClient{
+    fun provideStorefrontClient(): ApolloClient{
         return ApolloClient.Builder().httpHeaders(Constants.storeHeaders).serverUrl(
             Constants.STOREFRONT_URL
         ).build()
     }
 
-
+    @Provides
+    @AdminClient
+    @Singleton
+    fun provideAdminClient(): ApolloClient{
+        return ApolloClient.Builder().httpHeaders(Constants.adminHeaders).serverUrl(
+            Constants.ADMIN_URL
+        ).build()
+    }
 }

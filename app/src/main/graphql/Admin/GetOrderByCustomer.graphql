@@ -5,18 +5,12 @@ query GetOrdersByCustomer($customerId: String!) {
                 id
                 name
                 createdAt
+                displayFinancialStatus
+                displayFulfillmentStatus
                 totalPriceSet {
                     shopMoney {
                         amount
                         currencyCode
-                    }
-                }
-                lineItems(first: 5) {
-                    edges {
-                        node {
-                            name
-                            quantity
-                        }
                     }
                 }
             }
