@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.House
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,9 +26,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,12 +53,15 @@ fun AddressesScreen(
     onAddressClick: (Address) -> Unit
 ) {
     val addresses by viewModel.addresses.collectAsState()
+    val areAddressesFull by viewModel.areAddressesFull.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
+        val showDialog = remember { mutableStateOf(false) }
+
         CustomTopAppBar(
             title = "Addresses",
             onBackClick = onBack,
@@ -65,11 +72,30 @@ fun AddressesScreen(
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
                     modifier = Modifier
-                        .clickable { onAddClicked() }
+                        .clickable {
+                            if (areAddressesFull) {
+                                showDialog.value = true
+                            } else {
+                                onAddClicked()
+                            }
+                        }
                         .padding(horizontal = 8.dp)
                 )
             }
         )
+
+        if (showDialog.value) {
+            AlertDialog(
+                onDismissRequest = { showDialog.value = false },
+                title = { Text("Maximum Addresses Reached") },
+                text = { Text("You can only add up to 2 addresses. Please remove an existing address to add a new one.") },
+                confirmButton = {
+                    TextButton(onClick = { showDialog.value = false }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

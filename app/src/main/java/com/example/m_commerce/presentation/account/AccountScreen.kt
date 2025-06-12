@@ -11,6 +11,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.R
 
 @Composable
@@ -32,16 +35,20 @@ fun AccountScreen(
     onNotificationsClick: () -> Unit = {},
     onVeloraPayClick: () -> Unit = {},
     onHelpClick: () -> Unit = {},
-    onAboutClick: () -> Unit = {}
+    onAboutClick: () -> Unit = {},
+    viewModel: AccountViewModel = hiltViewModel()
 ) {
+
+    val customer by viewModel.customerState.collectAsState()
+    val customerName = customer?.displayName ?: "Guest"
+    val avatarLetter = customer?.firstName?.firstOrNull()?.toString()?.uppercase() ?: "G"
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
 
-        val guestName = "Guest"
-        val avatarLetter = guestName.firstOrNull()?.toString() ?: ""
         // Header
         Row(
             modifier = Modifier
@@ -66,7 +73,7 @@ fun AccountScreen(
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(2f)) {
-                Text("Hi Guest", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
+                Text("Hi $customerName", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                     Icon(

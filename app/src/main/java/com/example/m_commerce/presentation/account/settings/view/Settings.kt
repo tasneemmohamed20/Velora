@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 
@@ -46,12 +47,14 @@ enum class Currency {
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel,
+    viewModel: SettingsViewModel = hiltViewModel(),
     onAddressClick: () -> Unit,
     onBackClick: () -> Unit
     ){
 
-    var selectedCurrency by remember { mutableStateOf(Currency.USD) }
+    var selectedCurrency by remember {
+        mutableStateOf(if (viewModel.getCurrencyPreference()) Currency.USD else Currency.EGP)
+    }
     var showDropdown by remember { mutableStateOf(false) }
 
 
@@ -81,7 +84,6 @@ fun SettingsScreen(
                         ?: selectedCurrency.name,
                     onClick = { showDropdown = true },
                     icon = SettingsIcon.ARROW_DROP_DOWN
-
                 )
                 DropdownMenu(
                     expanded = showDropdown,
@@ -93,8 +95,10 @@ fun SettingsScreen(
                             onClick = {
                                 selectedCurrency = currency
                                 showDropdown = false
-                                viewModel.getCurrencyExchange()
-
+                                viewModel.setCurrencyPreference(currency == Currency.USD)
+                                if (currency == Currency.USD) {
+                                    viewModel.getCurrencyExchange()
+                                }
                             }
                         )
                     }
@@ -155,10 +159,3 @@ fun SettingsItemRow(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun settingsScreenPreview() {
-//    SettingsScreen()
-}
-

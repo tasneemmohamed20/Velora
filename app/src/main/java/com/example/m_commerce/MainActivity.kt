@@ -38,16 +38,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceImp
-import com.example.m_commerce.data.repository_imp.settings_repo.RepositoryImp
 import androidx.navigation.toRoute
-import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
-
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
-
 import com.example.m_commerce.presentation.home.HomeScreen
-
 import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.OrderScreen
@@ -58,8 +51,6 @@ import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
-import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
-
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
@@ -208,13 +199,6 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Settings>{
             SettingsScreen(
-                viewModel = SettingsViewModel(
-                    currencyExchangeUsecase = CurrencyExchangeUseCase(
-                        repository = RepositoryImp(
-                            remoteDataSource = RemoteDataSourceImp()
-                        )
-                    )
-                ),
                 onAddressClick = {
                     navHostController.navigate(ScreensRoute.Addresses)
                 },
@@ -326,7 +310,7 @@ fun MainActivity.NavHostSetup(){
             AddressInfo(
                 onBack = { navHostController.popBackStack() },
                 onSave = { address ->
-                    viewModel.updateOrAddAddress(address)
+                    viewModel.saveAddressToCustomer(address)
                     navHostController.popBackStack(
                         "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
                         inclusive = false

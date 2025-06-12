@@ -17,5 +17,18 @@ object Constants {
             ),
         )
 
+    const val ADMIN_URL = "https://and2-ism-mad45.myshopify.com/admin/api/2024-10/graphql.json"
+
+    val adminHeaders =
+        listOf(
+            HttpHeader(
+                "X-Shopify-Access-Token",
+                "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",
+            ),
+            HttpHeader(
+                "Content-Type",
+                "application/json",
+            ),
+        )
 
 }

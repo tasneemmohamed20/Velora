@@ -3,14 +3,19 @@ package com.example.m_commerce.presentation.account.settings.view_model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SettingsViewModel(
-    private val currencyExchangeUsecase: CurrencyExchangeUseCase
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val currencyExchangeUsecase: CurrencyExchangeUseCase,
+    private val sharedPreferencesHelper: SharedPreferencesHelper
 ) : ViewModel() {
 
     private val _currencyExchange = MutableSharedFlow<CurrencyExchangeResponse>()
@@ -31,5 +36,14 @@ class SettingsViewModel(
                 Log.e("SettingsViewModel", "Error fetching currency exchange rate: ${e.message}")
             }
         }
+    }
+
+    fun setCurrencyPreference(isUSD: Boolean) {
+        sharedPreferencesHelper.isUSD(isUSD)
+        Log.d("SettingsViewModel", "Currency preference set to USD: $isUSD")
+    }
+
+    fun getCurrencyPreference(): Boolean {
+        return sharedPreferencesHelper.getCurrencyPreference()
     }
 }

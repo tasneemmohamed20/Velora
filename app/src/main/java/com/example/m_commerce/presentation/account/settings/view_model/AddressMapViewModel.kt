@@ -9,9 +9,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.example.m_commerce.ResponseState
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.data.services.location.LocationWorker
 import com.example.m_commerce.domain.entities.Address
+import com.example.m_commerce.domain.entities.AddressType
+import com.example.m_commerce.domain.entities.CustomerAddresses
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
+import com.example.m_commerce.domain.usecases.CustomerUseCase
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
@@ -34,7 +38,9 @@ import kotlin.coroutines.suspendCoroutine
 class AddressMapViewModel @Inject constructor (
     @ApplicationContext context: Context,
     private val geoCodingRepository: IGeoCodingRepository,
-    private val placesClient: PlacesClient
+    private val placesClient: PlacesClient,
+    sharedPreferencesHelper: SharedPreferencesHelper,
+    private val customerUseCase: CustomerUseCase
 ) : ViewModel() {
     private val TAG = "AddressMapViewModel"
     private val workManager = WorkManager.getInstance(context)
@@ -72,10 +78,17 @@ class AddressMapViewModel @Inject constructor (
     private val _editingAddress = MutableStateFlow<Address?>(null)
     val editingAddress: StateFlow<Address?> = _editingAddress
 
+    private val customerId = sharedPreferencesHelper.getCustomerId()
+    private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
+    val updateAddressState: StateFlow<ResponseState> = _updateAddressState
+
+    private val _areAddressesFull = MutableStateFlow(false)
+    val areAddressesFull: StateFlow<Boolean> = _areAddressesFull
 
     init {
         startLocationUpdates()
         observeLocationUpdates()
+        getCustomerAddresses()
     }
 
     fun updateCurrentLocation(latLng: LatLng) {
@@ -225,20 +238,125 @@ class AddressMapViewModel @Inject constructor (
         fetchAddress("${latLng.latitude},${latLng.longitude}")
     }
 
-    fun updateOrAddAddress(newAddress: Address) {
-        _addresses.update { currentList ->
-            val existingAddress = _editingAddress.value
-            if (existingAddress != null) {
-                // Replace existing address
-                currentList.map { address ->
-                    if (address == existingAddress) newAddress else address
+
+    // In AddressMapViewModel.kt
+
+    fun saveAddressToCustomer(newAddress: Address) {
+        viewModelScope.launch {
+            _updateAddressState.value = ResponseState.Loading
+            try {
+                customerUseCase(customerId.toString()).collect { customer ->
+                    val existingAddresses = customer.addresses?.firstOrNull() ?: CustomerAddresses("", "", "")
+
+                    val addressString = buildString {
+                        append("type:").append(newAddress.type.name)
+                        append("|building:").append(newAddress.building)
+                        append("|street:").append(newAddress.street)
+                        append("|apt:").append(newAddress.apartment)
+                        append("|floor:").append(newAddress.floor ?: "")
+                        append("|area:").append(newAddress.area)
+                        append("|phone:").append(newAddress.phoneNumber)
+                        append("|label:").append(newAddress.addressLabel ?: "")
+                        append("|directions:").append(newAddress.additionalDirections ?: "")
+                        append("|lat:").append(newAddress.latitude)
+                        append("|lon:").append(newAddress.longitude)
+                    }
+
+                    val updatedAddresses = if (_editingAddress.value != null) {
+                        // Compare building and street instead of latitude
+                        when {
+                            existingAddresses.address1?.contains("building:${_editingAddress.value?.building}|street:${_editingAddress.value?.street}") == true ->
+                                existingAddresses.copy(address1 = addressString)
+                            existingAddresses.address2?.contains("building:${_editingAddress.value?.building}|street:${_editingAddress.value?.street}") == true ->
+                                existingAddresses.copy(address2 = addressString)
+                            else -> throw Exception("Could not find address to update")
+                        }
+                    } else {
+                        // Add new address to the first empty slot
+                        when {
+                            existingAddresses.address1.isNullOrEmpty() ->
+                                existingAddresses.copy(address1 = addressString)
+                            existingAddresses.address2.isNullOrEmpty() ->
+                                existingAddresses.copy(address2 = addressString)
+                            else -> throw Exception("No empty address slots available")
+                        }
+                    }
+
+                    Log.d(TAG, "Updating addresses: $updatedAddresses")
+
+                    customerUseCase(
+                        id = customerId,
+                        phone = newAddress.phoneNumber,
+                        addresses = updatedAddresses
+                    ).collect { result ->
+                        if (result.id.isNotEmpty()) {
+                            _updateAddressState.value = ResponseState.Success(result)
+                            getCustomerAddresses()
+                        } else {
+                            throw Exception("Failed to update customer data")
+                        }
+                    }
                 }
-            } else {
-                // Add new address
-                currentList + newAddress
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update address: ${e.message}", e)
+                _updateAddressState.value = ResponseState.Failure(e)
             }
         }
-        // Clear editing state
-        _editingAddress.value = null
+    }
+
+    fun getCustomerAddresses() {
+        viewModelScope.launch {
+            try {
+                customerUseCase(customerId.toString()).collect { customer ->
+                    Log.d(TAG, "Customer addresses: ${customer}")
+                    val decodedAddresses = customer.addresses?.mapNotNull { customerAddress ->
+                        listOfNotNull(
+                            customerAddress.address1,
+                            customerAddress.address2,
+                            customerAddress.formatted
+                        ).mapNotNull { addressStr ->
+                            _areAddressesFull.value = !customerAddress.address1.isNullOrEmpty() &&
+                                    !customerAddress.address2.isNullOrEmpty()
+                            Log.d(TAG, "Are addresses full? ${_areAddressesFull.value}")
+                            if (addressStr.isBlank()) return@mapNotNull null
+
+                            try {
+                                val parts = addressStr.split("|")
+                                val map = parts.associate {
+                                    val keyValue = it.split(":", limit = 2)
+                                    if (keyValue.size == 2) keyValue[0] to keyValue[1] else "" to ""
+                                }
+
+                                val latitude = map["lat"]?.toDoubleOrNull() ?: return@mapNotNull null
+                                val longitude = map["lon"]?.toDoubleOrNull() ?: return@mapNotNull null
+                                _selectedLocation .value = LatLng(latitude, longitude)
+                                Address(
+                                    building = map["building"] ?: "",
+                                    street = map["street"] ?: "",
+                                    apartment = map["apt"] ?: "",
+                                    floor = map["floor"] ?: "",
+                                    area = map["area"] ?: "",
+                                    additionalDirections = map["directions"] ?: "",
+                                    latitude = latitude,
+                                    longitude = longitude,
+                                    type = AddressType.valueOf(map["type"] ?: AddressType.HOME.name),
+                                    phoneNumber = map["phone"] ?: "",
+                                    addressLabel = map["label"] ?: ""
+                                )
+
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to decode address: $addressStr", e)
+                                null
+                            }
+                        }
+                    }?.flatten() ?: emptyList()
+
+                    _addresses.value = decodedAddresses
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get customer addresses", e)
+                _addresses.value = emptyList()
+            }
+        }
     }
 }

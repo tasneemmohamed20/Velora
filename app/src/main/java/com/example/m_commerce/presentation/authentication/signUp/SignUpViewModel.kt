@@ -159,7 +159,7 @@ class SignUpViewModel@Inject constructor(
 
                             val customerInfo = "Customer created: ID=$id, $firstName $lastName ($email)"
                             Log.d("SignUpViewModel", customerInfo)
-
+                            sharedPreferencesHelper.saveCustomerId(id)
                             withContext(Dispatchers.Main) {
                                 _signUpState.value = ResponseState.Success(customerInfo)
                             }
