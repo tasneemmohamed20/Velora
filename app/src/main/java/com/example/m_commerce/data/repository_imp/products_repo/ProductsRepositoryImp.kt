@@ -1,5 +1,6 @@
 package com.example.m_commerce.data.repository_imp.products_repo
 
+import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.remote.graphql.product.IProductRemoteDataSource
 import com.example.m_commerce.di.StoreApollo
 import com.example.m_commerce.domain.entities.Brand
@@ -17,7 +18,11 @@ class ProductsRepositoryImp @Inject constructor(private val productRemote: IProd
         return productRemote.getBrands()
     }
 
-    override suspend fun getAllProducts(): Flow<List<Product>> {
+    override fun getAllProducts(): Flow<List<Product>> {
         return productRemote.getAllProducts()
+    }
+
+    override suspend fun getProductById(productId: String): Product {
+        return productRemote.getProductById(productId)
     }
 }

@@ -52,4 +52,6 @@ sealed class ScreensRoute {
     @Serializable
     data object Search : ScreensRoute()
 
+    @Serializable
+    class ProductDetails(val productId: String): ScreensRoute()
 }

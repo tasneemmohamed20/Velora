@@ -7,7 +7,7 @@ data class Product(
     val productType: String,
     val description: String,
     val price: PriceDetails,
-    val image: String
+    val images: List<String>
 )
 
 data class PriceDetails(
