@@ -15,9 +15,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import com.example.m_commerce.ResponseState
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
-import androidx.compose.material.MaterialTheme
+
 import androidx.compose.ui.graphics.Color
 
 
@@ -68,11 +66,11 @@ fun SearchScreen(
         ) {
             Text(
                 text = "Min: %.2f $currency".format(viewModel.convertPrice(minAllowedPrice, currency)),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.bodyMedium
             )
             Text(
                 text = "Max: %.2f $currency".format(viewModel.convertPrice(maxAllowedPrice, currency)),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
@@ -97,7 +95,7 @@ fun SearchScreen(
 
             Text(
                 text = "%.2f $currency".format(viewModel.convertPrice(currentMaxPrice, currency)),
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 

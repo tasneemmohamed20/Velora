@@ -79,7 +79,8 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                             currencyCode = node.priceRange.minVariantPrice.currencyCode.name
                         )
                     ),
-                    image = node.images.edges.firstOrNull()?.node?.url.toString()
+                    image = node.images.edges.firstOrNull()?.node?.url.toString(),
+                    productType = "",
                 )
             } ?: emptyList()
         emit(products)

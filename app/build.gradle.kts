@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation (libs.maps.compose)
     implementation(libs.places)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -117,5 +118,8 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(libs.play.services.auth.v2130)
+
 
 }
