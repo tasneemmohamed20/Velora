@@ -29,6 +29,7 @@ import com.google.android.gms.common.api.ApiException
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.start.StartViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import kotlinx.coroutines.launch
@@ -37,7 +38,7 @@ import kotlinx.coroutines.launch
 fun StartScreen(
     onEmailClicked: () -> Unit,
     onGoogleSuccess: () -> Unit,
-    viewModel: StartViewModel = viewModel()
+    viewModel: StartViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val signInState by viewModel.googleSignInState.collectAsStateWithLifecycle()

@@ -99,7 +99,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
 fun Categories(onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Text(
         text = "Categories",
-        modifier = modifier.padding(start = 20.dp)
+        modifier = modifier.padding(start = 20.dp),
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
@@ -158,7 +158,7 @@ fun CategoryItem(type: String, onItemClicked: (String) -> Unit, @DrawableRes id:
 fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
     Text(
         text = "Brands",
-        modifier = Modifier.padding(start = 20.dp)
+        modifier = Modifier.padding(start = 20.dp),
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
