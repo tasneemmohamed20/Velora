@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +17,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -57,22 +62,12 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 20.dp, top = 10.dp, end = 20.dp)
+            .padding(top = 10.dp)
             .verticalScroll(scrollState)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(2.dp, Color.White, shape = RoundedCornerShape(12.dp))
-                .background(color = Color.Red, shape = RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center,
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.coupon),
-                contentDescription = "coupon",
-                modifier = Modifier.size(150.dp)
-            )
-        }
+
+        Ads()
+
         Spacer(Modifier.height(15.dp))
         Categories(onItemClicked)
         Spacer(Modifier.height(15.dp))
@@ -88,7 +83,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxSize().padding(top = 80.dp)
+                        .fillMaxSize()
+                        .padding(top = 80.dp)
                 ) {
                     CircularProgressIndicator()
                 }
@@ -103,12 +99,14 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
 fun Categories(onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Text(
         text = "Categories",
+        modifier = modifier.padding(start = 20.dp)
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp),
+
     ){
         CategoryItem(type = "Women", id = R.drawable.women, onItemClicked = onItemClicked)
         CategoryItem(type ="Men", id = R.drawable.men, onItemClicked = onItemClicked)
@@ -160,6 +158,7 @@ fun CategoryItem(type: String, onItemClicked: (String) -> Unit, @DrawableRes id:
 fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
     Text(
         text = "Brands",
+        modifier = Modifier.padding(start = 20.dp)
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
@@ -167,7 +166,9 @@ fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
         rows = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
         modifier = Modifier.height(280.dp)
+
     ) {
         items(brands.size){
             BrandItem(brands[it], onItemClicked)
@@ -215,6 +216,53 @@ fun BrandItem(brand: Brand, onItemClicked: (String) -> Unit, modifier: Modifier 
             color = Color.Black,
             style = MaterialTheme.typography.titleMedium
         )
+    }
+}
+
+@Composable
+fun AdsItem(@DrawableRes imageRes: Int, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .width(280.dp)
+            .height(150.dp)
+            .background(color = Color.Blue, shape = RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = "ad",
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxSize()
+                .clip(shape = RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+@Composable
+fun Ads(modifier: Modifier = Modifier) {
+    val adImages = listOf(
+        R.drawable.puma,
+        R.drawable.nike,
+        R.drawable.converse,
+        R.drawable.vans,
+        R.drawable.adidas
+    ).shuffled()
+
+    val listState = rememberLazyListState(Int.MAX_VALUE / 2 - (Int.MAX_VALUE / 2) % adImages.size)
+    LazyRow(
+        state = listState,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(150.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+    ) {
+        items(Int.MAX_VALUE, itemContent = {
+            val index = it % adImages.size
+            AdsItem(imageRes = adImages[index])
+        })
     }
 }
 
