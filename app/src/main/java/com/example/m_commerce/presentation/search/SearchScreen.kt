@@ -30,6 +30,11 @@ fun SearchScreen(
     val minAllowedPrice by viewModel.minAllowedPrice.collectAsStateWithLifecycle()
     val maxAllowedPrice by viewModel.maxAllowedPrice.collectAsStateWithLifecycle()
     val currentMaxPrice by viewModel.currentMaxPrice.collectAsStateWithLifecycle()
+    val currencyPrefState by viewModel.currencyPrefFlow.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.getCurrencyPref()
+    }
 
     Column(
         modifier = Modifier
@@ -120,7 +125,7 @@ fun SearchScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(products) { product ->
-                                ProductCard(product)
+                                ProductCard(product, currencyPref = currencyPrefState)
                             }
                         }
                     }

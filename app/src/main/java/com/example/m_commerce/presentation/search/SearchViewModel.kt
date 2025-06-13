@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.usecases.GetAllProductsUseCase
+import com.example.m_commerce.domain.usecases.GetCurrencyPrefUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,6 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val getAllProductsUseCase: GetAllProductsUseCase,
+    private val currencyPref: GetCurrencyPrefUseCase,
     private val sharedPreferencesHelper: SharedPreferencesHelper
 ) : ViewModel() {
 
@@ -35,6 +37,9 @@ class SearchViewModel @Inject constructor(
 
     private val _currentMaxPrice = MutableStateFlow(1000.0)
     val currentMaxPrice: StateFlow<Double> = _currentMaxPrice
+
+    private val _currencyPref = MutableStateFlow(Pair(true, 0f))
+    val currencyPrefFlow: StateFlow<Pair<Boolean, Float>> = _currencyPref
 
     private val usdToEgpRate = 48.0
 
@@ -90,5 +95,11 @@ class SearchViewModel @Inject constructor(
 
     fun convertPrice(amount: Double, currency: String): Double {
         return if (currency == "USD") amount / usdToEgpRate else amount
+    }
+
+    fun getCurrencyPref() {
+        viewModelScope.launch {
+            _currencyPref.value  = currencyPref.invoke()
+        }
     }
 }

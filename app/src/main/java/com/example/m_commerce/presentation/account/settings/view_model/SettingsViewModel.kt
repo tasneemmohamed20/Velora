@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val currencyExchangeUsecase: CurrencyExchangeUseCase,
+    private val currencyExchangeUseCase: CurrencyExchangeUseCase,
     private val sharedPreferencesHelper: SharedPreferencesHelper
 ) : ViewModel() {
 
@@ -27,12 +27,14 @@ class SettingsViewModel @Inject constructor(
     fun getCurrencyExchange() {
         viewModelScope.launch {
             try {
-                currencyExchangeUsecase().collect { response ->
+                currencyExchangeUseCase().collect { response ->
                     _currencyExchange.emit(response)
+                    saveUsdToEgpValue(response.rates.EGP.toFloat())
                     Log.d("SettingsViewModel", "Currency exchange rate: ${response.rates.EGP}")
                 }
             } catch (e: Exception) {
                 _error.emit(e.message ?: "Unknown error occurred")
+
                 Log.e("SettingsViewModel", "Error fetching currency exchange rate: ${e.message}")
             }
         }
@@ -45,5 +47,9 @@ class SettingsViewModel @Inject constructor(
 
     fun getCurrencyPreference(): Boolean {
         return sharedPreferencesHelper.getCurrencyPreference()
+    }
+
+    fun saveUsdToEgpValue(value: Float){
+        sharedPreferencesHelper.saveUsdToEgpValue(value)
     }
 }

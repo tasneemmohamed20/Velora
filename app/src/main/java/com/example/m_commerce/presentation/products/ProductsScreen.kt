@@ -1,6 +1,7 @@
 
 package com.example.m_commerce.presentation.products
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -52,8 +53,10 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String)
 
     LaunchedEffect(Unit) {
         viewModel.getProductsByType(type)
+        viewModel.getCurrencyPref()
     }
     val productsState by viewModel.productsList.collectAsStateWithLifecycle()
+    val currencyPrefState by viewModel.currencyPrefFlow.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -80,7 +83,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String)
                 is ResponseState.Success -> {
                     val productsData = productsState.data as List<Product>
 
-                    ProductsList(productsData, Modifier.weight(2F))
+                    ProductsList(productsData, currencyPrefState, Modifier.weight(2F))
                 }
             }
         }
@@ -91,7 +94,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String)
 }
 
 @Composable
-fun ProductsList(productsState: List<Product>, modifier: Modifier = Modifier){
+fun ProductsList(productsState: List<Product>, currencyPref: Pair<Boolean, Float>, modifier: Modifier = Modifier){
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -102,15 +105,26 @@ fun ProductsList(productsState: List<Product>, modifier: Modifier = Modifier){
             .padding(top = 16.dp, start = 8.dp, end = 8.dp)
     ) {
         items(productsState.size){
-            ProductCard(productsState[it])
+            ProductCard(productsState[it], currencyPref = currencyPref)
         }
     }
 }
 
 @Composable
-fun ProductCard(productDetails: Product, modifier: Modifier = Modifier) {
-
+fun ProductCard(
+    productDetails: Product,
+    modifier: Modifier = Modifier,
+    currencyPref: Pair<Boolean, Float> = Pair(false, 1f)
+) {
     val (brand, productName) = formatTitleAndBrand(productDetails.title)
+
+    val egpPrice = productDetails.price.minVariantPrice.amount.toFloatOrNull() ?: 0f
+    val prefersUSD = currencyPref.first
+    val egpToUsdRate = currencyPref.second.takeIf { it != 0f } ?: 1f
+    Log.i("TAG", "ProductCard: ${currencyPref.second}")
+    val finalPrice = if (prefersUSD) egpPrice / egpToUsdRate else egpPrice
+    val currencySymbol = if (prefersUSD) "USD" else "EGP"
+
     Card(
         modifier = modifier
             .width(160.dp)
@@ -126,17 +140,18 @@ fun ProductCard(productDetails: Product, modifier: Modifier = Modifier) {
                     loading = {
                         CircularProgressIndicator()
                     },
-                    error = {
-                    },
-                    contentDescription = "Network Image with Coil (Sub compose)",
+                    error = {},
+                    contentDescription = "Product image",
                     modifier = Modifier.size(140.dp),
                     contentScale = ContentScale.Inside
                 )
             }
 
-            Box(modifier = Modifier
-                .padding(10.dp)
-                .height(80.dp)) {
+            Box(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(80.dp)
+            ) {
                 Column {
                     Text(
                         text = brand,
@@ -153,7 +168,7 @@ fun ProductCard(productDetails: Product, modifier: Modifier = Modifier) {
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${productDetails.price.minVariantPrice.amount}${productDetails.price.minVariantPrice.currencyCode}",
+                        text = "%.2f $currencySymbol".format(finalPrice),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.Red,
                     )
@@ -162,6 +177,7 @@ fun ProductCard(productDetails: Product, modifier: Modifier = Modifier) {
         }
     }
 }
+
 
 @Composable
 fun FilterChips(modifier: Modifier = Modifier, viewModel: ProductsViewModel){

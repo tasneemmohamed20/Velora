@@ -57,6 +57,7 @@ import com.example.m_commerce.presentation.account.settings.view_model.AddressMa
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 
 import com.example.m_commerce.presentation.products.ProductsScreen
+import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.start.StartScreen
 
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
@@ -119,7 +120,8 @@ fun MainActivity.MainScreen(){
                     showBottomNavBar.value = true
                     showTopAppBar.value = false
                 }
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" -> {
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" ,
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search" -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Products"
@@ -171,7 +173,7 @@ fun MainActivity.MainScreen(){
                         } else null
                     },
                     actions = {
-                        IconButton(onClick = {  }) {
+                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
                         IconButton(onClick = { }) {
@@ -209,6 +211,9 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Cart>{}
 
+        composable<ScreensRoute.Favorites>{
+
+        }
         composable<ScreensRoute.Settings>{
             SettingsScreen(
                 onAddressClick = {
@@ -303,6 +308,9 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
+        composable<ScreensRoute.Search> {
+            SearchScreen {  }
+        }
         composable<ScreensRoute.MapSearch> {
             MapSearch(
                 onBack = { navHostController.popBackStack() },

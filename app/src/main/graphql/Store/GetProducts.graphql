@@ -28,16 +28,5 @@ query GetProductsByHandle($handle: String!) {
     }
 }
 
-query GetLocalizationOptions {
-    localization {
-        availableCountries {
-            isoCode
-            name
-            unitSystem
-            availableLanguages {
-                name
-            }
-        }
-    }
-}
+
 
