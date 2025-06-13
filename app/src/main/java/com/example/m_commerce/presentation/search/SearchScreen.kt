@@ -15,7 +15,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import com.example.m_commerce.ResponseState
-
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.Color
 
 
@@ -30,11 +32,6 @@ fun SearchScreen(
     val minAllowedPrice by viewModel.minAllowedPrice.collectAsStateWithLifecycle()
     val maxAllowedPrice by viewModel.maxAllowedPrice.collectAsStateWithLifecycle()
     val currentMaxPrice by viewModel.currentMaxPrice.collectAsStateWithLifecycle()
-    val currencyPrefState by viewModel.currencyPrefFlow.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.getCurrencyPref()
-    }
 
     Column(
         modifier = Modifier
@@ -66,20 +63,6 @@ fun SearchScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Min: %.2f $currency".format(viewModel.convertPrice(minAllowedPrice, currency)),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Max: %.2f $currency".format(viewModel.convertPrice(maxAllowedPrice, currency)),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
@@ -100,7 +83,7 @@ fun SearchScreen(
 
             Text(
                 text = "%.2f $currency".format(viewModel.convertPrice(currentMaxPrice, currency)),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.body2
             )
         }
 
@@ -125,7 +108,7 @@ fun SearchScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(products) { product ->
-                                ProductCard(product, currencyPref = currencyPrefState)
+                                ProductCard(product)
                             }
                         }
                     }
