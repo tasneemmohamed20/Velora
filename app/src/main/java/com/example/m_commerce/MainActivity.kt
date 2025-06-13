@@ -1,10 +1,13 @@
 package com.example.m_commerce
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,29 +41,29 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
 import androidx.navigation.toRoute
-
+import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
-
 import com.example.m_commerce.presentation.home.HomeScreen
-
 import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
-import com.example.m_commerce.presentation.OrderScreen
+import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
-import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 
 import com.example.m_commerce.presentation.products.ProductsScreen
+import com.example.m_commerce.presentation.search.SearchScreen
+import com.example.m_commerce.presentation.start.StartScreen
+
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
-import com.example.m_commerce.start.StartScreen
 import com.google.android.gms.maps.model.LatLng
+
 import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainActivity"
@@ -68,6 +71,7 @@ private const val TAG = "MainActivity"
 @AndroidEntryPoint // marks this activity for Hilt dependency injection
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,6 +89,7 @@ class MainActivity : ComponentActivity() {
 
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainActivity.MainScreen(){
@@ -111,8 +116,12 @@ fun MainActivity.MainScreen(){
                     }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"-> showTopAppBar.value = false
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" -> {
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"->{
+                    showBottomNavBar.value = true
+                    showTopAppBar.value = false
+                }
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" ,
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search" -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Products"
@@ -164,7 +173,7 @@ fun MainActivity.MainScreen(){
                         } else null
                     },
                     actions = {
-                        IconButton(onClick = {  }) {
+                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
                         IconButton(onClick = { }) {
@@ -183,11 +192,12 @@ fun MainActivity.MainScreen(){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Start,
+        startDestination = ScreensRoute.Home,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -201,6 +211,9 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Cart>{}
 
+        composable<ScreensRoute.Favorites>{
+
+        }
         composable<ScreensRoute.Settings>{
             SettingsScreen(
                 onAddressClick = {
@@ -244,7 +257,6 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
-
         composable<ScreensRoute.Login> {
             LoginScreen(
                 onButtonClicked = { navHostController.navigate(ScreensRoute.SignUp)},
@@ -258,7 +270,7 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.SignUp> {
             SignUpScreen(onButtonClicked = {
-                navHostController.popBackStack()
+                navHostController.navigate(ScreensRoute.Login)
             })
         }
 
@@ -291,15 +303,15 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {
-                    navHostController.navigate(ScreensRoute.AddressInfo)
-                },
+                onConfirmLocation = {},
                 viewModel = viewModel
             )
         }
 
+        composable<ScreensRoute.Search> {
+            SearchScreen {  }
+        }
         composable<ScreensRoute.MapSearch> {
-
             MapSearch(
                 onBack = { navHostController.popBackStack() },
                 onResultClick = { latLng ->
@@ -307,20 +319,6 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
-            )
-        }
-
-        composable<ScreensRoute.AddressInfo> {
-            AddressInfo(
-                onBack = { navHostController.popBackStack() },
-                onSave = { address ->
-                    viewModel.saveAddressToCustomer(address)
-                    navHostController.popBackStack(
-                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
-                        inclusive = false
-                    )
-                },
-                viewModel = viewModel,
             )
         }
     }

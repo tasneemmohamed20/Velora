@@ -37,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -97,8 +99,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
 fun Categories(onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Text(
         text = "Categories",
-        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
         modifier = modifier.padding(start = 20.dp)
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
     Row(
@@ -156,8 +158,8 @@ fun CategoryItem(type: String, onItemClicked: (String) -> Unit, @DrawableRes id:
 fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
     Text(
         text = "Brands",
-        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
         modifier = Modifier.padding(start = 20.dp)
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
     )
     Spacer(Modifier.height(10.dp))
     LazyHorizontalGrid(
@@ -263,3 +265,4 @@ fun Ads(modifier: Modifier = Modifier) {
         })
     }
 }
+

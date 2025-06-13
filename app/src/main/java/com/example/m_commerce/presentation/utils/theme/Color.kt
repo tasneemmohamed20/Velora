@@ -11,3 +11,5 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val WhiteSmoke = Color(0xfff9f9f9)
+
+val primaryBlue = Color(0xFF3669C9)
