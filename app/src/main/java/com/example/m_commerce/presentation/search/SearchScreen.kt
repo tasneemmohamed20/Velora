@@ -24,7 +24,8 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onProductClick: (String) -> Unit
 ) {
     val productsState by viewModel.productsList.collectAsStateWithLifecycle()
     val currency by viewModel.selectedCurrency.collectAsStateWithLifecycle()
@@ -108,7 +109,7 @@ fun SearchScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(products) { product ->
-                                ProductCard(product)
+                                ProductCard(product,onProductClick = onProductClick)
                             }
                         }
                     }

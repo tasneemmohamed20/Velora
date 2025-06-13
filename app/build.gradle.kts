@@ -132,4 +132,7 @@ dependencies {
 
     //slider
     implementation("androidx.compose.material:material:1.9.0-alpha04")
+
+    implementation ("androidx.compose.foundation:foundation:1.4.3")
+
 }
