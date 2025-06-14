@@ -8,7 +8,10 @@ data class Product(
     val description: String,
     val price: PriceDetails,
     val images: List<String>,
-    val variants: Variant
+    val variants: List<ProductVariant> = emptyList(),
+    val rating: Float = 0f,
+    val numberOfReviews: Int = 0
+
 )
 
 data class PriceDetails(
@@ -20,8 +23,11 @@ data class Price(
     val currencyCode: String
 )
 
-data class Variant(
+data class ProductVariant(
     val id: String,
+    val title: String,
+    val availableForSale: Boolean,
+    val selectedOptions: List<SelectedOption>
 )
 
 enum class note {
@@ -34,3 +40,8 @@ enum class note {
         }
     }
 }
+
+data class SelectedOption(
+    val name: String,
+    val value: String
+)

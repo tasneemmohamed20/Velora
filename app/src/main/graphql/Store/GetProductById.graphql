@@ -17,9 +17,17 @@ query GetProductById($id: ID!) {
                 }
             }
         }
-        variants(first: 1) {
-            nodes {
-                id
+        variants(first: 10) {
+            edges {
+                node {
+                    id
+                    title
+                    availableForSale
+                    selectedOptions {
+                        name
+                        value
+                    }
+                }
             }
         }
     }

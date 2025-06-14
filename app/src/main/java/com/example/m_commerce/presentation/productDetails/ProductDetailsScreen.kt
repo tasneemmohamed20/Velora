@@ -25,6 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import com.example.m_commerce.ResponseState
+import com.example.m_commerce.domain.entities.ProductVariant
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
+
 
 @Composable
 fun ProductDetailsScreen(
@@ -59,7 +63,7 @@ fun ProductDetailsScreen(
 
                 Text(
                     text = product.title,
-                    style = MaterialTheme.typography.titleMedium.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -100,6 +104,11 @@ fun ProductDetailsScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                VariantOptionsSection(
+                    variants = product.variants,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Text(
                     text = "Description",
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -208,6 +217,91 @@ private fun ImageCarousel(urls: List<String>, modifier: Modifier = Modifier) {
                             if (selected) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                         )
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun VariantOptionsSection(
+    variants: List<ProductVariant>,
+    modifier: Modifier = Modifier
+) {
+    val colorOptions = variants
+        .flatMap { it.selectedOptions }
+        .filter { it.name.equals("Color", ignoreCase = true) }
+        .map { it.value }
+        .distinct()
+
+    val sizeOptions = variants
+        .flatMap { it.selectedOptions }
+        .filter { it.name.equals("Size", ignoreCase = true) }
+        .map { it.value }
+        .distinct()
+
+    Column(modifier = modifier) {
+        if (colorOptions.isNotEmpty()) {
+            Text(
+                text = "Colors",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow {
+                items(colorOptions) { color ->
+                    ElevatedFilterChip(
+                        selected = false,
+                        onClick = {},
+                        label = { Text(color) },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (sizeOptions.isNotEmpty()) {
+            Text(
+                text = "Sizes",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow {
+                items(sizeOptions) { size ->
+                    ElevatedFilterChip(
+                        selected = false,
+                        onClick = {},
+                        label = { Text(size) },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RatingSection(
+    rating: Float,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row {
+            repeat(5) { index ->
+                val starColor = if (index < rating) Color(0xFFFFC107) else Color.Gray
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Rating",
+                    tint = starColor,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
