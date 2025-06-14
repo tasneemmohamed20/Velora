@@ -2,10 +2,11 @@ package com.example.m_commerce.domain.repository
 
 import com.example.m_commerce.domain.entities.DraftOrder
 import kotlinx.coroutines.flow.Flow
+import com.example.m_commerce.domain.entities.LineItem
 
 interface IDraftOrderRepository {
     suspend fun createDraftOrder(
-        lineItems: List<com.example.m_commerce.service1.type.LineItem>,
+        lineItems: List<LineItem>,
         variantId: String,
         note: com.apollographql.apollo.api.Optional<String?>,
         email: String,

@@ -55,6 +55,7 @@ import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.cart.CartScreen
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 
 import com.example.m_commerce.presentation.products.ProductsScreen
@@ -109,7 +110,8 @@ fun MainActivity.MainScreen(){
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap" ,
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo"
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Cart",
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
@@ -178,7 +180,7 @@ fun MainActivity.MainScreen(){
                         IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Cart) }) {
                             Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
                         }
                     }
@@ -211,7 +213,11 @@ fun MainActivity.NavHostSetup(){
             }
         }
 
-        composable<ScreensRoute.Cart>{}
+        composable<ScreensRoute.Cart>{
+            CartScreen(
+                onBack = {navHostController.popBackStack()},
+            )
+        }
 
         composable<ScreensRoute.Favorites>{
 

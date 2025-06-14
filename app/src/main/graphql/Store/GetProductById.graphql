@@ -17,5 +17,10 @@ query GetProductById($id: ID!) {
                 }
             }
         }
+        variants(first: 1) {
+            nodes {
+                id
+            }
+        }
     }
 }

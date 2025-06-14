@@ -7,7 +7,7 @@ data class Product(
     val productType: String,
     val description: String,
     val price: PriceDetails,
-    val image: String,
+    val images: List<String>,
     val variants: Variant
 )
 
@@ -24,3 +24,13 @@ data class Variant(
     val id: String,
 )
 
+enum class note {
+    cart,
+    fav;
+
+    companion object {
+        fun get(value: String): note? {
+            return note.entries.find { it.name == value }
+        }
+    }
+}

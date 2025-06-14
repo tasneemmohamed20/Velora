@@ -1,6 +1,5 @@
 package com.example.m_commerce.presentation.productDetails
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -56,7 +55,6 @@ fun ProductDetailsScreen(
                     urls = product.images,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(

@@ -3,8 +3,11 @@ package com.example.m_commerce.presentation.authentication.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
+import com.example.m_commerce.domain.entities.note
+import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -22,7 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel  @Inject constructor(
-    private val sharedPreferencesHelper: SharedPreferencesHelper
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
+    private val draftOrderUseCase: DraftOrderUseCase
 ) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
@@ -48,6 +52,20 @@ class LoginViewModel  @Inject constructor(
                         if (user?.isEmailVerified == true) {
                             fetchShopifyCustomerId(email)
                             _loginState.value = ResponseState.Success("Welcome back! You have successfully logged in")
+                            val customerId = sharedPreferencesHelper.getCustomerId()
+                            viewModelScope.launch {
+                                val customerId = sharedPreferencesHelper.getCustomerId()
+                                customerId?.let {
+                                    getDraftOrder(it).let { hasExistingOrder ->
+                                        if (hasExistingOrder) {
+                                            Log.d("LoginViewModel", "Draft order already exists for customer: $customerId")
+
+                                        } else {
+                                            Log.d("LoginViewModel", "No existing draft order found for customer: $customerId")
+                                        }
+                                    }
+                                }
+                            }
                         } else {
                             auth.signOut()
                             _loginState.value = ResponseState.Failure(
@@ -129,5 +147,22 @@ class LoginViewModel  @Inject constructor(
                 Log.e("LoginError", "Failed to fetch Shopify customer ID", e)
             }
         }
+    }
+
+    private suspend fun getDraftOrder(customerId: String): Boolean {
+        var hasExistingOrder = false
+        try {
+            draftOrderUseCase(customerId)?.collect { draftOrders ->
+                if (draftOrders.note2 == "cart") {
+                    hasExistingOrder = true
+                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrders.note2}")
+                    Log.d("LoginViewModel", "Draft order ID: ${draftOrders.id}")
+                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LoginViewModel", "Error getting draft orders", e)
+        }
+        return hasExistingOrder
     }
 }

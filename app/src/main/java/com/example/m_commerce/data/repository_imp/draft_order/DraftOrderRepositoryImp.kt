@@ -4,7 +4,7 @@ import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.data.datasource.remote.graphql.draft_orders.IDraftOrderRemoteDataSource
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.repository.IDraftOrderRepository
-import com.example.m_commerce.service1.type.LineItem
+import com.example.m_commerce.domain.entities.LineItem
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

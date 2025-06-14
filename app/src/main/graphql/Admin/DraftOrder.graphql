@@ -54,6 +54,38 @@ mutation DraftOrderCreate(
             transformerFingerprint
             updatedAt
             visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                    }
+                }
+            }
         }
         userErrors {
             field
@@ -61,7 +93,6 @@ mutation DraftOrderCreate(
         }
     }
 }
-
 
 query GetDraftOrders(
     $query: String,
@@ -109,7 +140,38 @@ query GetDraftOrders(
             transformerFingerprint
             updatedAt
             visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-
 }

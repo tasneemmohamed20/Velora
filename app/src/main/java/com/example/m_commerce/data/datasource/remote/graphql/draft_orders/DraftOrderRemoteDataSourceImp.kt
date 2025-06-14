@@ -4,10 +4,16 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.di.AdminApollo
 import com.example.m_commerce.domain.entities.DraftOrder
+import com.example.m_commerce.domain.entities.DraftOrderLineItemConnection
+import com.example.m_commerce.domain.entities.Image
+import com.example.m_commerce.domain.entities.LineItem
+import com.example.m_commerce.domain.entities.Price
+import com.example.m_commerce.domain.entities.PriceDetails
+import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.entities.UserError
+import com.example.m_commerce.domain.entities.Variant
 import com.example.m_commerce.service1.DraftOrderCreateMutation
 import com.example.m_commerce.service1.GetDraftOrdersQuery
-import com.example.m_commerce.service1.type.LineItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,6 +22,7 @@ import javax.inject.Inject
 
 
 class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shopifyService: ApolloClient) : IDraftOrderRemoteDataSource{
+
     override suspend fun createDraftOrder(
         lineItems: List<LineItem>,
         variantId: String,
@@ -71,8 +78,40 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                 transformerFingerprint = draft.transformerFingerprint,
                 updatedAt = draft.updatedAt?.toString(),
                 visibleToCustomer = draft.visibleToCustomer,
+
                 userErrors = response.data?.draftOrderCreate?.userErrors?.map {
                     UserError(field = it.field?.toString(), message = it.message)
+                },
+                lineItems = draft.lineItems?.let { lineItems ->
+                    DraftOrderLineItemConnection(
+                        nodes = lineItems.nodes?.map { node ->
+                            LineItem(
+                                custom = node.custom,
+                                discountedTotal = node.discountedTotal?.toString()?.toDoubleOrNull(),
+                                discountedUnitPrice = node.discountedUnitPrice?.toString()?.toDoubleOrNull(),
+                                grams = node.grams,
+                                id = node.id,
+                                isGiftCard = node.isGiftCard,
+                                name = node.name,
+                                originalTotal = node.originalTotal?.toString()?.toDoubleOrNull(),
+                                originalUnitPrice = node.originalUnitPrice?.toString()?.toDoubleOrNull(),
+                                quantity = node.quantity,
+                                requiresShipping = node.requiresShipping,
+                                sku = node.sku,
+                                taxable = node.taxable,
+                                title = node.title,
+                                totalDiscount = node.totalDiscount?.toString()?.toDoubleOrNull(),
+                                uuid = node.uuid,
+                                variantTitle = node.variantTitle,
+                                vendor = node.vendor,
+                                image = node.image?.let { image ->
+                                    Image(
+                                        url = image.url?.toString()
+                                    )
+                                }
+                            )
+                        }
+                    )
                 }
             )
         } ?: throw Exception("Failed to create draft order: No response data")
@@ -121,7 +160,57 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                 totalWeight = draft.totalWeight?.toString()?.toDoubleOrNull(),
                 transformerFingerprint = draft.transformerFingerprint,
                 updatedAt = draft.updatedAt?.toString(),
-                visibleToCustomer = draft.visibleToCustomer
+                visibleToCustomer = draft.visibleToCustomer,
+                lineItems = draft.lineItems?.let { lineItems ->
+                    DraftOrderLineItemConnection(
+                        nodes = lineItems.nodes?.map { node ->
+                            LineItem(
+                                custom = node.custom,
+                                discountedTotal = node.discountedTotal?.toString()?.toDoubleOrNull(),
+                                discountedUnitPrice = node.discountedUnitPrice?.toString()?.toDoubleOrNull(),
+                                grams = node.grams,
+                                id = node.id,
+                                isGiftCard = node.isGiftCard,
+                                name = node.name,
+                                originalTotal = node.originalTotal?.toString()?.toDoubleOrNull(),
+                                originalUnitPrice = node.originalUnitPrice?.toString()?.toDoubleOrNull(),
+                                quantity = node.quantity,
+                                requiresShipping = node.requiresShipping,
+                                sku = node.sku,
+                                taxable = node.taxable,
+                                title = node.title,
+                                totalDiscount = node.totalDiscount?.toString()?.toDoubleOrNull(),
+                                uuid = node.uuid,
+                                variantTitle = node.variantTitle,
+                                vendor = node.vendor,
+                                image = node.image?.let { image ->
+                                    Image(
+                                        url = image.url?.toString()
+                                    )
+                                },
+                                product = node.product?.let { product ->
+                                    Product(
+                                        id = "",
+                                        title = "",
+                                        productType = "",
+                                        description = "",
+                                        price = PriceDetails(
+                                            minVariantPrice = Price(
+                                                amount = product.priceRange.minVariantPrice.amount.toString(),
+                                                currencyCode = ""
+                                            )
+                                        ),
+                                        images =  emptyList(),
+                                        variants = Variant(
+                                            id = ""
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    )
+                },
+
             )
         } ?: throw Exception("Failed to fetch the Draft Order: No response data")
 

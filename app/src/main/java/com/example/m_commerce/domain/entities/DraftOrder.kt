@@ -38,10 +38,43 @@ data class DraftOrder(
     val transformerFingerprint: String? = null,
     val updatedAt: String? = null,
     val visibleToCustomer: Boolean? = null,
-    val userErrors: List<UserError>? = null
+    val userErrors: List<UserError>? = null,
+    val lineItems: DraftOrderLineItemConnection? = null
+
+)
+
+data class DraftOrderLineItemConnection(
+    val nodes: List<LineItem>? = null
+)
+
+data class LineItem(
+    val custom: Boolean? = null,
+    val discountedTotal: Double? = null,
+    val discountedUnitPrice: Double? = null,
+    val grams: Int? = null,
+    val id: String? = null,
+    val isGiftCard: Boolean? = null,
+    val name: String? = null,
+    val originalTotal: Double? = null,
+    val originalUnitPrice: Double? = null,
+    val quantity: Int? = null,
+    val requiresShipping: Boolean? = null,
+    val sku: String? = null,
+    val taxable: Boolean? = null,
+    val title: String? = null,
+    val totalDiscount: Double? = null,
+    val uuid: String? = null,
+    val variantTitle: String? = null,
+    val vendor: String? = null,
+    val image: Image? = null,
+    val product: Product? = null
 )
 
 data class UserError(
     val field: String? = null,
     val message: String? = null
+)
+
+data class Image(
+    val url: String? = null
 )

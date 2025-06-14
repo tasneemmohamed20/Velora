@@ -9,6 +9,7 @@ import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.entities.Variant
 import com.example.m_commerce.service2.GetAllProductsQuery
 import com.example.m_commerce.service2.GetBrandsQuery
+import com.example.m_commerce.service2.GetProductByIdQuery
 import com.example.m_commerce.service2.GetProductsByHandleQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val shopifyService: ApolloClient) : IProductRemoteDataSource {
-
 
     override fun getProductsByHandle(handle: String): Flow<List<Product>> = flow{
 
@@ -39,7 +39,7 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                             amount = node.priceRange.minVariantPrice.amount.toString(),
                             currencyCode = node.priceRange.minVariantPrice.currencyCode.name
                         ),),
-                    image = node.images.edges[0].node.url.toString(),
+                    images = node.images.edges.map { it.node.url.toString() },
                     variants = Variant(
                         id = node.variants.nodes.firstOrNull()?.id.toString()
                     )
@@ -65,7 +65,7 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
             emit(brands)
     }
 
-    override suspend fun getAllProducts(): Flow<List<Product>> = flow {
+    override fun getAllProducts(): Flow<List<Product>> = flow {
         val response = withContext(Dispatchers.IO) {
             shopifyService.query(GetAllProductsQuery()).execute()
         }
@@ -83,7 +83,7 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                             currencyCode = node.priceRange.minVariantPrice.currencyCode.name
                         )
                     ),
-                    image = node.images.edges.firstOrNull()?.node?.url.toString(),
+                    images = node.images.edges.map { it.node.url.toString() },
                     productType = "",
                     variants = Variant(
                         id = node.variants.nodes.firstOrNull()?.id.toString()
@@ -91,5 +91,28 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                 )
             } ?: emptyList()
         emit(products)
+    }
+
+    override suspend fun getProductById(productId: String): Product {
+        val response = withContext(Dispatchers.IO) {
+            shopifyService.query(GetProductByIdQuery(productId)).execute()
+        }
+        val node = response.data?.product ?: throw Exception("Product not found")
+        return Product(
+            id = node.id,
+            title = node.title,
+            productType = node.productType,
+            description = node.description,
+            price = PriceDetails(
+                minVariantPrice = Price(
+                    amount = node.priceRange.minVariantPrice.amount.toString(),
+                    currencyCode = node.priceRange.minVariantPrice.currencyCode.name
+                )
+            ),
+            images = node.images.edges.map { it.node.url.toString() },
+            variants = Variant(
+                id = node.variants.nodes.firstOrNull()?.id.toString()
+            )
+        )
     }
 }
