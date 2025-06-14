@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,16 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -49,7 +47,7 @@ import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
 
 @Composable
-fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String){
+fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,onProductClick: (String) -> Unit){
 
     LaunchedEffect(Unit) {
         viewModel.getProductsByType(type)
@@ -83,7 +81,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String)
                 is ResponseState.Success -> {
                     val productsData = productsState.data as List<Product>
 
-                    ProductsList(productsData, currencyPrefState, Modifier.weight(2F))
+                    ProductsList(productsData, currencyPrefState, Modifier.weight(2F),onProductClick = onProductClick)
                 }
             }
         }
@@ -94,7 +92,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String)
 }
 
 @Composable
-fun ProductsList(productsState: List<Product>, currencyPref: Pair<Boolean, Float>, modifier: Modifier = Modifier){
+fun ProductsList(productsState: List<Product>, currencyPref: Pair<Boolean, Float>, modifier: Modifier = Modifier,onProductClick: (String) -> Unit){
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -105,7 +103,7 @@ fun ProductsList(productsState: List<Product>, currencyPref: Pair<Boolean, Float
             .padding(top = 16.dp, start = 8.dp, end = 8.dp)
     ) {
         items(productsState.size){
-            ProductCard(productsState[it], currencyPref = currencyPref)
+            ProductCard(productsState[it], currencyPref = currencyPref, onProductClick = onProductClick)
         }
     }
 }
@@ -114,14 +112,14 @@ fun ProductsList(productsState: List<Product>, currencyPref: Pair<Boolean, Float
 fun ProductCard(
     productDetails: Product,
     modifier: Modifier = Modifier,
-    currencyPref: Pair<Boolean, Float> = Pair(false, 1f)
+    currencyPref: Pair<Boolean, Float> = Pair(false, 1f),
+    onProductClick: (String) -> Unit
 ) {
     val (brand, productName) = formatTitleAndBrand(productDetails.title)
 
     val egpPrice = productDetails.price.minVariantPrice.amount.toFloatOrNull() ?: 0f
     val prefersUSD = currencyPref.first
     val egpToUsdRate = currencyPref.second.takeIf { it != 0f } ?: 1f
-    Log.i("TAG", "ProductCard: ${currencyPref.second}")
     val finalPrice = if (prefersUSD) egpPrice / egpToUsdRate else egpPrice
     val currencySymbol = if (prefersUSD) "USD" else "EGP"
     val variantId = productDetails.variants.id
@@ -129,7 +127,10 @@ fun ProductCard(
     Card(
         modifier = modifier
             .width(160.dp)
-            .padding(bottom = 8.dp),
+            .padding(bottom = 8.dp)
+            .clickable {
+                productDetails.id?.let { onProductClick(it) }
+            },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -137,7 +138,7 @@ fun ProductCard(
         Column {
             Box(modifier = Modifier.height(150.dp)) {
                 SubcomposeAsyncImage(
-                    model = productDetails.image,
+                    model = productDetails.images.firstOrNull(),
                     loading = {
                         CircularProgressIndicator()
                     },
@@ -219,6 +220,6 @@ fun FilterChips(modifier: Modifier = Modifier, viewModel: ProductsViewModel){
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ProductPreview(){
-    ProductsScreen(type= "vans")
+    ProductsScreen(type= "vans", onProductClick = {})
 }
 

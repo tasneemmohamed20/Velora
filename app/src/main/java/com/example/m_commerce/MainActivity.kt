@@ -55,6 +55,7 @@ import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
@@ -121,7 +122,8 @@ fun MainActivity.MainScreen(){
                     showTopAppBar.value = false
                 }
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" ,
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search" -> {
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search" ,
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.ProductDetails/{productId}" -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Products"
@@ -197,7 +199,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Start,
+        startDestination = ScreensRoute.Home,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -237,7 +239,10 @@ fun MainActivity.NavHostSetup(){
             val entry = backStackEntry.toRoute<ScreensRoute.Products>()
             val type = entry.type
             ProductsScreen(
-                type = type
+                type = type,
+                onProductClick = { productId ->
+                    navHostController.navigate(ScreensRoute.ProductDetails(productId))
+                }
             )
         }
 
@@ -309,7 +314,12 @@ fun MainActivity.NavHostSetup(){
         }
 
         composable<ScreensRoute.Search> {
-            SearchScreen {  }
+            SearchScreen(
+                onBack = { navHostController.popBackStack() },
+                onProductClick = { productId ->
+                    navHostController.navigate(ScreensRoute.ProductDetails(productId))
+                }
+            )
         }
         composable<ScreensRoute.MapSearch> {
             MapSearch(
@@ -319,6 +329,14 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
+            )
+        }
+
+        composable<ScreensRoute.ProductDetails> { backStackEntry ->
+            val entry = backStackEntry.toRoute<ScreensRoute.ProductDetails>()
+            ProductDetailsScreen(
+                productId = entry.productId,
+                onBack = { navHostController.popBackStack() }
             )
         }
     }

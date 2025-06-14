@@ -1,6 +1,6 @@
 package com.example.m_commerce.data.repository_imp.order_repo
 
-import com.example.m_commerce.data.datasource.remote.graphql.product.IOrderRemoteDataSource
+import com.example.m_commerce.data.datasource.remote.graphql.order.IOrderRemoteDataSource
 import com.example.m_commerce.domain.entities.Order
 import com.example.m_commerce.domain.repository.IOrderRepository
 import kotlinx.coroutines.flow.Flow
