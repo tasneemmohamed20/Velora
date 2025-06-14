@@ -83,6 +83,7 @@ class ProductsRepositoryTest {
         // Arrange
         val handle = ""
         var result = listOf<Product>()
+
         // Act
         repo.getProductsByHandle(handle).collect{
             result = it.toMutableList()
