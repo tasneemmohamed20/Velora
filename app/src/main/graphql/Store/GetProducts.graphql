@@ -22,6 +22,11 @@ query GetProductsByHandle($handle: String!) {
                                 }
                             }
                         }
+                        variants(first: 1) {
+                            nodes {
+                                id
+                            }
+                        }
                     }
                 }
             }

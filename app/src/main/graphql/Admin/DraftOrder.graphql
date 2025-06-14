@@ -1,0 +1,115 @@
+mutation DraftOrderCreate(
+    $email: String!,
+    $note: String,
+    $quantity: Int!,
+    $variantId: ID!,
+) {
+    draftOrderCreate(
+        input: {
+            email: $email
+            note: $note
+            lineItems: [
+                {
+                    quantity: $quantity
+                    variantId: $variantId
+                }
+            ]
+        }
+    ) {
+        draftOrder {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+
+
+query GetDraftOrders(
+    $query: String,
+
+) {
+    draftOrders(
+        first: 2,
+        query: $query,
+    ) {
+        nodes {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+        }
+    }
+
+}

@@ -124,7 +124,8 @@ fun ProductCard(
     Log.i("TAG", "ProductCard: ${currencyPref.second}")
     val finalPrice = if (prefersUSD) egpPrice / egpToUsdRate else egpPrice
     val currencySymbol = if (prefersUSD) "USD" else "EGP"
-
+    val variantId = productDetails.variants.id
+    Log.i("TAG", "ProductCard: $variantId")
     Card(
         modifier = modifier
             .width(160.dp)

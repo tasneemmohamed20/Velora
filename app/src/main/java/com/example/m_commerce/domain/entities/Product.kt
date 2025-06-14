@@ -7,7 +7,8 @@ data class Product(
     val productType: String,
     val description: String,
     val price: PriceDetails,
-    val image: String
+    val image: String,
+    val variants: Variant
 )
 
 data class PriceDetails(
@@ -17,5 +18,9 @@ data class PriceDetails(
 data class Price(
     val amount: String,
     val currencyCode: String
+)
+
+data class Variant(
+    val id: String,
 )
 
