@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.datasource.remote.graphql.product
+package com.example.m_commerce.data.datasource.remote.graphql.order
 
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.di.AdminApollo
@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class OrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shopifyService: ApolloClient) : IOrderRemoteDataSource {
+class OrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shopifyService: ApolloClient) :
+    IOrderRemoteDataSource {
 
 
     override fun getOrdersByCustomerId(customerId: String): Flow<List<Order>> = flow{
