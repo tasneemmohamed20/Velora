@@ -6,6 +6,8 @@ import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product
+import com.example.m_commerce.domain.entities.ProductVariant
+import com.example.m_commerce.domain.entities.SelectedOption
 import com.example.m_commerce.service2.GetAllProductsQuery
 import com.example.m_commerce.service2.GetBrandsQuery
 import com.example.m_commerce.service2.GetProductByIdQuery
@@ -101,8 +103,20 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                     currencyCode = node.priceRange.minVariantPrice.currencyCode.name
                 )
             ),
-            images = node.images.edges.map { it.node.url.toString() }
+            images = node.images.edges.map { it.node.url.toString() },
+            variants = node.variants.edges.map { edge ->
+                ProductVariant(
+                    id = edge.node.id,
+                    title = edge.node.title,
+                    availableForSale = edge.node.availableForSale,
+                    selectedOptions = edge.node.selectedOptions.map { option ->
+                        SelectedOption(
+                            name = option.name,
+                            value = option.value
+                        )
+                    }
+                )
+            }
         )
-
     }
 }
