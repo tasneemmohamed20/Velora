@@ -1,8 +1,8 @@
 package com.example.m_commerce.di
 
-import com.example.m_commerce.data.datasource.remote.graphql.product.IOrderRemoteDataSource
+import com.example.m_commerce.data.datasource.remote.graphql.order.IOrderRemoteDataSource
 import com.example.m_commerce.data.datasource.remote.graphql.product.IProductRemoteDataSource
-import com.example.m_commerce.data.datasource.remote.graphql.product.OrderRemoteDataSourceImp
+import com.example.m_commerce.data.datasource.remote.graphql.order.OrderRemoteDataSourceImp
 import com.example.m_commerce.data.datasource.remote.graphql.product.ProductRemoteDataSourceImp
 import com.example.m_commerce.data.repository_imp.order_repo.OrderRepositoryImp
 import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp

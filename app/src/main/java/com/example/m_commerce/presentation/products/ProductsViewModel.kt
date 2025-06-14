@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.ContinuationInterceptor
 
 
 @HiltViewModel
@@ -52,8 +53,8 @@ class ProductsViewModel @Inject constructor(
     fun getProductsByType(type: String) {
         viewModelScope.launch {
             _mutableProductsList.value = ResponseState.Loading
-
-            val result = productsUseCase.invoke(type)
+            println("Dispatcher: ${coroutineContext[ContinuationInterceptor]}")
+            val result = productsUseCase(type)
             result
                 .catch {
                     _mutableProductsList.value = ResponseState.Failure(it)
