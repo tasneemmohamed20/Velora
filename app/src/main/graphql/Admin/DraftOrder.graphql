@@ -169,6 +169,19 @@ query GetDraftOrders(
                                 amount
                             }
                         }
+                        variants(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    availableForSale
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

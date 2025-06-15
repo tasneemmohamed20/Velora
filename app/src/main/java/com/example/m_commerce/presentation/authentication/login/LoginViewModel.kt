@@ -52,20 +52,7 @@ class LoginViewModel  @Inject constructor(
                         if (user?.isEmailVerified == true) {
                             fetchShopifyCustomerId(email)
                             _loginState.value = ResponseState.Success("Welcome back! You have successfully logged in")
-                            val customerId = sharedPreferencesHelper.getCustomerId()
-                            viewModelScope.launch {
-                                val customerId = sharedPreferencesHelper.getCustomerId()
-                                customerId?.let {
-                                    getDraftOrder(it).let { hasExistingOrder ->
-                                        if (hasExistingOrder) {
-                                            Log.d("LoginViewModel", "Draft order already exists for customer: $customerId")
 
-                                        } else {
-                                            Log.d("LoginViewModel", "No existing draft order found for customer: $customerId")
-                                        }
-                                    }
-                                }
-                            }
                         } else {
                             auth.signOut()
                             _loginState.value = ResponseState.Failure(
@@ -137,6 +124,19 @@ class LoginViewModel  @Inject constructor(
                             val customerId = customer.get("id").asString
                             sharedPreferencesHelper.saveCustomerId(customerId)
                             Log.d("LoginViewModel", "Full customer data: ${customer.toString()}")
+//                            viewModelScope.launch {
+//                                val customerId = sharedPreferencesHelper.getCustomerId()
+                                customerId?.let {
+                                    getDraftOrder(it).let { hasExistingOrder ->
+                                        if (hasExistingOrder) {
+                                            Log.d("LoginViewModel", "Draft order already exists for customer: $customerId")
+
+                                        } else {
+                                            Log.d("LoginViewModel", "No existing draft order found for customer: $customerId")
+                                        }
+                                    }
+                                }
+//                            }
                         }
                         else {
                             Log.d("LoginViewModel", "No Shopify customer found for email: $email")
@@ -152,7 +152,9 @@ class LoginViewModel  @Inject constructor(
     private suspend fun getDraftOrder(customerId: String): Boolean {
         var hasExistingOrder = false
         try {
+            Log.d("LoginViewModel", "Fetching draft orders for customer ID: $customerId")
             draftOrderUseCase(customerId)?.collect { draftOrders ->
+                Log.d("LoginViewModel", "Draft orders: ${draftOrders}")
                 if (draftOrders.note2 == "cart") {
                     hasExistingOrder = true
                     Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrders.note2}")
@@ -161,6 +163,7 @@ class LoginViewModel  @Inject constructor(
                 }
             }
         } catch (e: Exception) {
+
             Log.e("LoginViewModel", "Error getting draft orders", e)
         }
         return hasExistingOrder

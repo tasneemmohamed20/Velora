@@ -10,8 +10,8 @@ import com.example.m_commerce.domain.entities.LineItem
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product
+import com.example.m_commerce.domain.entities.ProductVariant
 import com.example.m_commerce.domain.entities.UserError
-import com.example.m_commerce.domain.entities.Variant
 import com.example.m_commerce.service1.DraftOrderCreateMutation
 import com.example.m_commerce.service1.GetDraftOrdersQuery
 import kotlinx.coroutines.Dispatchers
@@ -201,9 +201,19 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                                             )
                                         ),
                                         images =  emptyList(),
-                                        variants = Variant(
-                                            id = ""
-                                        )
+                                        variants = product.variants.edges.map { edge ->
+                                            ProductVariant(
+                                                id = edge.node.id,
+                                                title = edge.node.title,
+                                                availableForSale = edge.node.availableForSale == true,
+                                                selectedOptions = edge.node.selectedOptions?.map { option ->
+                                                    com.example.m_commerce.domain.entities.SelectedOption(
+                                                        name = option.name,
+                                                        value = option.value
+                                                    )
+                                                } ?: emptyList()
+                                            )
+                                        }
                                     )
                                 }
                             )
