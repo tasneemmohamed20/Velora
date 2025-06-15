@@ -255,6 +255,9 @@ fun MainActivity.NavHostSetup(){
             AccountScreen(
                 onSettingsClick = {
                     navHostController.navigate(ScreensRoute.Settings)
+                },
+                onOrderClick = {
+                    navHostController.navigate(ScreensRoute.Order)
                 }
             )
         }

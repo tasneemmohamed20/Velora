@@ -1,5 +1,14 @@
 package com.example.m_commerce.presentation.search
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Down
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Up
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +30,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.Color
 
 
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
@@ -33,6 +44,13 @@ fun SearchScreen(
     val minAllowedPrice by viewModel.minAllowedPrice.collectAsStateWithLifecycle()
     val maxAllowedPrice by viewModel.maxAllowedPrice.collectAsStateWithLifecycle()
     val currentMaxPrice by viewModel.currentMaxPrice.collectAsStateWithLifecycle()
+    val currencyPrefState by viewModel.currencyPrefFlow.collectAsStateWithLifecycle()
+
+
+    LaunchedEffect(Unit) {
+        viewModel.getCurrencyPref()
+    }
+
 
     Column(
         modifier = Modifier
@@ -94,28 +112,44 @@ fun SearchScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            when (productsState) {
-                is ResponseState.Loading -> CircularProgressIndicator()
-                is ResponseState.Success -> {
-                    val products = (productsState as ResponseState.Success).data as List<Product>
-                    if (products.isEmpty()) {
-                        Text("No products found")
-                    } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(products) { product ->
-                                ProductCard(product,onProductClick = onProductClick)
+            AnimatedContent(
+                targetState = productsState,
+                transitionSpec =  {
+                    slideIntoContainer(
+                        animationSpec = tween(300, easing = EaseIn),
+                        towards = Up
+                    ).with(
+                       slideOutOfContainer(
+                           animationSpec = tween(300, easing = EaseOut),
+                           towards = Down
+                       )
+                    )
+                }
+            ) { productsState ->
+                when (productsState) {
+                    is ResponseState.Loading -> CircularProgressIndicator()
+                    is ResponseState.Success -> {
+                        val products = productsState.data as List<Product>
+                        if (products.isEmpty()) {
+                            Text("No products found")
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(products) { product ->
+                                    ProductCard(product, onProductClick = onProductClick, currencyPref = currencyPrefState)
+                                }
                             }
                         }
                     }
+                    is ResponseState.Failure -> Text("Error loading products")
                 }
-                is ResponseState.Failure -> Text("Error loading products")
             }
+
         }
     }
 }
