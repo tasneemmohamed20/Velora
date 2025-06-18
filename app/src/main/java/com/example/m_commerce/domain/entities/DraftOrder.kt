@@ -78,3 +78,8 @@ data class UserError(
 data class Image(
     val url: String? = null
 )
+
+data class Item(
+    val variantID: String,
+    val quantity: Int?
+)

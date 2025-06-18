@@ -7,13 +7,20 @@ import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.domain.usecases.GetProductByIdUseCase
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
+import com.example.m_commerce.domain.entities.DraftOrder
+import com.example.m_commerce.domain.entities.Item
+import com.example.m_commerce.domain.entities.LineItem
 import com.example.m_commerce.domain.entities.note
 import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.collections.toMutableList
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
@@ -28,7 +35,7 @@ class ProductDetailsViewModel @Inject constructor(
     private val _cartState = MutableStateFlow<ResponseState>(ResponseState.Loading)
     val cartState: StateFlow<ResponseState> = _cartState
 
-
+    private val cartScope = viewModelScope
 
     fun loadProduct(productId: String) {
         viewModelScope.launch {
@@ -43,50 +50,160 @@ class ProductDetailsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getDraftOrder(customerId: String, noteType: note): Boolean {
+    private suspend fun getDraftOrder(customerId: String, noteType: note): Pair<Boolean, List<LineItem>> {
         var hasExistingOrder = false
+        var currentLineItems = emptyList<LineItem>()
+
         try {
-            draftOrderUseCase(customerId)?.collect { draftOrders ->
-                if (draftOrders.note2 == noteType.name) {
-                    _cartState.value = ResponseState.Success(draftOrders)
-                    hasExistingOrder = true
-                    Log.d("ProductDetailsViewModel", "Found existing draft order with note: ${draftOrders.note2}")
+            withContext(Dispatchers.IO) {
+                draftOrderUseCase(customerId)?.collect { draftOrders ->
+                    if (draftOrders.note2 == noteType.name) {
+                        _cartState.value = ResponseState.Success(draftOrders)
+                        hasExistingOrder = true
+                        currentLineItems = draftOrders.lineItems?.nodes?.filterNotNull()?.map { node ->
+                            LineItem(
+                                id = node.id ?: "",
+                                quantity = node.quantity ?: 1
+                            )
+                        } ?: emptyList()
+                    }
                 }
             }
         } catch (e: Exception) {
-            Log.e("ProductDetailsViewModel", "Error getting draft orders", e)
-            _cartState.value = ResponseState.Failure(e)
+            when (e) {
+                is CancellationException -> throw e
+                else -> Log.e("ProductDetailsViewModel", "Error getting draft orders", e)
+            }
         }
-        return hasExistingOrder
+        return Pair(hasExistingOrder, currentLineItems)
     }
 
-    private suspend fun createCart(variantId: String, customerId: String) {
-        val draftOrder = draftOrderUseCase(
-            lineItems = emptyList(),
-            variantId = variantId,
-            note = Optional.present(note.cart.name),
-            email = customerId,
-            quantity = 1
-        )
-        _cartState.value = ResponseState.Success(draftOrder)
-        Log.d("ProductDetailsViewModel", "Created new cart with variantId: $variantId")
-    }
-
-    fun addToCart(variantId: String) {
-        viewModelScope.launch {
-            _cartState.value = ResponseState.Loading
+    fun addToCart(variantId: String, quantity: Int) {
+        cartScope.launch {
             try {
-                val customerId = sharedPreferencesHelper.getCustomerId()
-                    ?: throw Exception("Customer ID not found")
+                _cartState.value = ResponseState.Loading
 
-                val hasExistingOrder = getDraftOrder(customerId, note.cart)
-                if (!hasExistingOrder) {
-                    createCart(variantId, customerId)
+                val customerEmail = sharedPreferencesHelper.getCustomerEmail()
+                    ?: throw IllegalStateException("Customer email not found")
+                val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
+
+                try {
+                    val (hasExistingOrder, currentLineItems) = getDraftOrder(draftOrderId.toString(), note.cart)
+                    if (hasExistingOrder) {
+                        updateExistingCart(variantId, currentLineItems, quantity)
+                        Log.d("ProductDetailsViewModel", "Existing cart updated")
+                    } else {
+                        // Create new cart if getDraftOrder returns no data
+                        createNewCart(variantId, customerEmail, quantity)
+                        Log.d("ProductDetailsViewModel", "New cart created")
+                    }
+                } catch (e: Exception) {
+                    // If getDraftOrder fails, create a new cart
+                    createNewCart(variantId, customerEmail, quantity)
+                    Log.d("ProductDetailsViewModel", "Created new cart after getDraftOrder failed")
                 }
+
             } catch (e: Exception) {
-                _cartState.value = ResponseState.Failure(e)
-                Log.e("ProductDetailsViewModel", "Error adding to cart", e)
+                when (e) {
+                    is CancellationException -> throw e
+                    else -> {
+                        Log.e("ProductDetailsViewModel", "Error adding to cart", e)
+                        _cartState.value = ResponseState.Failure(e)
+                    }
+                }
             }
         }
     }
+
+    private suspend fun createNewCart(variantId: String, customerEmail: String, quantity: Int) {
+        val lineItems = listOf(
+            LineItem(
+                id = variantId,
+                quantity = quantity,
+                requiresShipping = true,
+                taxable = true
+            )
+        )
+
+        val draftOrder = withContext(Dispatchers.IO) {
+            draftOrderUseCase(
+                lineItems = lineItems,
+                variantId = variantId,
+                note = Optional.present(note.cart.name),
+                email = customerEmail,
+                quantity = quantity
+            )
+        }
+
+        if (draftOrder.id != null) {
+            _cartState.value = ResponseState.Success(draftOrder)
+            sharedPreferencesHelper.saveCartDraftOrderId(draftOrder.id)
+        } else {
+            throw IllegalStateException("Failed to create cart - no order ID returned")
+        }
+    }
+
+    private suspend fun updateExistingCart(variantId: String, existingLineItems: List<LineItem>, quantity: Int) {
+        try {
+            // Convert LineItem list to Item list while preserving quantities
+            val existingItems = existingLineItems.mapNotNull { lineItem ->
+                lineItem.id?.takeIf { id ->
+                    // Only include items that are already proper variant IDs
+                    id.startsWith("gid://shopify/ProductVariant/")
+                }?.let {
+                    Item(variantID = it, quantity = lineItem.quantity)
+                }
+            }
+
+            // Format the new variant ID
+            val formattedVariantId = if (!variantId.startsWith("gid://shopify/ProductVariant/")) {
+                "gid://shopify/ProductVariant/$variantId"
+            } else {
+                variantId
+            }
+
+            val updatedItems = existingItems.toMutableList()
+            val existingItemIndex = updatedItems.indexOfFirst {
+                it.variantID == formattedVariantId
+            }
+
+            if (existingItemIndex != -1) {
+                // Add to existing quantity
+                val currentQuantity = updatedItems[existingItemIndex].quantity ?: 0
+//                val sanitizedVariantId = validateVariantId(variantId)
+                updatedItems[existingItemIndex] = Item(
+                    variantID = formattedVariantId,
+                    quantity = quantity
+                )
+            } else {
+                // Add as new item
+                updatedItems.add(Item(variantID = formattedVariantId, quantity = quantity))
+            }
+
+            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
+                ?: throw IllegalStateException("Draft order ID not found")
+
+            val updatedDraftOrder = withContext(Dispatchers.IO) {
+                draftOrderUseCase(
+                    id = draftOrderId,
+                    lineItems = updatedItems
+                )
+            }
+
+            _cartState.value = ResponseState.Success(updatedDraftOrder)
+            Log.d("ProductDetailsViewModel", "Cart updated successfully with ${updatedItems.size} items")
+
+        } catch (e: Exception) {
+            _cartState.value = ResponseState.Failure(e)
+            Log.e("ProductDetailsViewModel", "Error updating cart", e)
+        }
+    }
+//    private fun validateVariantId(variantId: String): String {
+//        // Only wrap if not already a valid GID
+//        return if (variantId.startsWith("gid://shopify/ProductVariant/")) {
+//            variantId
+//        } else {
+//            "gid://shopify/ProductVariant/$variantId"
+//        }
+//    }
 }

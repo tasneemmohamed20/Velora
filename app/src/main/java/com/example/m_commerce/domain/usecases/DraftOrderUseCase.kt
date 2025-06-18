@@ -1,6 +1,7 @@
 package com.example.m_commerce.domain.usecases
 
 import com.apollographql.apollo.api.Optional
+import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.repository.IDraftOrderRepository
 import javax.inject.Inject
 import com.example.m_commerce.domain.entities.LineItem
@@ -17,4 +18,9 @@ class DraftOrderUseCase @Inject constructor(private val repository: IDraftOrderR
     ) = repository.createDraftOrder(lineItems, variantId, note, email, quantity)
 
     suspend operator fun invoke(id: String) = repository.getDraftOrderById(id)
+
+    suspend operator fun invoke(
+        id: String,
+        lineItems: List<Item>
+    ) = repository.updateDraftOrder(id, lineItems)
 }

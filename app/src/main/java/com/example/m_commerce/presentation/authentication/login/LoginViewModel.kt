@@ -3,10 +3,8 @@ package com.example.m_commerce.presentation.authentication.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-import com.example.m_commerce.domain.entities.note
 import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
@@ -52,7 +50,22 @@ class LoginViewModel  @Inject constructor(
                         if (user?.isEmailVerified == true) {
                             fetchShopifyCustomerId(email)
                             _loginState.value = ResponseState.Success("Welcome back! You have successfully logged in")
-
+                            val customerId = sharedPreferencesHelper.getCustomerId()
+                            viewModelScope.launch {
+                                customerId?.let {
+                                    try {
+                                        getDraftOrder(it).let { hasExistingOrder ->
+                                            if (hasExistingOrder) {
+                                                Log.d("LoginViewModel", "Draft order already exists for customer: $customerId")
+                                            } else {
+                                                Log.d("LoginViewModel", "No existing draft order found for customer: $customerId")
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("LoginViewModel", "Error checking draft order", e)
+                                    }
+                                }
+                            }
                         } else {
                             auth.signOut()
                             _loginState.value = ResponseState.Failure(
@@ -122,21 +135,10 @@ class LoginViewModel  @Inject constructor(
                             val customer = customers[0].asJsonObject
                                 .getAsJsonObject("node")
                             val customerId = customer.get("id").asString
+                            val customerEmail = customer.get("email").asString
                             sharedPreferencesHelper.saveCustomerId(customerId)
+                            sharedPreferencesHelper.saveCustomerEmail(customerEmail)
                             Log.d("LoginViewModel", "Full customer data: ${customer.toString()}")
-//                            viewModelScope.launch {
-//                                val customerId = sharedPreferencesHelper.getCustomerId()
-                                customerId?.let {
-                                    getDraftOrder(it).let { hasExistingOrder ->
-                                        if (hasExistingOrder) {
-                                            Log.d("LoginViewModel", "Draft order already exists for customer: $customerId")
-
-                                        } else {
-                                            Log.d("LoginViewModel", "No existing draft order found for customer: $customerId")
-                                        }
-                                    }
-                                }
-//                            }
                         }
                         else {
                             Log.d("LoginViewModel", "No Shopify customer found for email: $email")

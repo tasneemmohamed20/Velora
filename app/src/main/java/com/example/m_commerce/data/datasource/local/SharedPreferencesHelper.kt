@@ -81,4 +81,16 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
         return prefs.getString(CART_ID_KEY, null)
     }
 
+    fun saveCustomerEmail(email: String) {
+        prefs.edit().apply {
+            putString("customer_email", email)
+            apply()
+        }
+        Log.d(TAG, "Saved customer email: $email")
+    }
+
+    fun getCustomerEmail(): String? {
+        return prefs.getString("customer_email", null)
+    }
+
 }
