@@ -48,16 +48,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 
 
-data class CartItem(
-    val name: String,
-    val imageUrl: String,
-    var quantity: Int,
-    val price: Double,
-    val size: String ,
-    val color: String,
-    val id: String
-)
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CartHeader(onBack: () -> Unit) {
@@ -66,46 +56,6 @@ fun CartHeader(onBack: () -> Unit) {
         onBackClick = onBack,
     )
     Spacer(Modifier.height(10.dp))
-}
-
-@Composable
-fun SpecialRequestSection(specialRequest: String) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = "Special request",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = Color.Black
-        )
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.ChatBubbleOutline,
-                contentDescription = null,
-                tint = Color.Black
-            )
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = "Any special requests?",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
-                Text(
-                    text = "Anything else we need to know?",
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 15.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -163,7 +113,13 @@ fun VoucherSection(voucherCode: String, onVoucherChange: (String) -> Unit) {
 }
 
 @Composable
-fun PaymentSummarySection(subtotal: Double, deliveryFee: Double, serviceFee: Double, proDiscount: Double) {
+fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsCount: Int, totalPrice: Double) {
+    var item : String? = null
+    if (itemsCount > 1 ){
+        item = "items"
+    } else {
+        item = "item"
+    }
     Column(
         Modifier
             .fillMaxWidth()
@@ -177,52 +133,11 @@ fun PaymentSummarySection(subtotal: Double, deliveryFee: Double, serviceFee: Dou
             color = Color.Black
         )
         Spacer(Modifier.height(8.dp))
-        SummaryRow("Subtotal", "EGP %.2f".format(subtotal))
-        SummaryRow("Delivery fee", "EGP %.2f".format(deliveryFee), info = true)
-        ProOfferRow(proDiscount)
-        SummaryRow("Service fee", "EGP %.2f".format(serviceFee), info = true)
+        SummaryRow("Subtotal - ${itemsCount} items", "EGP %.2f".format(subtotal))
+        SummaryRow("Shipping fee", "FREE")
+        SummaryRow("Estimated fee", "EGP %.2f".format(estimatedFee))
         HorizontalDivider(Modifier.padding(8.dp))
-//        TotalRow(subtotal + deliveryFee + serviceFee)
-    }
-}
-
-@Composable
-fun ProOfferRow(proDiscount: Double) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFFF1E8FC))
-            .padding(vertical = 8.dp, horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            color = Color(0xFF7B36F2),
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Text(
-                "pro",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-            )
-        }
-        Spacer(Modifier.width(8.dp))
-        Text(
-            "Save EGP %.2f on this order".format(proDiscount),
-            color = Color(0xFF7B36F2),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
-        Spacer(Modifier.weight(1f))
-        Text(
-            "Try free",
-            color = Color(0xFF7B36F2),
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp
-        )
-    }
+        SummaryRow("Total price", "EGP %.2f".format(totalPrice))   }
 }
 
 @Composable
@@ -271,12 +186,44 @@ fun BottomButtons(onAddItems: () -> Unit, onCheckout: () -> Unit) {
 @Composable
 fun CartScreen(
     onBack: () -> Unit,
+    onAddItems:() -> Unit,
+    onCheckout:() -> Unit,
     viewModel: CartViewModel = hiltViewModel(),
     modifier: Modifier = Modifier.background(Color.White)
 ) {
-    var specialRequest by remember { mutableStateOf("") }
     var voucherCode by remember { mutableStateOf("") }
     val cartState by viewModel.cartState.collectAsState()
+
+    var subtotal : Double? = null
+    var estimatedFee: Double? = null
+    var itemsCount: Int? = null
+    var totalPrice: Double? = null
+
+    val removeItemRequest = viewModel.removeItemRequest
+    var itemToRemove by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        removeItemRequest.collect { variantId ->
+            itemToRemove = variantId
+        }
+    }
+
+    if (itemToRemove != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { itemToRemove = null },
+            title = { Text("Remove Item") },
+            text = { Text("Are you sure you want to remove this item from your cart?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.removeItem(itemToRemove!!)
+                    itemToRemove = null
+                }) { Text("Remove") }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemToRemove = null }) { Text("Cancel") }
+            }
+        )
+    }
 
     when (cartState) {
         is ResponseState.Loading -> {
@@ -305,16 +252,25 @@ fun CartScreen(
                     when (val order = draftOrder) {
                         is DraftOrder -> {
                             val nodes = order.lineItems?.nodes ?: emptyList()
+                            subtotal = order.subtotalPrice
+                            totalPrice = order.totalPrice
+                            estimatedFee = order.totalTax ?: 0.0
+                            itemsCount = order.totalQuantityOfLineItems
+                            Log.d("CartScreen", "Draft order items: ${nodes.size}")
                             Log.d("CartScreen", "Cart items: $nodes")
                             if (nodes.isEmpty()) {
                                 item {
-                                    Text(
-                                        text = "Your cart is empty",
+                                    Box(
                                         modifier = Modifier
-                                            .fillMaxWidth()
+                                            .fillMaxSize()
                                             .padding(16.dp),
-                                        textAlign = TextAlign.Center
-                                    )
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Your cart is empty",
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
                                 }
                             } else {
                                 items(nodes) { item ->
@@ -334,13 +290,19 @@ fun CartScreen(
                                             }?.selectedOptions?.firstOrNull { it?.name == "Color" }?.value ?: ""
                                         ),
                                         onQuantityChange = { newQty ->
-                                            item.id?.let { itemId ->
-                                                viewModel.updateQuantity(itemId, newQty)
+                                            if (newQty > 1) {
+                                                item.id?.let { itemId ->
+                                                    viewModel.updateQuantity(itemId, newQty)
+                                                }
+                                            }else{
+                                                item.id?.let { itemId ->
+                                                    viewModel.requestRemoveItem(item.id)
+                                                }
                                             }
                                         },
                                         onRemove = {
                                             item.id?.let { itemId ->
-                                                viewModel.removeItem(itemId)
+                                                viewModel.requestRemoveItem(item.id)
                                             }
                                         }
                                     )
@@ -350,23 +312,22 @@ fun CartScreen(
                         }
                     }
 
-                    item { SpecialRequestSection(specialRequest) }
                     item { Spacer(Modifier.height(18.dp)) }
                     item { VoucherSection(voucherCode) { voucherCode = it } }
                     item { Spacer(Modifier.height(18.dp)) }
                     item {
                         PaymentSummarySection(
-                            subtotal = 0.0,
-                            deliveryFee = 16.99,
-                            serviceFee = 5.80,
-                            proDiscount = 16.99
+                            subtotal = subtotal ?: 0.0,
+                            estimatedFee = estimatedFee ?: 0.0,
+                            itemsCount = itemsCount ?: 0,
+                            totalPrice = totalPrice ?: 0.0,
                         )
                     }
                     item { Spacer(Modifier.height(16.dp)) }
                     item {
                         BottomButtons(
-                            onAddItems = { /* Handle add items */ },
-                            onCheckout = { /* Handle checkout */ }
+                            onAddItems = {onAddItems() },
+                            onCheckout = { onCheckout() }
                         )
                     }
                     item { Spacer(Modifier.height(8.dp)) }
@@ -417,9 +378,6 @@ fun CartItemRow(
     onQuantityChange: (Int) -> Unit,
     onRemove: () -> Unit
 ) {
-
-    var quantityTemp :Int? = null
-
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -506,6 +464,7 @@ fun CartItemRow(
                 ) {
                     IconButton(
                         onClick = {
+
                             onQuantityChange(cartItem.quantity - 1)
                                   },
                         modifier = Modifier.size(28.dp)
@@ -543,24 +502,13 @@ fun CartItemRow(
     }
 }
 
-//@Preview
-//@Composable
-//fun CartItemRowPreview() {
-//    CartItemRow(
-//        cartItem = CartItem(
-//            name = "Sample Item",
-//            imageUrl = R.drawable.ic_menu_info_details.toString(),
-//            quantity = 2,
-//            price = 99.99,
-//            size = "M",
-//            color = "Red",
-//            id = "12345"
-//        ),
-//        onDelete = {},
-//        onQuantityChange = {},
-//        onRemove = {}
-//    )
-//
-//}
 
-
+data class CartItem(
+    val name: String,
+    val imageUrl: String,
+    var quantity: Int,
+    val price: Double,
+    val size: String ,
+    val color: String,
+    val id: String
+)
