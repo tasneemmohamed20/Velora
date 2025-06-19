@@ -101,40 +101,10 @@ fun ProductDetailsScreen(
                     )
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Row {
-                        repeat(5) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Rating",
-                                tint = Color(0xFFFFC107)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Reviews",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    TextButton(onClick = { }) {
-                        Text("View More")
-                    }
-                }
+                Text(
+                    text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -427,28 +397,6 @@ private fun VariantOptionsSection(
     }
 }
 
-@Composable
-private fun RatingSection(
-    rating: Float,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row {
-            repeat(5) { index ->
-                val starColor = if (index < rating) Color(0xFFFFC107) else Color.Gray
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Rating",
-                    tint = starColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun ProductBottomSheet(
