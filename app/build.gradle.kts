@@ -7,7 +7,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
-
+    id("kotlin-parcelize")
 }
 
 apollo {

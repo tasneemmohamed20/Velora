@@ -1,5 +1,6 @@
 package com.example.m_commerce.presentation.utils.routes
 
+import com.example.m_commerce.domain.entities.OrderEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,13 +11,16 @@ sealed class ScreensRoute {
     data object Home: ScreensRoute()
 
     @Serializable
-    class Products(val type: String): ScreensRoute()
+    data class Products(val type: String): ScreensRoute()
 
     @Serializable
     object Cart: ScreensRoute()
 
     @Serializable
     object Order: ScreensRoute()
+
+    @Serializable
+    data object OrderDetails: ScreensRoute()
 
     @Serializable
     object Favorites: ScreensRoute()

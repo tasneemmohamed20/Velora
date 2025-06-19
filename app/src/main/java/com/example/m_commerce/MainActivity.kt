@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -42,19 +41,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
+import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
-import com.example.m_commerce.presentation.order.OrderScreen
+import com.example.m_commerce.presentation.order.orders_list.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
-import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.order.order_details.OrderDetails
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 
 import com.example.m_commerce.presentation.products.ProductsScreen
@@ -127,6 +126,13 @@ fun MainActivity.MainScreen(){
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Products"
+                    showBackButton = true
+                }
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.OrderDetails",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order" -> {
+                    showBottomNavBar.value = false
+                    showTopAppBar.value = true
+                    topAppBarTitleState = "Order"
                     showBackButton = true
                 }
                 else ->{
@@ -250,9 +256,19 @@ fun MainActivity.NavHostSetup(){
         }
 
         composable<ScreensRoute.Order>{
-            OrderScreen()
+            OrderScreen(onOrderClicked = { order ->
+                navHostController.currentBackStackEntry?.savedStateHandle?.set("order", order)
+                navHostController.navigate(ScreensRoute.OrderDetails)
+            })
         }
 
+
+        composable<ScreensRoute.OrderDetails>{
+            val order = navHostController.previousBackStackEntry?.savedStateHandle?.get<OrderEntity>("order")
+            if (order != null) {
+                OrderDetails(order)
+            }
+        }
 
         composable<ScreensRoute.Start> {
             StartScreen(

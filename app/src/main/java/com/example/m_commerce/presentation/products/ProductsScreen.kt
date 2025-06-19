@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +46,7 @@ import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
+import kotlin.math.log
 
 @Composable
 fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,onProductClick: (String) -> Unit){
@@ -123,12 +125,17 @@ fun ProductCard(
     val finalPrice = if (prefersUSD) egpPrice / egpToUsdRate else egpPrice
     val currencySymbol = if (prefersUSD) "USD" else "EGP"
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+    val itemWidth = (screenWidth - 32.dp) / 2
+
+    Log.i("TAG", "ProductCard: $productDetails")
     Card(
         modifier = modifier
-            .width(160.dp)
+            .width(itemWidth)
             .padding(bottom = 8.dp)
             .clickable {
-                productDetails.id?.let { onProductClick(it) }
+                onProductClick(productDetails.id)
             },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),

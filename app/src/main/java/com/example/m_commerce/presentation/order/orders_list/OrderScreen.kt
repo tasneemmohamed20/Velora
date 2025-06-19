@@ -1,7 +1,8 @@
 
-package com.example.m_commerce.presentation.order
+package com.example.m_commerce.presentation.order.orders_list
 
 import  android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -37,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.m_commerce.ResponseState
-import com.example.m_commerce.domain.entities.Order
+import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.Functions.formatShopifyDate
 import com.example.m_commerce.presentation.utils.Functions.getOrderStatusColors
 import com.example.m_commerce.presentation.utils.Functions.mapOrderStatusSimple
@@ -46,7 +47,7 @@ import com.example.m_commerce.presentation.utils.theme.primaryBlue
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderScreen(viewModel: OrderViewModel = hiltViewModel()){
+fun OrderScreen(viewModel: OrderViewModel = hiltViewModel(), onOrderClicked: (OrderEntity) -> Unit){
 
 
     LaunchedEffect(Unit){
@@ -70,9 +71,9 @@ fun OrderScreen(viewModel: OrderViewModel = hiltViewModel()){
                 }
             }
             is ResponseState.Success -> {
-                val ordersData = ordersState.data as List<Order>
+                val ordersData = ordersState.data as List<OrderEntity>
 
-                OrderList(ordersData)
+                OrderList(ordersData, onOrderClicked)
             }
         }
     }
@@ -83,45 +84,57 @@ fun OrderScreen(viewModel: OrderViewModel = hiltViewModel()){
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderList(orders : List<Order>){
+fun OrderList(orders : List<OrderEntity>, onOrderClicked: (OrderEntity) -> Unit){
 
     LazyColumn {
         items(orders.size){
-            OrderCard(orders[it])
+            OrderCard(orders[it], onOrderClicked)
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderCard(order: Order, modifier: Modifier = Modifier){
+fun OrderCard(order: OrderEntity, onOrderClicked: (OrderEntity) -> Unit, modifier: Modifier = Modifier){
+
     val status = mapOrderStatusSimple(order.financialStatus, order.fulfillmentStatus)
     val color = getOrderStatusColors(status)
 
     Card(
         modifier = modifier
-            .fillMaxWidth().height(160.dp)
-            .padding(12.dp).border(
+            .fillMaxWidth()
+            .height(160.dp)
+            .padding(12.dp)
+            .border(
                 color = Color.Gray.copy(alpha = 0.3F),
                 width = 1.5.dp,
                 shape = RoundedCornerShape(12.dp),
             ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        onClick = { }
+        onClick = {
+            onOrderClicked(order) }
     ){
         Column(modifier = Modifier.padding(12.dp)) {
            Row(
-               modifier = Modifier.fillMaxWidth().weight(1f),
+               modifier = Modifier
+                   .fillMaxWidth()
+                   .weight(1f),
                verticalAlignment = Alignment.CenterVertically
 
            ){
-               Text(
-                   text = "Order#: ${order.id.split("/").last()}",
-                   color = primaryBlue,
-                   style = MaterialTheme.typography.titleMedium,
-
-               )
+               Row {
+                   Text(
+                       text = "Order ID: ",
+                       color = Color.Black,
+                       style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
+                   )
+                   Text(
+                       text = order.name,
+                       color = primaryBlue,
+                       style = MaterialTheme.typography.titleMedium
+                   )
+               }
                Spacer(modifier = Modifier.weight(1f))
                Text(
                    text = order.totalPrice + order.currency,
@@ -137,7 +150,9 @@ fun OrderCard(order: Order, modifier: Modifier = Modifier){
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

@@ -13,7 +13,37 @@ query GetOrdersByCustomer($customerId: String!) {
                         currencyCode
                     }
                 }
+                shippingAddress {
+                    name
+                    address1
+                    phone
+                }
+                lineItems(first: 10) {
+                    edges {
+                        node {
+                            title
+                            quantity
+                            variant {
+                                id
+                                title
+                                price
+                                product{
+                                    id
+                                    productType
+                                    images(first: 1){
+                                        edges{
+                                            node {
+                                                url
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
+

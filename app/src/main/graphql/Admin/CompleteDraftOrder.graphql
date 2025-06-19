@@ -1,0 +1,13 @@
+mutation CompleteDraftOrder($id: ID!) {
+    draftOrderComplete(id: $id) {
+        draftOrder {
+            id
+            name
+            invoiceUrl
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
