@@ -62,10 +62,12 @@ class ProductDetailsViewModel @Inject constructor(
                         hasExistingOrder = true
                         currentLineItems = draftOrders.lineItems?.nodes?.filterNotNull()?.map { node ->
                             LineItem(
-                                id = node.id ?: "",
+                                variantId = node.variantId ?: "",
                                 quantity = node.quantity ?: 1
                             )
                         } ?: emptyList()
+
+                        Log.d("ProductDetailsViewModel", "Existing cart found: $currentLineItems")
                     }
                 }
             }
@@ -89,6 +91,7 @@ class ProductDetailsViewModel @Inject constructor(
 
                 try {
                     val (hasExistingOrder, currentLineItems) = getDraftOrder(draftOrderId.toString(), note.cart)
+                    Log.d("ProductDetailsViewModel", "Draft order check complete: hasExistingOrder=$hasExistingOrder, currentLineItems=$currentLineItems")
                     if (hasExistingOrder) {
                         updateExistingCart(variantId, currentLineItems, quantity)
                         Log.d("ProductDetailsViewModel", "Existing cart updated")
@@ -147,15 +150,13 @@ class ProductDetailsViewModel @Inject constructor(
         try {
             // Convert LineItem list to Item list while preserving quantities
             val existingItems = existingLineItems.mapNotNull { lineItem ->
-                lineItem.id?.takeIf { id ->
-                    // Only include items that are already proper variant IDs
+                lineItem.variantId?.takeIf { id ->
                     id.startsWith("gid://shopify/ProductVariant/")
                 }?.let {
-                    Item(variantID = it, quantity = lineItem.quantity)
+                    Item(variantID = it, quantity = lineItem.quantity ?: 0)
                 }
             }
 
-            // Format the new variant ID
             val formattedVariantId = if (!variantId.startsWith("gid://shopify/ProductVariant/")) {
                 "gid://shopify/ProductVariant/$variantId"
             } else {
@@ -163,22 +164,31 @@ class ProductDetailsViewModel @Inject constructor(
             }
 
             val updatedItems = existingItems.toMutableList()
-            val existingItemIndex = updatedItems.indexOfFirst {
-                it.variantID == formattedVariantId
-            }
+            Log.d("ProductDetailsViewModel", "Existing items before update: $updatedItems")
+
+            val existingItemIndex = updatedItems.indexOfFirst { it.variantID == formattedVariantId }
 
             if (existingItemIndex != -1) {
-                // Add to existing quantity
                 val currentQuantity = updatedItems[existingItemIndex].quantity ?: 0
-//                val sanitizedVariantId = validateVariantId(variantId)
-                updatedItems[existingItemIndex] = Item(
+                val newQuantity = currentQuantity + quantity
+                if (newQuantity > 0) {
+                    updatedItems[existingItemIndex] = Item(
+                        variantID = formattedVariantId,
+                        quantity = newQuantity
+                    )
+                } else {
+                    // Remove if total quantity becomes 0 or negative
+                    updatedItems.removeAt(existingItemIndex)
+                }
+            } else if (quantity > 0) {
+                // Add new item if it doesn't exist and quantity > 0
+                updatedItems.add(Item(
                     variantID = formattedVariantId,
                     quantity = quantity
-                )
-            } else {
-                // Add as new item
-                updatedItems.add(Item(variantID = formattedVariantId, quantity = quantity))
+                ))
             }
+
+            Log.d("ProductDetailsViewModel", "Updated items after modification: $updatedItems")
 
             val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
                 ?: throw IllegalStateException("Draft order ID not found")
@@ -192,18 +202,12 @@ class ProductDetailsViewModel @Inject constructor(
 
             _cartState.value = ResponseState.Success(updatedDraftOrder)
             Log.d("ProductDetailsViewModel", "Cart updated successfully with ${updatedItems.size} items")
+            Log.d("ProductDetailsViewModel", "Final cart items: ${updatedItems.map { "${it.variantID}: ${it.quantity}" }}")
 
         } catch (e: Exception) {
             _cartState.value = ResponseState.Failure(e)
             Log.e("ProductDetailsViewModel", "Error updating cart", e)
         }
     }
-//    private fun validateVariantId(variantId: String): String {
-//        // Only wrap if not already a valid GID
-//        return if (variantId.startsWith("gid://shopify/ProductVariant/")) {
-//            variantId
-//        } else {
-//            "gid://shopify/ProductVariant/$variantId"
-//        }
-//    }
+
 }

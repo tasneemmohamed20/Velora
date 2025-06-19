@@ -115,7 +115,8 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                                     Image(
                                         url = image.url?.toString()
                                     )
-                                }
+                                },
+                                variantId = node.variant?.id
                             )
                         }
                     )
@@ -222,7 +223,9 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                                             )
                                         }
                                     )
-                                }
+                                },
+                                variantId = node.variant?.id
+
                             )
                         }
                     )

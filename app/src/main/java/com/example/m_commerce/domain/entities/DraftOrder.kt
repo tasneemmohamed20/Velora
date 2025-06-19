@@ -67,7 +67,9 @@ data class LineItem(
     val variantTitle: String? = null,
     val vendor: String? = null,
     val image: Image? = null,
-    val product: Product? = null
+    val product: Product? = null,
+//    val variant: Variant? = null
+    val variantId: String? = null
 )
 
 data class UserError(
@@ -82,4 +84,8 @@ data class Image(
 data class Item(
     val variantID: String,
     val quantity: Int?
+)
+
+data class Variant(
+    val id: String?
 )

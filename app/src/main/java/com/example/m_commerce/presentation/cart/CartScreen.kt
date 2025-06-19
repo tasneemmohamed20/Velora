@@ -42,7 +42,9 @@ import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 
 
@@ -50,7 +52,10 @@ data class CartItem(
     val name: String,
     val imageUrl: String,
     var quantity: Int,
-    val price: Double
+    val price: Double,
+    val size: String ,
+    val color: String,
+    val id: String
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -300,6 +305,7 @@ fun CartScreen(
                     when (val order = draftOrder) {
                         is DraftOrder -> {
                             val nodes = order.lineItems?.nodes ?: emptyList()
+                            Log.d("CartScreen", "Cart items: $nodes")
                             if (nodes.isEmpty()) {
                                 item {
                                     Text(
@@ -312,14 +318,21 @@ fun CartScreen(
                                 }
                             } else {
                                 items(nodes) { item ->
+
                                     CartItemRow(
                                         cartItem = CartItem(
                                             name = item.title ?: item.name ?: "Unknown Item",
                                             imageUrl = item.image?.url.toString(),
                                             quantity = item.quantity ?: 1,
-                                            price = item.product?.price?.minVariantPrice?.amount?.toDouble() ?: 0.0
+                                            price = item.originalUnitPrice?: 0.0,
+                                            id = item.variantId.toString(),
+                                            size = item.product?.variants?.find { variant ->
+                                                variant.id == item.variantId
+                                            }?.selectedOptions?.firstOrNull { it?.name == "Size" }?.value ?: "",
+                                            color = item.product?.variants?.find { variant ->
+                                                variant.id == item.variantId
+                                            }?.selectedOptions?.firstOrNull { it?.name == "Color" }?.value ?: ""
                                         ),
-                                        onEdit = { /* Handle edit */ },
                                         onQuantityChange = { newQty ->
                                             item.id?.let { itemId ->
                                                 viewModel.updateQuantity(itemId, newQty)
@@ -401,135 +414,153 @@ fun SummaryRow(label: String, value: String, info: Boolean = false) {
 @Composable
 fun CartItemRow(
     cartItem: CartItem,
-    onEdit: () -> Unit,
     onQuantityChange: (Int) -> Unit,
     onRemove: () -> Unit
 ) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.Top
+
+    var quantityTemp :Int? = null
+
+    Box(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 10.dp,
-                alignment = Alignment.CenterVertically
-            ) ,
-
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(cartItem.imageUrl),
-                contentDescription = cartItem.name,
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier
-                    .height(80.dp)
-                    .width(100.dp)
-                    .clip(RoundedCornerShape(10.dp))
-            )
-            Text(
-                text = cartItem.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                color = Color.Black,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Text(
-                text = "EGP ${"%.2f".format(cartItem.price)}",
-                fontSize = 15.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = Color.Red
             )
         }
-        Spacer(Modifier.width(12.dp))
-        Column(
-            modifier = Modifier.width(100.dp)
-                .padding(vertical = 25.dp),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 10.dp,
-                alignment = Alignment.CenterVertically
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            TextButton(
-                onClick = onEdit,
-                contentPadding = PaddingValues(0.dp)
+            Column(
+                Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    space = 10.dp,
+                    alignment = Alignment.CenterVertically
+                ) ,
+
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_menu_edit),
-                    contentDescription = "Edit",
-                    tint = Color.Blue,
-                    modifier = Modifier.size(18.dp)
+                Image(
+                    painter = rememberAsyncImagePainter(cartItem.imageUrl),
+                    contentDescription = cartItem.name,
+                    contentScale = ContentScale.FillHeight,
+                    modifier = Modifier
+                        .height(80.dp)
+                        .width(100.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(
+                            width = 1.dp,
+                            color = Color.Blue,
+                            shape = RoundedCornerShape(8.dp)
+                        )
                 )
-                Spacer(Modifier.width(6.dp))
                 Text(
-                    "Edit",
-                    color = Color.Blue,
+                    text = cartItem.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    color = Color.Black,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = "Size: ${cartItem.size} - Color: ${cartItem.color}",
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Normal
+                )
+
+                Text(
+                    text = "EGP ${"%.2f".format(cartItem.price)}",
+                    fontSize = 15.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
                 )
             }
+            Spacer(Modifier.width(12.dp))
 
             // Quantity section
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.White)
-                    .border(1.dp, Color(0xFFF5F5F5), RoundedCornerShape(24.dp))
-                  .height(40.dp)
-
-            ) {
-                IconButton(
-                    onClick = onRemove,
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove",
-                        tint = Color.Blue
-                    )
-                }
-                Text(
-                    "${cartItem.quantity}",
-                    modifier = Modifier.width(20.dp),
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center
+            Box (modifier = Modifier
+                .align (
+                    Alignment.CenterVertically
                 )
-                IconButton(
-                    onClick = { onQuantityChange(cartItem.quantity + 1) },
-                    modifier = Modifier.size(28.dp)
+            ) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White)
+                        .border(1.dp, Color(0xFFF5F5F5), RoundedCornerShape(24.dp))
+                        .height(40.dp)
+
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Increase",
-                        tint = Color.Blue
+                    IconButton(
+                        onClick = {
+                            onQuantityChange(cartItem.quantity - 1)
+                                  },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Text(
+                            text = "-",
+                            color = Color.Blue,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 24.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Text(
+                        "${cartItem.quantity}",
+                        modifier = Modifier.width(20.dp),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
                     )
+                    IconButton(
+                        onClick = { onQuantityChange(cartItem.quantity + 1) },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Increase",
+                            tint = Color.Blue
+                        )
+                    }
                 }
             }
         }
+
     }
 }
 
-@Preview
-@Composable
-fun CartItemRowPreview() {
-    CartItemRow(
-        cartItem = CartItem(
-            name = "Sample Item",
-            imageUrl = R.drawable.ic_menu_info_details.toString(),
-            quantity = 2,
-            price = 99.99
-        ),
-        onEdit = {},
-        onQuantityChange = {},
-        onRemove = {}
-    )
-}
+//@Preview
+//@Composable
+//fun CartItemRowPreview() {
+//    CartItemRow(
+//        cartItem = CartItem(
+//            name = "Sample Item",
+//            imageUrl = R.drawable.ic_menu_info_details.toString(),
+//            quantity = 2,
+//            price = 99.99,
+//            size = "M",
+//            color = "Red",
+//            id = "12345"
+//        ),
+//        onDelete = {},
+//        onQuantityChange = {},
+//        onRemove = {}
+//    )
+//
+//}
 
 

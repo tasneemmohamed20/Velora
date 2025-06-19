@@ -84,6 +84,9 @@ mutation DraftOrderCreate(
                             }
                         }
                     }
+                    variant {
+                        id
+                    }
                 }
             }
         }
@@ -182,6 +185,9 @@ query GetDraftOrders(
                                 }
                             }
                         }
+                    }
+                    variant {
+                        id
                     }
                 }
             }
