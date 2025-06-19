@@ -41,7 +41,15 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                             currencyCode = node.priceRange.minVariantPrice.currencyCode.name
                         )
                     ),
-                    images = node.images.edges.map { it.node.url.toString() }
+                    images = node.images.edges.map { it.node.url.toString() },
+                    variants = node.variants.nodes.map { edge ->
+                        ProductVariant(
+                            id = edge.id,
+                            title = null,
+                            availableForSale = null,
+                            selectedOptions = null
+                        )
+                    },
                 )
             } ?: emptyList()
         emit(products)
@@ -82,6 +90,14 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                     ),
                     images = node.images.edges.map { it.node.url.toString() },
                     productType = "",
+                    variants = node.variants.nodes.map { edge ->
+                        ProductVariant(
+                            id = edge.id,
+                            title = null,
+                            availableForSale = null,
+                            selectedOptions = null
+                        )
+                    }
                 )
             } ?: emptyList()
         emit(products)
@@ -118,5 +134,6 @@ class ProductRemoteDataSourceImp @Inject constructor(@StoreApollo private val sh
                 )
             }
         )
+
     }
 }

@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -42,29 +41,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.m_commerce.domain.usecases.CurrencyExchangeUseCase
-import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
-import com.example.m_commerce.presentation.home.HomeScreen
-import com.example.m_commerce.presentation.authentication.login.LoginScreen
-import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
-import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
-import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
+import com.example.m_commerce.presentation.authentication.login.LoginScreen
+import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
+import com.example.m_commerce.presentation.cart.CartScreen
+import com.example.m_commerce.presentation.home.HomeScreen
+import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
-
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.start.StartScreen
-
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.google.android.gms.maps.model.LatLng
-
 import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainActivity"
@@ -109,7 +104,8 @@ fun MainActivity.MainScreen(){
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap" ,
                 "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo"
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo",
+                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Cart",
                     -> {
                         showBottomNavBar.value = false
                         showTopAppBar.value = false
@@ -178,7 +174,7 @@ fun MainActivity.MainScreen(){
                         IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Cart) }) {
                             Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
                         }
                     }
@@ -211,7 +207,11 @@ fun MainActivity.NavHostSetup(){
             }
         }
 
-        composable<ScreensRoute.Cart>{}
+        composable<ScreensRoute.Cart>{
+            CartScreen(
+                onBack = {navHostController.popBackStack()},
+            )
+        }
 
         composable<ScreensRoute.Favorites>{
 
