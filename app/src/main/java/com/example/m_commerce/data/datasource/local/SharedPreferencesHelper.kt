@@ -11,6 +11,7 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
     private val CUSTOMER_ID_KEY = "customer_id"
     private val CUSTOMER_Token = "customer_token"
     private val CURRENCY_KEY = "currency_is_egp"
+    private val CART_ID_KEY = "cart_id"
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun saveCustomerId(customerId: String) {
@@ -68,5 +69,28 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
         return prefs.getBoolean(CURRENCY_KEY, false)
     }
 
+    fun saveCartDraftOrderId(draftOrderId: String) {
+        prefs.edit().apply {
+            putString(CART_ID_KEY, draftOrderId)
+            apply()
+        }
+        Log.d(TAG, "Saved cart draft order ID: $draftOrderId")
+    }
+
+    fun getCartDraftOrderId(): String? {
+        return prefs.getString(CART_ID_KEY, null)
+    }
+
+    fun saveCustomerEmail(email: String) {
+        prefs.edit().apply {
+            putString("customer_email", email)
+            apply()
+        }
+        Log.d(TAG, "Saved customer email: $email")
+    }
+
+    fun getCustomerEmail(): String? {
+        return prefs.getString("customer_email", null)
+    }
 
 }
