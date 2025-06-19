@@ -11,8 +11,6 @@ import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.entities.note
 import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +28,11 @@ class CartViewModel @Inject constructor(
     val cartState: StateFlow<ResponseState> = _cartState
     var currentOrder : DraftOrder? = null
     val draftOrderID = sharedPreferencesHelper.getCartDraftOrderId()
+
+    private val _removeItemRequest = MutableSharedFlow<String>()
+    val removeItemRequest = _removeItemRequest
+
+
     init {
         loadCartItems()
 
@@ -131,6 +134,12 @@ class CartViewModel @Inject constructor(
                     else -> _cartState.value = ResponseState.Failure(e)
                 }
             }
+        }
+    }
+
+    fun requestRemoveItem(variantId: String) {
+        viewModelScope.launch {
+            _removeItemRequest.emit(variantId)
         }
     }
 }

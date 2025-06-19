@@ -209,7 +209,9 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Cart>{
             CartScreen(
-                onBack = {navHostController.popBackStack()},
+                onBack = { navHostController.popBackStack() },
+                onAddItems = { navHostController.popBackStack() },
+                onCheckout = {},
             )
         }
 
