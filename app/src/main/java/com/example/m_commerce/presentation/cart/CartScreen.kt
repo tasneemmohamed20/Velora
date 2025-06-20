@@ -236,9 +236,20 @@ fun CartScreen(
             )
         }
         is ResponseState.Failure -> {
-            val error = (cartState as ResponseState.Failure).err
-            Log.e("CartScreen", "Error loading cart items", error)
+            Box(
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Your cart is empty",
+                    textAlign = TextAlign.Center
+                )
+            }
         }
+
         is ResponseState.Success -> {
             val draftOrder = (cartState as ResponseState.Success).data
             Column(
@@ -290,7 +301,7 @@ fun CartScreen(
                                             }?.selectedOptions?.firstOrNull { it?.name == "Color" }?.value ?: ""
                                         ),
                                         onQuantityChange = { newQty ->
-                                            if (newQty > 1) {
+                                            if (newQty >= 1) {
                                                 item.id?.let { itemId ->
                                                     viewModel.updateQuantity(itemId, newQty)
                                                 }
