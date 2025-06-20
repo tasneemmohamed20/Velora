@@ -41,8 +41,6 @@ class CartViewModel @Inject constructor(
     fun loadCartItems() {
         viewModelScope.launch {
             try {
-//                val customerId = sharedPreferencesHelper.getCustomerId()
-//                    ?: throw Exception("Customer ID not found")
                 val customerEmail = sharedPreferencesHelper.getCustomerEmail()
                     ?: throw Exception("Customer email not found")
                 getDraftOrder(customerEmail, note.cart)
