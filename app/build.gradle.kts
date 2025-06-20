@@ -58,6 +58,8 @@ android {
     buildFeatures {
         compose = true
     }
+
+    buildFeatures { dataBinding = true }
 }
 
 dependencies {
@@ -158,5 +160,8 @@ dependencies {
 
     testImplementation("app.cash.turbine:turbine:1.2.0")
 
+    // paymob
+
+//    implementation(libs.paymob.sdk)
 
 }
