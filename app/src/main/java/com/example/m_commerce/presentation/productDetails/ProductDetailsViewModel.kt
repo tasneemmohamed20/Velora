@@ -90,13 +90,12 @@ class ProductDetailsViewModel @Inject constructor(
                 val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
 
                 try {
-                    val (hasExistingOrder, currentLineItems) = getDraftOrder(draftOrderId.toString(), note.cart)
+                    val (hasExistingOrder, currentLineItems) = getDraftOrder(customerEmail.toString(), note.cart)
                     Log.d("ProductDetailsViewModel", "Draft order check complete: hasExistingOrder=$hasExistingOrder, currentLineItems=$currentLineItems")
                     if (hasExistingOrder) {
                         updateExistingCart(variantId, currentLineItems, quantity)
                         Log.d("ProductDetailsViewModel", "Existing cart updated")
                     } else {
-                        // Create new cart if getDraftOrder returns no data
                         createNewCart(variantId, customerEmail, quantity)
                         Log.d("ProductDetailsViewModel", "New cart created")
                     }
