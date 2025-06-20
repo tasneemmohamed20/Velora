@@ -60,6 +60,7 @@ class CartViewModel @Inject constructor(
                 if (draftOrders.note2 == noteType.name) {
                     currentOrder = draftOrders
                     _cartState.value = ResponseState.Success(draftOrders)
+                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
                     Log.d("CartViewModel", "Found cart: ${draftOrders.note2}")
                     Log.d("CartViewModel", "Found cart: ${draftOrders}")
                 }

@@ -50,22 +50,22 @@ class LoginViewModel  @Inject constructor(
                         if (user?.isEmailVerified == true) {
                             fetchShopifyCustomerId(email)
                             _loginState.value = ResponseState.Success("Welcome back! You have successfully logged in")
-                            val customerId = sharedPreferencesHelper.getCustomerId()
-//                            viewModelScope.launch {
-//                                customerId?.let {
-//                                    try {
-//                                        getDraftOrder(it).let { hasExistingOrder ->
-//                                            if (hasExistingOrder) {
-//                                                Log.d("LoginViewModel", "Draft order already exists for customer: $customerId")
-//                                            } else {
-//                                                Log.d("LoginViewModel", "No existing draft order found for customer: $customerId")
-//                                            }
-//                                        }
-//                                    } catch (e: Exception) {
-//                                        Log.e("LoginViewModel", "Error checking draft order", e)
-//                                    }
-//                                }
-//                            }
+                            val customerEmail = sharedPreferencesHelper.getCustomerEmail()
+                            viewModelScope.launch {
+                                customerEmail?.let {
+                                    try {
+                                        getDraftOrder(it).let { hasExistingOrder ->
+                                            if (hasExistingOrder) {
+                                                Log.d("LoginViewModel", "Draft order already exists for customer: $customerEmail")
+                                            } else {
+                                                Log.d("LoginViewModel", "No existing draft order found for customer: $customerEmail")
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("LoginViewModel", "Error checking draft order", e)
+                                    }
+                                }
+                            }
                         } else {
                             auth.signOut()
                             _loginState.value = ResponseState.Failure(
