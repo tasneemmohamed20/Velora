@@ -1,5 +1,6 @@
 package com.example.m_commerce
 
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -37,10 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.toRoute
+import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
@@ -52,15 +56,20 @@ import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.cart.CartScreen
 import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.order.OrderScreen
+import com.example.m_commerce.presentation.payment.PaymentScreen
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.start.StartScreen
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.routes.ScreensRoute.Payment
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.serialization.json.Json
+import kotlin.text.toInt
+import kotlin.times
 
 private const val TAG = "MainActivity"
 
@@ -207,11 +216,24 @@ fun MainActivity.NavHostSetup(){
             }
         }
 
-        composable<ScreensRoute.Cart>{
+        composable<ScreensRoute.Cart> {
             CartScreen(
                 onBack = { navHostController.popBackStack() },
-                onAddItems = { navHostController.popBackStack() },
-                onCheckout = {},
+                onAddItems = { navHostController.navigate(ScreensRoute.Home) },
+                onCheckout = { order, totalAmountCents ->
+                    val orderItems = order.lineItems?.nodes?.map { node ->
+                        OrderItem(
+                            name = node.title ?: node.name ?: "Unknown Item",
+                            description = node.title ?: "",
+                            amountCents = (totalAmountCents.times(100)).toDouble(),
+                            quantity = node.quantity ?: 1,
+                            itemId = node.id ?: ""
+                        )
+                    } ?: emptyList()
+
+                    val itemsJson = Uri.encode(Json.encodeToString(ArrayList(orderItems)))
+                    navHostController.navigate("payment/$itemsJson/$totalAmountCents")
+                }
             )
         }
 
@@ -339,6 +361,25 @@ fun MainActivity.NavHostSetup(){
             ProductDetailsScreen(
                 productId = entry.productId,
                 onBack = { navHostController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "payment/{items}/{totalAmountCents}",
+            arguments = listOf(
+                navArgument("items") { type = NavType.StringType },
+                navArgument("totalAmountCents") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val itemsJson = backStackEntry.arguments?.getString("items") ?: "[]"
+            val totalAmountCents = backStackEntry.arguments?.getInt("totalAmountCents") ?: 0
+            val items = Json.decodeFromString<List<OrderItem>>(Uri.decode(itemsJson))
+
+            PaymentScreen(
+                items = items,
+                totalAmountCents = totalAmountCents,
+                onPaymentComplete = { /* Handle completion */ },
+                onPaymentError = { /* Handle error */ }
             )
         }
     }

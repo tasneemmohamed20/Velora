@@ -2,28 +2,49 @@ package com.example.m_commerce.presentation.cart
 
 import android.R
 import android.util.Log
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -34,18 +55,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
+import kotlin.text.toInt
+import kotlin.times
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -115,10 +133,10 @@ fun VoucherSection(voucherCode: String, onVoucherChange: (String) -> Unit) {
 @Composable
 fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsCount: Int, totalPrice: Double) {
     var item : String? = null
-    if (itemsCount > 1 ){
-        item = "items"
+    item = if (itemsCount > 1 ){
+        "items"
     } else {
-        item = "item"
+        "item"
     }
     Column(
         Modifier
@@ -133,7 +151,7 @@ fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsCount: In
             color = Color.Black
         )
         Spacer(Modifier.height(8.dp))
-        SummaryRow("Subtotal - ${itemsCount} items", "EGP %.2f".format(subtotal))
+        SummaryRow("Subtotal - $itemsCount items", "EGP %.2f".format(subtotal))
         SummaryRow("Shipping fee", "FREE")
         SummaryRow("Estimated fee", "EGP %.2f".format(estimatedFee))
         HorizontalDivider(Modifier.padding(8.dp))
@@ -187,7 +205,7 @@ fun BottomButtons(onAddItems: () -> Unit, onCheckout: () -> Unit) {
 fun CartScreen(
     onBack: () -> Unit,
     onAddItems:() -> Unit,
-    onCheckout:() -> Unit,
+    onCheckout:(order:DraftOrder, total : Int) -> Unit,
     viewModel: CartViewModel = hiltViewModel(),
     modifier: Modifier = Modifier.background(Color.White)
 ) {
@@ -337,8 +355,18 @@ fun CartScreen(
                     item { Spacer(Modifier.height(16.dp)) }
                     item {
                         BottomButtons(
-                            onAddItems = {onAddItems() },
-                            onCheckout = { onCheckout() }
+                            onAddItems = onAddItems,
+                            onCheckout = {
+                                when (val state = cartState) {
+                                    is ResponseState.Success -> {
+                                        val order = state.data as DraftOrder
+                                        // Convert to cents and provide default value of 0 if null
+                                        val totalAmountCents = (order.totalPrice?.times(100))?.toInt() ?: 0
+                                        onCheckout(order, totalAmountCents)
+                                    }
+                                    else -> {}
+                                }
+                            }
                         )
                     }
                     item { Spacer(Modifier.height(8.dp)) }
