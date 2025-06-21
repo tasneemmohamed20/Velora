@@ -14,9 +14,8 @@ class CustomerRepositoryImp @Inject constructor(private val customerRemote: ICus
 
     override suspend fun updateCustomerData(
         id: String?,
-        phone: String?,
-        addresses: CustomerAddresses
+        addresses: List<CustomerAddresses>
     ): Flow<Customer> {
-        return customerRemote.updateCustomerData(id, phone, addresses)
+        return customerRemote.updateCustomerData(id, addresses)
     }
 }

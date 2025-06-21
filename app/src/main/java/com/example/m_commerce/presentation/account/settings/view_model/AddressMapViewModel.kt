@@ -27,8 +27,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -79,11 +80,13 @@ class AddressMapViewModel @Inject constructor (
     val editingAddress: StateFlow<Address?> = _editingAddress
 
     private val customerId = sharedPreferencesHelper.getCustomerId()
-    private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
-    val updateAddressState: StateFlow<ResponseState> = _updateAddressState
 
-    private val _areAddressesFull = MutableStateFlow(false)
-    val areAddressesFull: StateFlow<Boolean> = _areAddressesFull
+    private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
+
+    private val _isAddMode = MutableStateFlow(true)
+    val isAddMode: StateFlow<Boolean> = _isAddMode
+
+    private val _formState = MutableStateFlow<AddressFormState?>(null)
 
     init {
         startLocationUpdates()
@@ -91,9 +94,28 @@ class AddressMapViewModel @Inject constructor (
         getCustomerAddresses()
     }
 
+    fun resetForAddMode() {
+        _isAddMode.value = true
+        _editingAddress.value = null
+        _phoneNumber.value = ""
+    }
+
+    // Setup for edit mode
+    fun setupForEditMode(address: Address) {
+        _isAddMode.value = false
+        _editingAddress.value = address
+        _phoneNumber.value = address.phoneNumber
+        updateCurrentLocation(LatLng(address.latitude, address.longitude))
+    }
+
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
         fetchAddress("${latLng.latitude},${latLng.longitude}")
+    }
+
+    fun confirmSelectedLocation(latLng: LatLng) {
+        _selectedLocation.value = latLng
+        _currentLocation.value = latLng
     }
 
     private fun startLocationUpdates() {
@@ -205,14 +227,29 @@ class AddressMapViewModel @Inject constructor (
         }
     }
 
-
     fun clearQuery() {
         _searchQuery.value = ""
         _searchResults.value = emptyList()
     }
 
-    fun addAddressFromInfo(address: Address) {
-        _addresses.update { currentList -> currentList + address }
+    fun storeFormState(
+        addressType: AddressType,
+        buildingName: String,
+        aptNumber: String,
+        floor: String,
+        street: String,
+        additionalDirections: String,
+        addressLabel: String
+    ) {
+        _formState.value = AddressFormState(
+            addressType,
+            buildingName,
+            aptNumber,
+            floor,
+            street,
+            additionalDirections,
+            addressLabel
+        )
     }
 
     fun validateAndUpdatePhone(newValue: String) {
@@ -220,10 +257,6 @@ class AddressMapViewModel @Inject constructor (
             _phoneNumber.value = newValue
             _isPhoneValid.value = newValue.isEmpty() || newValue.matches("^01[0125][0-9]{8}$".toRegex())
         }
-    }
-
-    fun isValidEgyptianMobileNumber(number: String): Boolean {
-        return number.matches("^01[0125][0-9]{8}$".toRegex())
     }
 
     fun setEditingAddress(address: Address?) {
@@ -239,66 +272,50 @@ class AddressMapViewModel @Inject constructor (
     }
 
 
-    // In AddressMapViewModel.kt
-
     fun saveAddressToCustomer(newAddress: Address) {
         viewModelScope.launch {
             _updateAddressState.value = ResponseState.Loading
             try {
-                customerUseCase(customerId.toString()).collect { customer ->
-                    val existingAddresses = customer.addresses?.firstOrNull() ?: CustomerAddresses("", "", "")
+                val customer = customerUseCase(customerId.toString()).first()
+                val currentApiAddresses = customer.addresses?.toMutableList() ?: mutableListOf()
 
-                    val addressString = buildString {
-                        append("type:").append(newAddress.type.name)
-                        append("|building:").append(newAddress.building)
-                        append("|street:").append(newAddress.street)
-                        append("|apt:").append(newAddress.apartment)
-                        append("|floor:").append(newAddress.floor ?: "")
-                        append("|area:").append(newAddress.area)
-                        append("|phone:").append(newAddress.phoneNumber)
-                        append("|label:").append(newAddress.addressLabel ?: "")
-                        append("|directions:").append(newAddress.additionalDirections ?: "")
-                        append("|lat:").append(newAddress.latitude)
-                        append("|lon:").append(newAddress.longitude)
-                    }
+                val address1 = "type:${newAddress.type.name}|building:${newAddress.building}|street:${newAddress.street}|apt:${newAddress.apartment}|floor:${newAddress.floor ?: ""}|area:${newAddress.area}|lat:${newAddress.latitude}|lon:${newAddress.longitude}"
+                val address2 = "label:${newAddress.addressLabel ?: ""}|directions:${newAddress.additionalDirections ?: ""}"
 
-                    val updatedAddresses = if (_editingAddress.value != null) {
-                        // Compare building and street instead of latitude
-                        when {
-                            existingAddresses.address1?.contains("building:${_editingAddress.value?.building}|street:${_editingAddress.value?.street}") == true ->
-                                existingAddresses.copy(address1 = addressString)
-                            existingAddresses.address2?.contains("building:${_editingAddress.value?.building}|street:${_editingAddress.value?.street}") == true ->
-                                existingAddresses.copy(address2 = addressString)
-                            else -> throw Exception("Could not find address to update")
-                        }
+                val editingId = _editingAddress.value?.id
+                Log.d(TAG, "Editing address ID: $editingId")
+                if (editingId != null) {
+                    val index = currentApiAddresses.indexOfFirst { it.id == editingId }
+                    if (index != -1) {
+                        currentApiAddresses[index] = currentApiAddresses[index].copy(
+                            address1 = address1,
+                            address2 = address2,
+                            phone = newAddress.phoneNumber
+                        )
                     } else {
-                        // Add new address to the first empty slot
-                        when {
-                            existingAddresses.address1.isNullOrEmpty() ->
-                                existingAddresses.copy(address1 = addressString)
-                            existingAddresses.address2.isNullOrEmpty() ->
-                                existingAddresses.copy(address2 = addressString)
-                            else -> throw Exception("No empty address slots available")
-                        }
+                        throw Exception("Address with id $editingId not found for update.")
                     }
-
-                    Log.d(TAG, "Updating addresses: $updatedAddresses")
-
-                    customerUseCase(
-                        id = customerId,
+                } else {
+                    val newApiAddress = CustomerAddresses(
+                        id = UUID.randomUUID().toString(),
+                        address1 = address1,
+                        address2 = address2,
                         phone = newAddress.phoneNumber,
-                        addresses = updatedAddresses
-                    ).collect { result ->
-                        if (result.id.isNotEmpty()) {
-                            _updateAddressState.value = ResponseState.Success(result)
-                            getCustomerAddresses()
-                        } else {
-                            throw Exception("Failed to update customer data")
-                        }
-                    }
+                        city = newAddress.area
+                    )
+                    currentApiAddresses.add(newApiAddress)
                 }
+
+                Log.d(TAG, "Updating addresses: $currentApiAddresses")
+
+                customerUseCase(id = customerId.toString(), addresses = currentApiAddresses)
+                    .collect { updatedCustomer ->
+                        _updateAddressState.value = ResponseState.Success(updatedCustomer)
+                        getCustomerAddresses()
+                        _editingAddress.value = null
+                    }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to update address: ${e.message}", e)
+                Log.e(TAG, "Failed to save address: ${e.message}", e)
                 _updateAddressState.value = ResponseState.Failure(e)
             }
         }
@@ -306,52 +323,50 @@ class AddressMapViewModel @Inject constructor (
 
     fun getCustomerAddresses() {
         viewModelScope.launch {
+            _addresses.value = emptyList()
             try {
                 customerUseCase(customerId.toString()).collect { customer ->
-                    Log.d(TAG, "Customer addresses: ${customer}")
-                    val decodedAddresses = customer.addresses?.mapNotNull { customerAddress ->
-                        listOfNotNull(
-                            customerAddress.address1,
-                            customerAddress.address2,
-                            customerAddress.formatted
-                        ).mapNotNull { addressStr ->
-                            _areAddressesFull.value = !customerAddress.address1.isNullOrEmpty() &&
-                                    !customerAddress.address2.isNullOrEmpty()
-                            Log.d(TAG, "Are addresses full? ${_areAddressesFull.value}")
-                            if (addressStr.isBlank()) return@mapNotNull null
+                    val uiAddresses = customer.addresses?.mapNotNull { apiAddress ->
+                        try {
+                            val address1Map = apiAddress.address1?.split("|")?.mapNotNull {
+                                val pair = it.split(":", limit = 2)
+                                if (pair.size == 2) pair[0] to pair[1] else null
+                            }?.toMap() ?: emptyMap()
 
-                            try {
-                                val parts = addressStr.split("|")
-                                val map = parts.associate {
-                                    val keyValue = it.split(":", limit = 2)
-                                    if (keyValue.size == 2) keyValue[0] to keyValue[1] else "" to ""
-                                }
+                            val address2Map = apiAddress.address2?.split("|")?.mapNotNull {
+                                val pair = it.split(":", limit = 2)
+                                if (pair.size == 2) pair[0] to pair[1] else null
+                            }?.toMap() ?: emptyMap()
 
-                                val latitude = map["lat"]?.toDoubleOrNull() ?: return@mapNotNull null
-                                val longitude = map["lon"]?.toDoubleOrNull() ?: return@mapNotNull null
-                                _selectedLocation .value = LatLng(latitude, longitude)
-                                Address(
-                                    building = map["building"] ?: "",
-                                    street = map["street"] ?: "",
-                                    apartment = map["apt"] ?: "",
-                                    floor = map["floor"] ?: "",
-                                    area = map["area"] ?: "",
-                                    additionalDirections = map["directions"] ?: "",
-                                    latitude = latitude,
-                                    longitude = longitude,
-                                    type = AddressType.valueOf(map["type"] ?: AddressType.HOME.name),
-                                    phoneNumber = map["phone"] ?: "",
-                                    addressLabel = map["label"] ?: ""
-                                )
+                            val lat = address1Map["lat"]?.toDoubleOrNull()
+                            val lon = address1Map["lon"]?.toDoubleOrNull()
 
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Failed to decode address: $addressStr", e)
-                                null
+                            if (lat == null || lon == null) {
+                                Log.w(TAG, "Skipping address with invalid lat/lon: ${apiAddress.id}")
+                                return@mapNotNull null
                             }
-                        }
-                    }?.flatten() ?: emptyList()
 
-                    _addresses.value = decodedAddresses
+                            Address(
+                                id = apiAddress.id,
+                                type = AddressType.valueOf(address1Map["type"] ?: AddressType.HOME.name),
+                                building = address1Map["building"] ?: "",
+                                street = address1Map["street"] ?: "",
+                                apartment = address1Map["apt"] ?: "",
+                                floor = address1Map["floor"] ?: "",
+                                area = address1Map["area"] ?: "",
+                                latitude = lat,
+                                longitude = lon,
+                                addressLabel = address2Map["label"] ?: "",
+                                additionalDirections = address2Map["directions"] ?: "",
+                                phoneNumber = apiAddress.phone ?: ""
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error parsing address ${apiAddress.id}", e)
+                            null
+                        }
+                    } ?: emptyList()
+
+                    _addresses.value = uiAddresses
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get customer addresses", e)
@@ -359,4 +374,15 @@ class AddressMapViewModel @Inject constructor (
             }
         }
     }
+
 }
+
+data class AddressFormState(
+    val addressType: AddressType,
+    val buildingName: String,
+    val aptNumber: String,
+    val floor: String,
+    val street: String,
+    val additionalDirections: String,
+    val addressLabel: String
+)

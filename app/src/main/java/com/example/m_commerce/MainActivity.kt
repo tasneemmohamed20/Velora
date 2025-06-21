@@ -46,6 +46,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.presentation.account.AccountScreen
+import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
@@ -240,6 +241,7 @@ fun MainActivity.NavHostSetup(){
         composable<ScreensRoute.Favorites>{
 
         }
+
         composable<ScreensRoute.Settings>{
             SettingsScreen(
                 onAddressClick = {
@@ -335,8 +337,12 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {},
-                viewModel = viewModel
+                onConfirmLocation = {
+                    navHostController.navigate(ScreensRoute.AddressInfo)
+                },
+                viewModel = viewModel,
+                isFromEdit = navHostController.previousBackStackEntry?.destination?.route == ScreensRoute.AddressInfo.toString()
+
             )
         }
 
@@ -356,6 +362,25 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
+            )
+        }
+
+        composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.saveAddressToCustomer(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
+                goToMap = {
+                    navHostController.navigate(ScreensRoute.AddressMap) {
+                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
+                    }
+                }
             )
         }
 
