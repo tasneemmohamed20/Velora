@@ -8,7 +8,6 @@ interface ICustomerRepository {
     suspend fun getCustomerIdByID(id: String): Flow<Customer>
     suspend fun updateCustomerData(
         id: String?,
-        phone: String?,
-        addresses: CustomerAddresses
+        addresses: List<CustomerAddresses>
     ): Flow<Customer>
 }

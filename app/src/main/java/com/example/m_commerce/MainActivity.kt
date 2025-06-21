@@ -42,6 +42,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.m_commerce.presentation.account.AccountScreen
+import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
@@ -218,6 +219,7 @@ fun MainActivity.NavHostSetup(){
         composable<ScreensRoute.Favorites>{
 
         }
+
         composable<ScreensRoute.Settings>{
             SettingsScreen(
                 onAddressClick = {
@@ -313,7 +315,9 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {},
+                onConfirmLocation = {
+                    navHostController.navigate(ScreensRoute.AddressInfo)
+                },
                 viewModel = viewModel
             )
         }
@@ -334,6 +338,20 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
+            )
+        }
+
+        composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.saveAddressToCustomer(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
             )
         }
 

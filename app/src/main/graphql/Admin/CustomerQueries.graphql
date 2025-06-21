@@ -8,7 +8,11 @@ query GetCustomerData($id: ID!) {
         addresses {
             address1
             address2
-            formatted
+            city
+            latitude
+            longitude
+            phone
+            id
         }
     }
 }
@@ -25,9 +29,10 @@ mutation CustomerUpdate($input: CustomerInput!) {
             addresses {
                 address1
                 address2
-                company
-                formatted
-                formattedArea
+                city
+                latitude
+                longitude
+                phone
                 id
             }
         }
