@@ -53,7 +53,7 @@ fun AddressesScreen(
     onAddressClick: (Address) -> Unit
 ) {
     val addresses by viewModel.addresses.collectAsState()
-    val areAddressesFull by viewModel.areAddressesFull.collectAsState()
+//    val areAddressesFull by viewModel.areAddressesFull.collectAsState()
 
     Column(
         modifier = Modifier
@@ -73,29 +73,29 @@ fun AddressesScreen(
                     fontSize = 18.sp,
                     modifier = Modifier
                         .clickable {
-                            if (areAddressesFull) {
-                                showDialog.value = true
-                            } else {
+//                            if (areAddressesFull) {
+//                                showDialog.value = true
+//                            } else {
                                 onAddClicked()
-                            }
+//                            }
                         }
                         .padding(horizontal = 8.dp)
                 )
             }
         )
 
-        if (showDialog.value) {
-            AlertDialog(
-                onDismissRequest = { showDialog.value = false },
-                title = { Text("Maximum Addresses Reached") },
-                text = { Text("You can only add up to 2 addresses. Please remove an existing address to add a new one.") },
-                confirmButton = {
-                    TextButton(onClick = { showDialog.value = false }) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
+//        if (showDialog.value) {
+//            AlertDialog(
+//                onDismissRequest = { showDialog.value = false },
+//                title = { Text("Maximum Addresses Reached") },
+//                text = { Text("You can only add up to 2 addresses. Please remove an existing address to add a new one.") },
+//                confirmButton = {
+//                    TextButton(onClick = { showDialog.value = false }) {
+//                        Text("OK")
+//                    }
+//                }
+//            )
+//        }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
