@@ -49,6 +49,7 @@ import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
+import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
@@ -199,7 +200,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home,
+        startDestination = ScreensRoute.Start,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -216,6 +217,7 @@ fun MainActivity.NavHostSetup(){
         composable<ScreensRoute.Favorites>{
 
         }
+
         composable<ScreensRoute.Settings>{
             SettingsScreen(
                 onAddressClick = {
@@ -308,7 +310,9 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {},
+                onConfirmLocation = {
+                    navHostController.navigate(ScreensRoute.AddressInfo)
+                },
                 viewModel = viewModel
             )
         }
@@ -329,6 +333,20 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
+            )
+        }
+
+        composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.saveAddressToCustomer(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
             )
         }
 

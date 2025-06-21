@@ -125,6 +125,27 @@ private fun AddressInfoContent(
     var additionalDirections by remember { mutableStateOf(initialAddress?.additionalDirections ?: "") }
     var addressLabel by remember { mutableStateOf(initialAddress?.addressLabel ?: "") }
 
+    LaunchedEffect(initialAddress) {
+        if (initialAddress != null) {
+            addressType = initialAddress.type
+            buildingName = initialAddress.building
+            aptNumber = initialAddress.apartment
+            floor = initialAddress.floor ?: ""
+            street = initialAddress.street
+            additionalDirections = initialAddress.additionalDirections ?: ""
+            addressLabel = initialAddress.addressLabel ?: ""
+            viewModel.validateAndUpdatePhone(initialAddress.phoneNumber)
+        } else {
+            addressType = AddressType.HOME
+            buildingName = ""
+            aptNumber = ""
+            floor = ""
+            street = ""
+            additionalDirections = ""
+            addressLabel = ""
+            viewModel.validateAndUpdatePhone("")
+        }
+    }
     val currentLocation by viewModel.selectedLocation.collectAsState()
     val address by viewModel.address.collectAsState()
     var selectedCountry by remember { mutableStateOf("+20") }
