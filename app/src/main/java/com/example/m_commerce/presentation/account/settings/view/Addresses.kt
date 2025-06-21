@@ -53,14 +53,12 @@ fun AddressesScreen(
     onAddressClick: (Address) -> Unit
 ) {
     val addresses by viewModel.addresses.collectAsState()
-//    val areAddressesFull by viewModel.areAddressesFull.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        val showDialog = remember { mutableStateOf(false) }
 
         CustomTopAppBar(
             title = "Addresses",
@@ -73,29 +71,14 @@ fun AddressesScreen(
                     fontSize = 18.sp,
                     modifier = Modifier
                         .clickable {
-//                            if (areAddressesFull) {
-//                                showDialog.value = true
-//                            } else {
-                                onAddClicked()
-//                            }
+                            onAddClicked()
+                            viewModel.resetForAddMode()
                         }
                         .padding(horizontal = 8.dp)
                 )
             }
         )
 
-//        if (showDialog.value) {
-//            AlertDialog(
-//                onDismissRequest = { showDialog.value = false },
-//                title = { Text("Maximum Addresses Reached") },
-//                text = { Text("You can only add up to 2 addresses. Please remove an existing address to add a new one.") },
-//                confirmButton = {
-//                    TextButton(onClick = { showDialog.value = false }) {
-//                        Text("OK")
-//                    }
-//                }
-//            )
-//        }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -107,7 +90,10 @@ fun AddressesScreen(
             ) { index ->
                 AddressItem(
                     address = addresses[index],
-                    onClick = { onAddressClick(addresses[index]) }
+                    onClick = {
+                        onAddressClick(addresses[index])
+                        viewModel.setupForEditMode(addresses[index])
+                    }
                 )
                 HorizontalDivider(
                     thickness = 1.dp,

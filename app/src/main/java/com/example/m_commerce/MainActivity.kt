@@ -313,7 +313,9 @@ fun MainActivity.NavHostSetup(){
                 onConfirmLocation = {
                     navHostController.navigate(ScreensRoute.AddressInfo)
                 },
-                viewModel = viewModel
+                viewModel = viewModel,
+                isFromEdit = navHostController.previousBackStackEntry?.destination?.route == ScreensRoute.AddressInfo.toString()
+
             )
         }
 
@@ -347,6 +349,11 @@ fun MainActivity.NavHostSetup(){
                     )
                 },
                 viewModel = viewModel,
+                goToMap = {
+                    navHostController.navigate(ScreensRoute.AddressMap) {
+                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
+                    }
+                }
             )
         }
 
