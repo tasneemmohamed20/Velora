@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -83,10 +82,11 @@ class AddressMapViewModel @Inject constructor (
     private val customerId = sharedPreferencesHelper.getCustomerId()
 
     private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
-    val updateAddressState: StateFlow<ResponseState> = _updateAddressState
 
-//    private val _areAddressesFull = MutableStateFlow(false)
-//    val areAddressesFull: StateFlow<Boolean> = _areAddressesFull
+    private val _isAddMode = MutableStateFlow(true)
+    val isAddMode: StateFlow<Boolean> = _isAddMode
+
+    private val _formState = MutableStateFlow<AddressFormState?>(null)
 
     init {
         startLocationUpdates()
@@ -94,9 +94,28 @@ class AddressMapViewModel @Inject constructor (
         getCustomerAddresses()
     }
 
+    fun resetForAddMode() {
+        _isAddMode.value = true
+        _editingAddress.value = null
+        _phoneNumber.value = ""
+    }
+
+    // Setup for edit mode
+    fun setupForEditMode(address: Address) {
+        _isAddMode.value = false
+        _editingAddress.value = address
+        _phoneNumber.value = address.phoneNumber
+        updateCurrentLocation(LatLng(address.latitude, address.longitude))
+    }
+
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
         fetchAddress("${latLng.latitude},${latLng.longitude}")
+    }
+
+    fun confirmSelectedLocation(latLng: LatLng) {
+        _selectedLocation.value = latLng
+        _currentLocation.value = latLng
     }
 
     private fun startLocationUpdates() {
@@ -213,8 +232,24 @@ class AddressMapViewModel @Inject constructor (
         _searchResults.value = emptyList()
     }
 
-    fun addAddressFromInfo(address: Address) {
-        _addresses.update { currentList -> currentList + address }
+    fun storeFormState(
+        addressType: AddressType,
+        buildingName: String,
+        aptNumber: String,
+        floor: String,
+        street: String,
+        additionalDirections: String,
+        addressLabel: String
+    ) {
+        _formState.value = AddressFormState(
+            addressType,
+            buildingName,
+            aptNumber,
+            floor,
+            street,
+            additionalDirections,
+            addressLabel
+        )
     }
 
     fun validateAndUpdatePhone(newValue: String) {
@@ -222,10 +257,6 @@ class AddressMapViewModel @Inject constructor (
             _phoneNumber.value = newValue
             _isPhoneValid.value = newValue.isEmpty() || newValue.matches("^01[0125][0-9]{8}$".toRegex())
         }
-    }
-
-    fun isValidEgyptianMobileNumber(number: String): Boolean {
-        return number.matches("^01[0125][0-9]{8}$".toRegex())
     }
 
     fun setEditingAddress(address: Address?) {
@@ -343,4 +374,15 @@ class AddressMapViewModel @Inject constructor (
             }
         }
     }
+
 }
+
+data class AddressFormState(
+    val addressType: AddressType,
+    val buildingName: String,
+    val aptNumber: String,
+    val floor: String,
+    val street: String,
+    val additionalDirections: String,
+    val addressLabel: String
+)
