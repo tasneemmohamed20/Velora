@@ -4,6 +4,8 @@ import android.content.Context
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.data.datasource.remote.restful.PlacesClientHelper
 import com.example.m_commerce.data.datasource.remote.restful.RetrofitClient
+import com.example.m_commerce.presentation.utils.Constants
+
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
 import dagger.Provides
@@ -13,7 +15,7 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import javax.inject.Singleton
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-import com.example.m_commerce.data.datasource.remote.graphql.ApolloHelper
+
 
 
 @Module
@@ -21,11 +23,13 @@ import com.example.m_commerce.data.datasource.remote.graphql.ApolloHelper
 object DataProviderModule {
 
     @Provides
+    @Singleton
     fun provideGeoRetrofit(): Retrofit {
         return RetrofitClient.getRetrofit()
     }
 
     @Provides
+    @Singleton
     fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
         return PlacesClientHelper.getPlacesClient(context)
     }
@@ -34,14 +38,20 @@ object DataProviderModule {
     @Singleton
     @StoreApollo
     fun provideStoreApolloClient(): ApolloClient {
-        return ApolloHelper.storeApolloClient()
+         return ApolloClient.Builder()
+            .httpHeaders(Constants.storeHeaders)
+            .serverUrl(Constants.STOREFRONT_URL)
+            .build()
     }
 
     @Provides
     @Singleton
     @AdminApollo
     fun provideAdminApolloClient(): ApolloClient {
-        return ApolloHelper.adminApolloClient()
+        return ApolloClient.Builder()
+            .httpHeaders(Constants.adminHeaders)
+            .serverUrl(Constants.ADMIN_URL)
+            .build()
     }
 
     @Provides
@@ -49,4 +59,6 @@ object DataProviderModule {
     fun provideSharedPreferencesHelper(@ApplicationContext context: Context): SharedPreferencesHelper {
         return SharedPreferencesHelper(context)
     }
+
+
 }

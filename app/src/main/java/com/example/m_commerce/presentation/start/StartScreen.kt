@@ -1,4 +1,4 @@
-package com.example.m_commerce.start
+package com.example.m_commerce.presentation.start
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,21 +23,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.m_commerce.R
 import com.example.m_commerce.ResponseState
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.m_commerce.start.StartViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import kotlinx.coroutines.launch
 
 @Composable
 fun StartScreen(
     onEmailClicked: () -> Unit,
     onGoogleSuccess: () -> Unit,
-    viewModel: StartViewModel = viewModel()
+    viewModel: StartViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val signInState by viewModel.googleSignInState.collectAsStateWithLifecycle()

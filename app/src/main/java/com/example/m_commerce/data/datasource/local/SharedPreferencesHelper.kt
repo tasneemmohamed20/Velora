@@ -3,8 +3,9 @@ package com.example.m_commerce.data.datasource.local
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import javax.inject.Inject
 
-class SharedPreferencesHelper(context: Context) {
+class SharedPreferencesHelper @Inject constructor(context: Context) {
     private val TAG = "SharedPreferencesHelper"
     private val PREFS_NAME = "MyCommercePrefs"
     private val CUSTOMER_ID_KEY = "customer_id"
@@ -53,6 +54,16 @@ class SharedPreferencesHelper(context: Context) {
         return isUSD
     }
 
+    fun saveUsdToEgpValue(value: Float) {
+        prefs.edit().apply {
+            putFloat("UsdToEgp", value)
+            apply()
+        }
+    }
+
+    fun getUsdToEgpValue() : Float{
+        return prefs.getFloat("UsdToEgp", 0f)
+    }
     fun getCurrencyPreference(): Boolean {
         return prefs.getBoolean(CURRENCY_KEY, false)
     }

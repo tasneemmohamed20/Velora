@@ -1,0 +1,34 @@
+query GetProductById($id: ID!) {
+    product(id: $id) {
+        id
+        title
+        productType
+        description
+        priceRange {
+            minVariantPrice {
+                amount
+                currencyCode
+            }
+        }
+        images(first: 5) {
+            edges {
+                node {
+                    url
+                }
+            }
+        }
+        variants(first: 10) {
+            edges {
+                node {
+                    id
+                    title
+                    availableForSale
+                    selectedOptions {
+                        name
+                        value
+                    }
+                }
+            }
+        }
+    }
+}

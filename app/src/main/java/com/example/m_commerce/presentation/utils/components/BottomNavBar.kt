@@ -3,6 +3,7 @@ package com.example.m_commerce.presentation.utils.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
@@ -37,9 +38,9 @@ val navigationItems = listOf(
     ),
 
     NavigationItem(
-        title = "Order",
-        icon = Icons.AutoMirrored.Outlined.List,
-        route = ScreensRoute.Order
+        title = "Favorite",
+        icon = Icons.Outlined.FavoriteBorder,
+        route = ScreensRoute.Favorites
     ),
     NavigationItem(
         title = "Account",

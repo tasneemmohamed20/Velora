@@ -1,0 +1,27 @@
+query GetAllOrders {
+    orders(first: 50, reverse: true) {
+        edges {
+            node {
+                id
+                name
+                createdAt
+                email
+                totalPriceSet {
+                    shopMoney {
+                        amount
+                        currencyCode
+                    }
+                }
+                lineItems(first: 5) {
+                    edges {
+                        node {
+                            name
+                            quantity
+                            variantTitle
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

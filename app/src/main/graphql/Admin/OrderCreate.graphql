@@ -1,0 +1,13 @@
+mutation OrderCreate($order: OrderCreateOrderInput!, $options: OrderCreateOptionsInput) {
+    orderCreate(order: $order, options: $options) {
+        order {
+            id
+            name
+            createdAt
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}

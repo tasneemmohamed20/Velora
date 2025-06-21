@@ -24,33 +24,15 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onProductClick: (String) -> Unit
 ) {
-    var query by remember { mutableStateOf("") }
-    var maxAllowedPrice by remember { mutableStateOf(1000f) }
-    var currentMaxPrice by remember { mutableStateOf(1000f) }
-    var isFirstLoad by remember { mutableStateOf(true) }
-
     val productsState by viewModel.productsList.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.searchProductsByName("", null, null)
-    }
-
-    LaunchedEffect(productsState) {
-        if (isFirstLoad && productsState is ResponseState.Success) {
-            val products = (productsState as ResponseState.Success).data as List<Product>
-            val prices = products.mapNotNull {
-                it.price.minVariantPrice.amount.toFloatOrNull()
-            }
-            if (prices.isNotEmpty()) {
-                val maxPrice = prices.maxOrNull() ?: 1000f
-                maxAllowedPrice = maxPrice
-                currentMaxPrice = maxPrice
-                isFirstLoad = false
-            }
-        }
-    }
+    val currency by viewModel.selectedCurrency.collectAsStateWithLifecycle()
+    val query by viewModel.query.collectAsStateWithLifecycle()
+    val minAllowedPrice by viewModel.minAllowedPrice.collectAsStateWithLifecycle()
+    val maxAllowedPrice by viewModel.maxAllowedPrice.collectAsStateWithLifecycle()
+    val currentMaxPrice by viewModel.currentMaxPrice.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -60,15 +42,7 @@ fun SearchScreen(
     ) {
         TextField(
             value = query,
-            onValueChange = { newQuery ->
-                query = newQuery
-                val maxPrice = if (currentMaxPrice < maxAllowedPrice) currentMaxPrice.toDouble() else null
-                viewModel.searchProductsByName(
-                    query = newQuery,
-                    minPrice = null,
-                    maxPrice = maxPrice
-                )
-            },
+            onValueChange = { viewModel.onQueryChange(it) },
             placeholder = { Text("Search by Product Name") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -87,33 +61,32 @@ fun SearchScreen(
             ),
         )
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Max Price: ${currentMaxPrice.toInt()}",
-            style = MaterialTheme.typography.body1
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Slider(
+                value = currentMaxPrice.toFloat().coerceIn(minAllowedPrice.toFloat(), maxAllowedPrice.toFloat()),
+                onValueChange = { viewModel.onMaxPriceChange(it.toDouble()) },
+                valueRange = minAllowedPrice.toFloat()..maxAllowedPrice.toFloat(),
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.Blue,
+                    activeTrackColor = Color.Blue,
+                    inactiveTrackColor = Color.LightGray
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
 
-        Slider(
-            value = currentMaxPrice,
-            onValueChange = { newValue ->
-                currentMaxPrice = newValue
-                viewModel.searchProductsByName(
-                    query = query,
-                    minPrice = null,
-                    maxPrice = newValue.toDouble()
-                )
-            },
-            valueRange = 0f..maxAllowedPrice,
-            colors = SliderDefaults.colors(
-                thumbColor = Color.Blue,
-                activeTrackColor = Color.Blue,
-                inactiveTrackColor = Color.LightGray
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
+            Text(
+                text = "%.2f $currency".format(viewModel.convertPrice(currentMaxPrice, currency)),
+                style = MaterialTheme.typography.body2
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -136,7 +109,7 @@ fun SearchScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(products) { product ->
-                                ProductCard(product)
+                                ProductCard(product,onProductClick = onProductClick)
                             }
                         }
                     }

@@ -19,7 +19,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
-import kotlin.text.get
 
 @HiltViewModel
 class LoginViewModel  @Inject constructor(
@@ -119,10 +118,10 @@ class LoginViewModel  @Inject constructor(
                                 .getAsJsonObject("node")
                             val customerId = customer.get("id").asString
                             sharedPreferencesHelper.saveCustomerId(customerId)
-                            Log.d("LoginSuccess", "Full customer data: ${customer.toString()}")
+                            Log.d("LoginViewModel", "Full customer data: ${customer.toString()}")
                         }
                         else {
-                            Log.d("LoginInfo", "No Shopify customer found for email: $email")
+                            Log.d("LoginViewModel", "No Shopify customer found for email: $email")
                         }
                     }
                 }

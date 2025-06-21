@@ -17,6 +17,7 @@ import javax.inject.Singleton
 abstract class GeoCoderRepoModule {
 
     @Binds
+    @Singleton
     abstract fun bindRemoteDataSource(impl: RemoteDataSourceImp): RemoteDataSourceContract
 
     @Binds

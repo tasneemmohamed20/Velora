@@ -15,8 +15,10 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import javax.inject.Inject
 
-class StartViewModel : ViewModel() {
+
+class StartViewModel @Inject constructor() : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val _googleSignInState = MutableStateFlow<ResponseState?>(null)
