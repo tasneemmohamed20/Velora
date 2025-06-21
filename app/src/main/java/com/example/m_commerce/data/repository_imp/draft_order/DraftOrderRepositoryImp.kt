@@ -30,4 +30,8 @@ class DraftOrderRepositoryImp @Inject constructor(private val remoteDataSource: 
     ): DraftOrder {
         return remoteDataSource.updateDraftOrder(id, lineItems)
     }
+
+    override suspend fun deleteDraftOrder(id: String): Boolean {
+        return remoteDataSource.deleteDraftOrder(id)
+    }
 }
