@@ -68,7 +68,6 @@ data class LineItem(
     val vendor: String? = null,
     val image: Image? = null,
     val product: Product? = null,
-//    val variant: Variant? = null
     val variantId: String? = null
 )
 
@@ -89,3 +88,21 @@ data class Item(
 data class Variant(
     val id: String?
 )
+
+data class DraftOrderDeleteResponse(
+    val data: Data?
+) {
+    data class Data(
+        val draftOrderDelete: DraftOrderDelete?
+    )
+
+    data class DraftOrderDelete(
+        val deletedId: String?,
+        val userErrors: List<UserError>
+    )
+
+    data class UserError(
+        val field: String?,
+        val message: String?
+    )
+}

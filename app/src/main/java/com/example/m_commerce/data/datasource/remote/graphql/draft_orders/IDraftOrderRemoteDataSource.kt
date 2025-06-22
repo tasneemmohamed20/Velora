@@ -21,4 +21,7 @@ interface IDraftOrderRemoteDataSource {
         id: String,
         lineItems: List<Item>,
     ): DraftOrder
+
+    suspend fun deleteDraftOrder(id: String): Boolean
+
 }

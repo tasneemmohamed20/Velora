@@ -1,6 +1,5 @@
-package com.example.m_commerce.data.datasource.remote.restful.remote
+package com.example.m_commerce.domain.repository
 
-import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.domain.entities.payment.AuthResponse
 import com.example.m_commerce.domain.entities.payment.BillingData
 import com.example.m_commerce.domain.entities.payment.OrderItem
@@ -8,13 +7,7 @@ import com.example.m_commerce.domain.entities.payment.OrderResponse
 import com.example.m_commerce.domain.entities.payment.PaymentKeyResponse
 import kotlinx.coroutines.flow.Flow
 
-interface RemoteDataSourceContract {
-    suspend fun getCurrencyExchangeRate(apiKey: String): Flow<CurrencyExchangeResponse>
-
-    suspend fun getAddressFromGeocoding(
-        latlng: String,
-        apiKey: String
-    ): Flow<String>
+interface IPaymobRepository {
 
     suspend fun getAuthenticationToken(): Flow<AuthResponse>
 
