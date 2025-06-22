@@ -28,4 +28,7 @@ interface IDraftOrderRemoteDataSource {
         id: String,
         billingAddress: BillingAddress
     ): DraftOrder
+
+    suspend fun deleteDraftOrder(id: String): Boolean
+
 }

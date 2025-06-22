@@ -17,6 +17,7 @@ import com.example.m_commerce.domain.entities.ProductVariant
 import com.example.m_commerce.domain.entities.SelectedOption
 import com.example.m_commerce.domain.entities.UserError
 import com.example.m_commerce.service1.DraftOrderCreateMutation
+import com.example.m_commerce.service1.DraftOrderDeleteMutation
 import com.example.m_commerce.service1.DraftOrderUpdateMutation
 import com.example.m_commerce.service1.GetDraftOrdersQuery
 import com.example.m_commerce.service1.UpdateDraftOrderBillingAddressMutation
@@ -263,6 +264,7 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
             else -> variantId
         }
     }
+
     override suspend fun updateDraftOrder(
         id: String,
         lineItems: List<Item>
@@ -381,5 +383,29 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                 }
             )
         } ?: Log.e("DraftOrderUpdate", "Draft order update failed ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()}")) as DraftOrder
+
+      override suspend fun deleteDraftOrder(id: String): Boolean {
+        return try {
+
+
+            val response = withContext(Dispatchers.IO) {
+                shopifyService.mutation(DraftOrderDeleteMutation(id = id)
+                ).execute()
+            }
+
+            val deletedId = response.data?.draftOrderDelete?.deletedId
+            val success = deletedId != null
+
+            if (!success) {
+                response.data?.draftOrderDelete?.userErrors?.forEach { error ->
+                    Log.e("DraftOrderDelete", "Error: ${error.message}, Field: ${error.field}")
+                }
+            }
+
+            success
+        } catch (e: Exception) {
+            Log.e("DraftOrderDelete", "Failed to delete draft order", e)
+            false
+        }
     }
 }

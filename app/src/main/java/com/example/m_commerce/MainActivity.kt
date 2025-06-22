@@ -297,6 +297,7 @@ fun MainActivity.NavHostSetup(){
                 },
                 onOrderClick = {
                     navHostController.navigate(ScreensRoute.Order)
+
                 }
             )
         }
@@ -321,7 +322,8 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
-        composable<ScreensRoute.AddressInfo> {
+      
+      composable<ScreensRoute.AddressInfo> {
             AddressInfo(
                 onBack = { navHostController.popBackStack() },
                 onSave = { address ->
@@ -336,6 +338,7 @@ fun MainActivity.NavHostSetup(){
                     navHostController.navigate(ScreensRoute.AddressMap) {
                         popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
                     }
+
                 }
             )
         }
@@ -401,7 +404,7 @@ fun MainActivity.NavHostSetup(){
                 navHostController.navigate(ScreensRoute.Login)
             })
         }
-
+        
         composable<ScreensRoute.Search> {
             SearchScreen(
                 onBack = { navHostController.popBackStack() },
@@ -419,6 +422,25 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel
 
+            )
+        }
+
+        composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.saveAddressToCustomer(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
+                goToMap = {
+                    navHostController.navigate(ScreensRoute.AddressMap) {
+                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -444,8 +466,8 @@ fun MainActivity.NavHostSetup(){
             PaymentScreen(
                 items = items,
                 totalAmountCents = totalAmountCents,
-                onPaymentComplete = { /* Handle completion */ },
-                onPaymentError = { /* Handle error */ }
+                onPaymentComplete = {  },
+                onPaymentError = { }
             )
         }
 
