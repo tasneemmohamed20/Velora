@@ -5,6 +5,7 @@ import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.entities.LineItem
+import com.example.m_commerce.domain.entities.OrderCreateResponse
 import com.example.m_commerce.service1.UpdateDraftOrderBillingAddressMutation
 import kotlinx.coroutines.flow.Flow
 
@@ -31,4 +32,5 @@ interface IDraftOrderRemoteDataSource {
 
     suspend fun deleteDraftOrder(id: String): Boolean
 
+    suspend fun completeAndDeleteDraftOrder(draftOrderId: String): Boolean
 }

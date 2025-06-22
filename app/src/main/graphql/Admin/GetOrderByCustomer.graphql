@@ -18,6 +18,11 @@ query GetOrdersByCustomer($customerId: String!) {
                     address1
                     phone
                 }
+                billingAddress {
+                    name
+                    address1
+                    phone
+                }
                 lineItems(first: 10) {
                     edges {
                         node {

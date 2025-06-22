@@ -5,6 +5,7 @@ import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import kotlinx.coroutines.flow.Flow
 import com.example.m_commerce.domain.entities.LineItem
+import com.example.m_commerce.domain.entities.OrderCreateResponse
 
 interface IDraftOrderRepository {
     suspend fun createDraftOrder(
@@ -28,4 +29,6 @@ interface IDraftOrderRepository {
     ): DraftOrder
 
     suspend fun deleteDraftOrder(id: String): Boolean
+
+    suspend fun completeDraftOrder(draftOrderId: String): Boolean
 }

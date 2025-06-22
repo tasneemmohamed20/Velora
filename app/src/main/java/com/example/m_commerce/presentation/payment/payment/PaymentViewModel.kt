@@ -1,13 +1,17 @@
 package com.example.m_commerce.presentation.payment.payment
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.payment.AuthResponse
 import com.example.m_commerce.domain.entities.payment.BillingData
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.domain.entities.payment.OrderResponse
 import com.example.m_commerce.domain.entities.payment.PaymentKeyResponse
+import com.example.m_commerce.domain.usecases.CompleteDraftOrder
+import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import com.example.m_commerce.domain.usecases.PaymentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +21,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PaymentViewModel @Inject constructor(
-    private val paymentUseCase: PaymentUseCase
+    private val paymentUseCase: PaymentUseCase,
+    private val completeDraftOrder: CompleteDraftOrder,
+    private val draftOrderDelete: DraftOrderUseCase,
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthResponse?>(null)
@@ -31,6 +38,9 @@ class PaymentViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+
+    var showSuccessDialog = mutableStateOf(false)
+    var showErrorDialog =  mutableStateOf(false)
 
     init {
         getAuthToken()
@@ -97,5 +107,27 @@ class PaymentViewModel @Inject constructor(
                 _error.value = e.message ?: "Payment key generation failed"
             }
         }
+    }
+
+
+    fun completeDraftOrder(){
+        Log.i("completeDraftOrder", "customerId: ${sharedPreferencesHelper.getCustomerId()} ")
+        viewModelScope.launch {
+            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
+            val result = completeDraftOrder(draftOrderId)
+
+            if (result) {
+                toggleSuccessAlert()
+            } else {
+                toggleErrorAlert()
+            }
+        }
+    }
+
+    fun toggleSuccessAlert(){
+        showSuccessDialog.value = !showSuccessDialog.value
+    }
+    fun toggleErrorAlert(){
+        showErrorDialog.value = !showErrorDialog.value
     }
 }

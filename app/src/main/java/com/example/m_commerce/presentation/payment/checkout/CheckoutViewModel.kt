@@ -1,11 +1,15 @@
 package com.example.m_commerce.presentation.checkout
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.Customer
+import com.example.m_commerce.domain.entities.Product
+import com.example.m_commerce.domain.usecases.CompleteDraftOrder
 import com.example.m_commerce.domain.usecases.CustomerUseCase
 import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +18,10 @@ import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
+import okhttp3.Response
 import javax.inject.Inject
 
 
@@ -22,13 +29,19 @@ import javax.inject.Inject
 class CheckoutViewModel @Inject constructor(
     private val sharedPreferencesHelper: SharedPreferencesHelper,
     private val customerUseCase: CustomerUseCase,
-    private val draftOrderUseCase: DraftOrderUseCase
+    private val draftOrderUseCase: DraftOrderUseCase,
+    private val completeDraftOrder: CompleteDraftOrder
+
 ) : ViewModel() {
 
     private val _selectedLocation = MutableStateFlow<LatLng?>(null)
     val selectedLocation: StateFlow<LatLng?> = _selectedLocation
     private val _selectedAddress = MutableStateFlow<String?>(null)
     val selectedAddress: StateFlow<String?> = _selectedAddress
+
+    var showSuccessDialog = mutableStateOf(false)
+
+    var showErrorDialog =  mutableStateOf(false)
 
     init {
         fetchCustomerAndSetLocation()
@@ -73,5 +86,26 @@ class CheckoutViewModel @Inject constructor(
             draftOrderUseCase(draftOrderId, address)
             
         }
+    }
+
+    fun completeDraftOrder(){
+
+        viewModelScope.launch {
+            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
+            val result = completeDraftOrder(draftOrderId)
+
+            if (result) {
+                toggleSuccessAlert()
+            } else {
+                toggleErrorAlert()
+            }
+        }
+    }
+
+    fun toggleSuccessAlert(){
+        showSuccessDialog.value = !showSuccessDialog.value
+    }
+    fun toggleErrorAlert(){
+        showErrorDialog.value = !showErrorDialog.value
     }
 }

@@ -7,5 +7,4 @@ import kotlinx.coroutines.flow.Flow
 interface IOrderRemoteDataSource {
     fun getOrdersByCustomerId(customerId: String): Flow<List<OrderEntity>>
     fun getOrderById(): Flow<OrderEntity>
-    fun completeDraftOrder(draftOrderId: String): Flow<OrderCreateResponse>
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Place
@@ -27,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.presentation.checkout.CheckoutViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -50,7 +52,8 @@ fun CheckoutScreen(
     itemsCount: Int,
     items: List<OrderItem>,
     onConfirmOrder: (PaymentMethod, List<OrderItem>, Int) -> Unit,
-    checkcoutViewModel: CheckoutViewModel = hiltViewModel(),
+    checkoutViewModel: CheckoutViewModel = hiltViewModel(),
+    onOrderCompleted: () -> Unit
 ) {
     // Check if total price exceeds cash on delivery limit
     val exceedsCashLimit = totalPrice > 5000.0
@@ -61,8 +64,8 @@ fun CheckoutScreen(
     var showPriceExceedsError by remember {
         mutableStateOf(false)
     }
-    val location by checkcoutViewModel.selectedLocation.collectAsState()
-    val selectedAddress by checkcoutViewModel.selectedAddress.collectAsState()
+    val location by checkoutViewModel.selectedLocation.collectAsState()
+    val selectedAddress by checkoutViewModel.selectedAddress.collectAsState()
 
     Log.d("CheckoutScreen", "CheckoutScreen: $location")
     Scaffold(
@@ -76,6 +79,9 @@ fun CheckoutScreen(
             ConfirmOrderBottomBar(
                 onConfirmOrder = {
                     onConfirmOrder(selectedPaymentMethod, items, (totalPrice * 100).toInt())
+                    if(selectedPaymentMethod == PaymentMethod.CASH){
+                            checkoutViewModel.completeDraftOrder()
+                    }
                 },
                 isEnabled = !showPriceExceedsError
             )
@@ -93,6 +99,7 @@ fun CheckoutScreen(
                 address = selectedAddress.toString()
             )
             Spacer(Modifier.height(16.dp))
+
 
             PayWithSection(
                 selectedMethod = selectedPaymentMethod,
@@ -127,6 +134,45 @@ fun CheckoutScreen(
                 totalPrice = totalPrice
             )
             Spacer(Modifier.height(24.dp))
+
+            if(checkoutViewModel.showErrorDialog.value){
+                ErrorAlertDialog(message = "Failed to complete order. Please try again.", onDismiss = {checkoutViewModel.toggleErrorAlert()})
+            }
+
+            if (checkoutViewModel.showSuccessDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        checkoutViewModel.toggleSuccessAlert()
+                        onOrderCompleted()
+                    },
+                    title = {
+                        Text("🎉 Order Confirmed!", style = MaterialTheme.typography.titleLarge)
+                    },
+                    text = {
+                        Text(
+                            "Your order has been placed successfully. Thank you!",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            checkoutViewModel.toggleSuccessAlert()
+                            onOrderCompleted()
+                        }) {
+                            Text("OK")
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Success",
+                            tint = Color(0xFF4CAF50), // Green
+                        )
+                    },
+                    containerColor = Color.White,
+                    shape = RoundedCornerShape(20.dp)
+                )
+            }
         }
     }
 }
@@ -350,15 +396,22 @@ private fun SummaryRow(label: String, value: String, isBold: Boolean = false) {
 }
 
 @Composable
-private fun ConfirmOrderBottomBar(onConfirmOrder: () -> Unit, isEnabled: Boolean = true) {
+private fun ConfirmOrderBottomBar(
+    onConfirmOrder: () -> Unit,
+    isEnabled: Boolean = true
+) {
+    var isLoading by remember { mutableStateOf(false) }
+
     Surface(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shadowElevation = 8.dp,
         color = Color.White,
     ) {
         Button(
-            onClick = onConfirmOrder,
+            onClick = {
+                isLoading = true
+                onConfirmOrder()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -370,14 +423,22 @@ private fun ConfirmOrderBottomBar(onConfirmOrder: () -> Unit, isEnabled: Boolean
                 disabledContainerColor = Color.Gray,
                 disabledContentColor = Color.White
             ),
-            enabled = isEnabled
+            enabled = isEnabled && !isLoading
         ) {
-            Text(
-                "Place Order",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text(
+                    text = "Place Order",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
         }
     }
 }

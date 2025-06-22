@@ -51,7 +51,7 @@ fun OrderScreen(viewModel: OrderViewModel = hiltViewModel(), onOrderClicked: (Or
 
 
     LaunchedEffect(Unit){
-        viewModel.getOrdersByCustomerId("8437399322843")
+        viewModel.getOrdersByCustomer()
     }
 
     val ordersState by viewModel.ordersList.collectAsStateWithLifecycle()

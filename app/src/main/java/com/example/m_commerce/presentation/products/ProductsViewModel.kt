@@ -47,8 +47,9 @@ class ProductsViewModel @Inject constructor(
     fun getProductsByType(type: String) {
         viewModelScope.launch {
             _mutableProductsList.value = ResponseState.Loading
-            println("Dispatcher: ${coroutineContext[ContinuationInterceptor]}")
+
             val result = productsUseCase(type)
+
             result
                 .catch {
                     _mutableProductsList.value = ResponseState.Failure(it)

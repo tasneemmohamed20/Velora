@@ -2,7 +2,6 @@ package com.example.m_commerce.presentation.cart
 
 import android.R
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,7 +30,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,9 +58,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
-import kotlin.compareTo
-import kotlin.text.toInt
-import kotlin.times
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -141,13 +136,13 @@ fun CartScreen(
                 CartHeader(onBack)
 
                 LazyColumn(modifier = Modifier.weight(1f)) {
-                    when (val order = draftOrder) {
+                    when (draftOrder) {
                         is DraftOrder -> {
-                            val nodes = order.lineItems?.nodes ?: emptyList()
-                            subtotal = order.subtotalPrice
-                            totalPrice = order.totalPrice
-                            estimatedFee = order.totalTax ?: 0.0
-                            itemsCount = order.totalQuantityOfLineItems
+                            val nodes = draftOrder.lineItems?.nodes ?: emptyList()
+                            subtotal = draftOrder.subtotalPrice
+                            totalPrice = draftOrder.totalPrice
+                            estimatedFee = draftOrder.totalTax ?: 0.0
+                            itemsCount = draftOrder.totalQuantityOfLineItems
                             Log.d("CartScreen", "Draft order items: ${nodes.size}")
                             Log.d("CartScreen", "Cart items: $nodes")
                             if (nodes.isEmpty()) {
@@ -172,21 +167,23 @@ fun CartScreen(
                                             name = item.title ?: item.name ?: "Unknown Item",
                                             imageUrl = item.image?.url.toString(),
                                             quantity = item.quantity ?: 1,
-                                            price = item.originalUnitPrice?: 0.0,
+                                            price = item.originalUnitPrice ?: 0.0,
                                             id = item.variantId.toString(),
                                             size = item.product?.variants?.find { variant ->
                                                 variant.id == item.variantId
-                                            }?.selectedOptions?.firstOrNull { it?.name == "Size" }?.value ?: "",
+                                            }?.selectedOptions?.firstOrNull { it?.name == "Size" }?.value
+                                                ?: "",
                                             color = item.product?.variants?.find { variant ->
                                                 variant.id == item.variantId
-                                            }?.selectedOptions?.firstOrNull { it?.name == "Color" }?.value ?: ""
+                                            }?.selectedOptions?.firstOrNull { it?.name == "Color" }?.value
+                                                ?: ""
                                         ),
                                         onQuantityChange = { newQty ->
                                             if (newQty >= 1) {
                                                 item.id?.let { itemId ->
                                                     viewModel.updateQuantity(itemId, newQty)
                                                 }
-                                            }else{
+                                            } else {
                                                 item.id?.let { itemId ->
                                                     viewModel.requestRemoveItem(item.id)
                                                 }
@@ -235,7 +232,7 @@ fun CartScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 @Composable
 fun CartHeader(onBack: () -> Unit) {
     CustomTopAppBar(

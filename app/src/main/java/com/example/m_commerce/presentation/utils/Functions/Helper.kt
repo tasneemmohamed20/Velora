@@ -76,3 +76,14 @@ fun getOrderStatusColors(status: String): Color {
     }
 }
 
+fun formatStreetAndArea(raw: String): String {
+    val parts = raw.split("|").associate {
+        val (key, value) = it.split(":")
+        key to value
+    }
+
+    val street = parts["street"] ?: ""
+    val area = parts["area"] ?: ""
+
+    return "$street St.\n$area"
+}

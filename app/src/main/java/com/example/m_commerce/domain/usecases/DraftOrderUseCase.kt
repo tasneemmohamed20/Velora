@@ -30,6 +30,4 @@ class DraftOrderUseCase @Inject constructor(private val repository: IDraftOrderR
         billingAddress: BillingAddress
     ) = repository.updateDraftOrderBillingAddress(id, billingAddress)
 
-    suspend fun deleteDraftOrder(id: String): Boolean =
-        repository.deleteDraftOrder(id)
 }

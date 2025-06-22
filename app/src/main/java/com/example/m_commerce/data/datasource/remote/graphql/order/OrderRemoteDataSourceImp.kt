@@ -1,5 +1,6 @@
 package com.example.m_commerce.data.datasource.remote.graphql.order
 
+import android.util.Log
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.di.AdminApollo
 import com.example.m_commerce.domain.entities.OrderEntity
@@ -8,6 +9,7 @@ import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.entities.UserError
+import com.example.m_commerce.presentation.utils.Functions.formatStreetAndArea
 import com.example.m_commerce.service1.CompleteDraftOrderMutation
 import com.example.m_commerce.service1.GetOrdersByCustomerQuery
 import kotlinx.coroutines.Dispatchers
@@ -21,13 +23,16 @@ class OrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shop
 
 
     override fun getOrdersByCustomerId(customerId: String): Flow<List<OrderEntity>> = flow{
-        val id = "customer_id:$customerId"
+
         val response = withContext(Dispatchers.IO){
             shopifyService.query(GetOrdersByCustomerQuery(customerId)).execute()
         }
+
+
         val orders = response.data?.orders?.edges?.map {
             it.node
         }?.map { it ->
+
             OrderEntity(
                 id = it.id,
                 name = it.name,
@@ -36,8 +41,8 @@ class OrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shop
                 financialStatus = it.displayFinancialStatus.toString(),
                 fulfillmentStatus = it.displayFulfillmentStatus.toString(),
                 currency = it.totalPriceSet.shopMoney.currencyCode.toString(),
-                phoneNumber = it.shippingAddress?.phone.toString(),
-                address = it.shippingAddress?.address1.toString(),
+                phoneNumber = it.billingAddress?.phone.toString(),
+                address = formatStreetAndArea(it.billingAddress?.address1.toString()),
                 lineItems = it.lineItems.edges.map{it.node}.map{
                     Product(
                         title = it.title,
@@ -61,35 +66,5 @@ class OrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shop
         TODO("Not yet implemented")
     }
 
-    override fun completeDraftOrder(draftOrderId: String): Flow<OrderCreateResponse> = flow {
-        val response = withContext(Dispatchers.IO) {
-            shopifyService.mutation(
-                CompleteDraftOrderMutation(id = draftOrderId)
-            ).execute()
-        }
-
-        val draft = response.data?.draftOrderComplete?.draftOrder
-        val userErrors = response.data?.draftOrderComplete?.userErrors?.map {
-            UserError(
-                field = it.field,
-                message = it.message
-            )
-        } ?: emptyList()
-
-        val completedOrder = draft?.let {
-            OrderEntity(
-                id = it.id,
-                name = it.name,
-                totalPrice = "",
-                createdAt = "",
-                financialStatus = "",
-                fulfillmentStatus = "",
-                currency = "",
-                lineItems = emptyList()
-            )
-        }
-
-        emit(OrderCreateResponse(order = completedOrder, userErrors = userErrors))
-    }
 
 }

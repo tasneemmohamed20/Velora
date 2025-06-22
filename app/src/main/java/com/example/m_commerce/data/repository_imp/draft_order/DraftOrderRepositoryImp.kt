@@ -7,6 +7,7 @@ import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.repository.IDraftOrderRepository
 import com.example.m_commerce.domain.entities.LineItem
+import com.example.m_commerce.domain.entities.OrderCreateResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -42,5 +43,9 @@ class DraftOrderRepositoryImp @Inject constructor(private val remoteDataSource: 
 
     override suspend fun deleteDraftOrder(id: String): Boolean {
         return remoteDataSource.deleteDraftOrder(id)
+    }
+
+    override suspend fun completeDraftOrder(draftOrderId: String): Boolean {
+        return remoteDataSource.completeAndDeleteDraftOrder(draftOrderId)
     }
 }

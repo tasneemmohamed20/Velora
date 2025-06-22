@@ -6,7 +6,3 @@ data class OrderCreateResponse(
 )
 
 
-data class UserError(
-    val field: List<String>?,
-    val message: String
-)

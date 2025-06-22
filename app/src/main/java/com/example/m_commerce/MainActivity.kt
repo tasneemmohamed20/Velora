@@ -59,12 +59,12 @@ import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
-import com.example.m_commerce.presentation.authentication.login.LoginScreen
-import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.cart.CartScreen
-import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.order.order_details.OrderDetails
-import com.example.m_commerce.presentation.order.OrderScreen import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
+import com.example.m_commerce.presentation.payment.checkout.CheckoutScreen
+import com.example.m_commerce.presentation.payment.checkout.PaymentMethod
+import com.example.m_commerce.presentation.payment.payment.PaymentScreen
+import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
@@ -72,13 +72,11 @@ import com.example.m_commerce.presentation.start.StartScreen
 
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
-import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.google.android.gms.maps.model.LatLng
 
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.json.Json
-import kotlin.div
-import kotlin.toString
+
 
 private const val TAG = "MainActivity"
 
@@ -115,7 +113,7 @@ fun MainActivity.MainScreen(){
 
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
-            Log.i(TAG, "MainScreen: route ${destination.route}")
+
             when {
                 destination.route in listOf(
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
@@ -148,8 +146,9 @@ fun MainActivity.MainScreen(){
                     topAppBarTitleState = "Products"
                     showBackButton = true
                 }
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.OrderDetails",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order" -> {
+                destination.route in listOf(
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.OrderDetails",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order") -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Order"
@@ -225,7 +224,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home,
+        startDestination = ScreensRoute.Start,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -267,6 +266,7 @@ fun MainActivity.NavHostSetup(){
                 navArgument("itemsCount") { type = NavType.IntType }
             )
         ) { backStackEntry ->
+
             val itemsJson = backStackEntry.arguments?.getString("items") ?: "[]"
             val totalAmountCents = backStackEntry.arguments?.getInt("totalAmountCents") ?: 0
             val items = Json.decodeFromString<List<OrderItem>>(Uri.decode(itemsJson))
@@ -274,6 +274,7 @@ fun MainActivity.NavHostSetup(){
             val estimatedFee =
                 backStackEntry.arguments?.getString("estimatedFee")?.toDoubleOrNull() ?: 0.0
             val itemsCount = backStackEntry.arguments?.getInt("itemsCount") ?: 0
+
             CheckoutScreen(
                 onBack = { navHostController.popBackStack() },
                 totalPrice = totalAmountCents / 100.0,
@@ -285,12 +286,17 @@ fun MainActivity.NavHostSetup(){
                             navHostController.navigate("payment/$itemsJson/$totalAmountCents")
                         }
 
-                        PaymentMethod.CASH -> {}
+                        PaymentMethod.CASH -> {
+
+                        }
                     }
                 },
                 subtotal = subtotal,
                 estimatedFee = estimatedFee,
                 itemsCount = itemsCount,
+                onOrderCompleted = {
+                    navHostController.navigate(ScreensRoute.Home)
+                }
             )
         }
 
@@ -491,8 +497,10 @@ fun MainActivity.NavHostSetup(){
             PaymentScreen(
                 items = items,
                 totalAmountCents = totalAmountCents,
-                onPaymentComplete = {  },
-                onPaymentError = { }
+                onPaymentComplete = {
+                    navHostController.navigate(ScreensRoute.Home)
+                                    },
+                onPaymentError = { Log.i("PaymentScreen", "onPaymentError: ") }
             )
         }
 

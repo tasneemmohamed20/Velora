@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.order.order_details
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,11 +42,10 @@ import com.example.m_commerce.presentation.utils.theme.primaryBlue
 fun OrderDetails(order: OrderEntity){
 
     val scrollState = rememberScrollState()
-    Log.i("TAG", "OrderDetails: $order ")
     Column(
         modifier = Modifier
             .padding(16.dp)
-            .fillMaxSize()
+            .fillMaxSize().background(color = Color.White)
             .verticalScroll(scrollState)
     ) {
 
@@ -138,7 +138,7 @@ fun OrderDetails(order: OrderEntity){
                horizontalArrangement = Arrangement.SpaceBetween
            ) {
                Text(text = "Subtotal", color = Color.Black.copy(alpha = 0.7f))
-               Text(text = "900 EGP", color = Color.Black.copy(alpha = 0.7f))
+               Text(text = order.totalPrice, color = Color.Black.copy(alpha = 0.7f))
            }
            Spacer(Modifier.height(5.dp))
            Row(
@@ -154,7 +154,7 @@ fun OrderDetails(order: OrderEntity){
                horizontalArrangement = Arrangement.SpaceBetween
            ) {
                Text(text = "Total Cost", fontWeight = FontWeight.W700, color = Color.Black)
-               Text(text = "900 EGP", fontWeight = FontWeight.W700, color = Color.Black)
+               Text(text = order.totalPrice, fontWeight = FontWeight.W700, color = Color.Black)
            }
 
        }

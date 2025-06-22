@@ -2,7 +2,6 @@ package com.example.m_commerce.domain.entities
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 
 @Parcelize
 data class Product(
@@ -12,7 +11,7 @@ data class Product(
     val description: String,
     val price: PriceDetails,
     val images: List<String>,
-    val variants: List<ProductVariant>,
+    val variants: List<ProductVariant> = emptyList(),
     val rating: Float = 0f,
     val quantity: Int = 0,
     val numberOfReviews: Int = 0
@@ -36,7 +35,8 @@ data class ProductVariant(
     val title: String?,
     val availableForSale: Boolean?,
     val selectedOptions: List<SelectedOption?>?
-)
+): Parcelable
+
 
 enum class note {
     cart,
@@ -48,10 +48,6 @@ enum class note {
         }
     }
 }
-    val title: String,
-    val availableForSale: Boolean,
-    val selectedOptions: List<SelectedOption>
-) : Parcelable
 
 @Parcelize
 data class SelectedOption(

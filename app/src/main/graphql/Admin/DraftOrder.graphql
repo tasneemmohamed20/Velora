@@ -418,7 +418,6 @@ mutation updateDraftOrderBillingAddress(
 
 mutation DraftOrderDelete($id: ID!) {
     draftOrderDelete(input: { id: $id }) {
-        deletedId
         userErrors {
             field
             message

@@ -10,12 +10,15 @@ import com.example.m_commerce.domain.entities.DraftOrderLineItemConnection
 import com.example.m_commerce.domain.entities.Image
 import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.entities.LineItem
+import com.example.m_commerce.domain.entities.OrderCreateResponse
+import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.entities.ProductVariant
 import com.example.m_commerce.domain.entities.SelectedOption
 import com.example.m_commerce.domain.entities.UserError
+import com.example.m_commerce.service1.CompleteDraftOrderMutation
 import com.example.m_commerce.service1.DraftOrderCreateMutation
 import com.example.m_commerce.service1.DraftOrderDeleteMutation
 import com.example.m_commerce.service1.DraftOrderUpdateMutation
@@ -399,20 +402,49 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                 ).execute()
             }
 
-            val deletedId = response.data?.draftOrderDelete?.deletedId
-            val success = deletedId != null
-
-            if (!success) {
+            val success = response.data?.draftOrderDelete?.userErrors?.isEmpty() ?: false
                 response.data?.draftOrderDelete?.userErrors?.forEach { error ->
                     Log.e("DraftOrderDelete", "Error: ${error.message}, Field: ${error.field}")
                 }
-            }
-
-            success
+                Log.e("DraftOrderDelete", "${response.data?.draftOrderDelete?.userErrors} + $success" )
+              success
         } catch (e: Exception) {
             Log.e("DraftOrderDelete", "Failed to delete draft order", e)
             false
         }
     }
+
+    override suspend fun completeAndDeleteDraftOrder(draftOrderId: String): Boolean {
+        return try {
+
+            val response = withContext(Dispatchers.IO) {
+                shopifyService.mutation(
+                    CompleteDraftOrderMutation(id = draftOrderId)
+                ).execute()
+            }
+
+            val userErrors = response.data?.draftOrderComplete?.userErrors.orEmpty()
+
+            if (userErrors.isNotEmpty()) {
+                userErrors.forEach {
+                    Log.e("completeDraftOrder", "Error: ${it.message} (Field: ${it.field})")
+                }
+                return false
+            }
+
+            val completedOrderId = response.data?.draftOrderComplete?.draftOrder?.id
+            Log.i("completeDraftOrder", "Successfully completed: $completedOrderId")
+
+
+            val deletionSuccess = deleteDraftOrder(draftOrderId)
+            Log.i("deleteDraftOrder", "Deletion success: $deletionSuccess")
+
+            deletionSuccess
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
 }
 
