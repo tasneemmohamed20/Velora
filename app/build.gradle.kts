@@ -52,7 +52,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    buildFeatures { dataBinding = true }
+//    buildFeatures { dataBinding = true }
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -164,5 +164,5 @@ dependencies {
     // paymob
 
 //    implementation(libs.paymob.sdk)
-    implementation("com.paymob.sdk:Paymob-SDK:1.6.7")
+//    implementation("com.paymob.sdk:Paymob-SDK:1.6.7")
 }
