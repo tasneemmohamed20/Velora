@@ -352,7 +352,10 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
         response.data?.draftOrderUpdate?.userErrors?.firstOrNull()?.let { error ->
             Log.e("DraftOrderUpdate", "Error: ${error.message}")
         }
-        Log.d("DraftOrderUpdate", "Draft order updated successfully ${ response.data?.draftOrderUpdate?.draftOrder?.billingAddress}")
+        Log.d(
+            "DraftOrderUpdate",
+            "Draft order updated successfully ${response.data?.draftOrderUpdate?.draftOrder?.billingAddress}"
+        )
         return (response.data?.draftOrderUpdate?.draftOrder?.let { draft ->
             DraftOrder(
                 id = draft.id,
@@ -382,14 +385,17 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                     )
                 }
             )
-        } ?: Log.e("DraftOrderUpdate", "Draft order update failed ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()}")) as DraftOrder
-
-      override suspend fun deleteDraftOrder(id: String): Boolean {
+        } ?: Log.e(
+            "DraftOrderUpdate",
+            "Draft order update failed ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()}"
+        )) as DraftOrder
+    }
+    override suspend fun deleteDraftOrder(id: String): Boolean {
         return try {
 
-
             val response = withContext(Dispatchers.IO) {
-                shopifyService.mutation(DraftOrderDeleteMutation(id = id)
+                shopifyService.mutation(
+                    DraftOrderDeleteMutation(id = id)
                 ).execute()
             }
 
@@ -409,3 +415,4 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
         }
     }
 }
+
