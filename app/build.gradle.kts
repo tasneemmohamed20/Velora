@@ -165,4 +165,6 @@ dependencies {
 
 //    implementation(libs.paymob.sdk)
 //    implementation("com.paymob.sdk:Paymob-SDK:1.6.7")
+
+    implementation (libs.lottie.compose)
 }

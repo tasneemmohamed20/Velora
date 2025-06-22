@@ -7,7 +7,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -23,10 +22,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.Color
 
 
@@ -61,7 +62,6 @@ fun SearchScreen(
         TextField(
             value = query,
             onValueChange = { viewModel.onQueryChange(it) },
-            placeholder = { Text("Search by Product Name") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -77,6 +77,20 @@ fun SearchScreen(
                 focusedLabelColor = Color.Black,
                 unfocusedLabelColor = Color.Gray
             ),
+            label = {
+                Text("Search by Product Name",
+                    color = Color.Gray.copy(alpha = 0.5f),
+                    style = androidx.compose.material3.MaterialTheme.typography.titleSmall
+                    )
+                },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.Black,
+                    modifier = Modifier.size(30.dp)
+                )
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))

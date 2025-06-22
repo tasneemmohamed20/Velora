@@ -1,6 +1,6 @@
 package com.example.m_commerce.presentation.order.order_details
 
-import android.util.Log
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -138,7 +138,7 @@ fun OrderDetails(order: OrderEntity){
                horizontalArrangement = Arrangement.SpaceBetween
            ) {
                Text(text = "Subtotal", color = Color.Black.copy(alpha = 0.7f))
-               Text(text = order.totalPrice, color = Color.Black.copy(alpha = 0.7f))
+               Text(text = order.totalPrice+"EGP", color = Color.Black.copy(alpha = 0.7f))
            }
            Spacer(Modifier.height(5.dp))
            Row(
@@ -154,7 +154,7 @@ fun OrderDetails(order: OrderEntity){
                horizontalArrangement = Arrangement.SpaceBetween
            ) {
                Text(text = "Total Cost", fontWeight = FontWeight.W700, color = Color.Black)
-               Text(text = order.totalPrice, fontWeight = FontWeight.W700, color = Color.Black)
+               Text(text = order.totalPrice+"EGP", fontWeight = FontWeight.W700, color = Color.Black)
            }
 
        }

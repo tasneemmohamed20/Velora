@@ -1,7 +1,7 @@
 package com.example.m_commerce.presentation.products
 
 import app.cash.turbine.test
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product

@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.usecases.GetCurrencyPrefUseCase
 import com.example.m_commerce.domain.usecases.GetProductsByTypeUseCase
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.ContinuationInterceptor
 
 
 @HiltViewModel

@@ -1,4 +1,4 @@
-package com.example.m_commerce
+package com.example.m_commerce.presentation.utils
 
 sealed class ResponseState {
     data object Loading: ResponseState()

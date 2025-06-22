@@ -3,7 +3,7 @@ package com.example.m_commerce.presentation.authentication.signUp
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest

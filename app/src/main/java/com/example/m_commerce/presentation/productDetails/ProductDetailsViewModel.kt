@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.domain.usecases.GetProductByIdUseCase
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.entities.LineItem
 import com.example.m_commerce.domain.entities.note

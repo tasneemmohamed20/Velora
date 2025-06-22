@@ -2,7 +2,7 @@ package com.example.m_commerce.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.usecases.GetAllProductsUseCase
 import com.example.m_commerce.domain.usecases.GetCurrencyPrefUseCase

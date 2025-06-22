@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,14 +21,12 @@ import com.example.m_commerce.domain.entities.Product
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.ui.tooling.preview.Preview
 
 
 val TAG = "ProductDetailsScreen"
@@ -56,7 +53,13 @@ fun ProductDetailsScreen(
 
 
     when (productState) {
-        is ResponseState.Loading -> CircularProgressIndicator()
+        is ResponseState.Loading ->  Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator()
+        }
         is ResponseState.Failure -> Text("Failed to load product")
         is ResponseState.Success -> {
             val product = (productState as ResponseState.Success).data as Product
@@ -185,7 +188,7 @@ fun ProductDetailsScreen(
                                 text = "ADD TO CART",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.ExtraBold
-                                )
+                                ),
                             )
                         }
                     }

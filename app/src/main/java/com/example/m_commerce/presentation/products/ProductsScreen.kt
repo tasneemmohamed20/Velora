@@ -1,7 +1,6 @@
 
 package com.example.m_commerce.presentation.products
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -42,11 +41,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
-import kotlin.math.log
 
 @Composable
 fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,onProductClick: (String) -> Unit){
@@ -129,9 +127,7 @@ fun ProductCard(
 
     val itemWidth = (screenWidth - 32.dp) / 2
 
-    Log.i("TAG", "ProductCard: $productDetails")
-    val variantId = productDetails.variants.firstOrNull()?.id ?: "No variant ID"
-    Log.i("TAG", "ProductCard: $variantId")
+
     Card(
         modifier = modifier
             .width(itemWidth)
@@ -209,7 +205,7 @@ fun FilterChips(modifier: Modifier = Modifier, viewModel: ProductsViewModel){
                 shape = RoundedCornerShape(50),
                 border = if (isSelected) BorderStroke(2.dp, Color.Black) else BorderStroke(0.dp, Color.Transparent),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.Transparent,
+                    containerColor = WhiteSmoke,
                     contentColor = Color.Black
                 ),
             ){

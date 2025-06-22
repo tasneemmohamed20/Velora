@@ -4,11 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.Customer
-import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.domain.usecases.CompleteDraftOrder
 import com.example.m_commerce.domain.usecases.CustomerUseCase
 import com.example.m_commerce.domain.usecases.DraftOrderUseCase
@@ -18,10 +16,7 @@ import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
-import okhttp3.Response
 import javax.inject.Inject
 
 

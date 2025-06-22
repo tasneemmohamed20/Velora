@@ -2,7 +2,7 @@ package com.example.m_commerce.presentation.products
 
 import androidx.test.filters.MediumTest
 import app.cash.turbine.test
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.data.datasource.remote.grapghql.product.FakeProductRemoteDataSource
 import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
 import com.example.m_commerce.domain.entities.Product

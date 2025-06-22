@@ -2,9 +2,9 @@
 package com.example.m_commerce.presentation.order.orders_list
 
 import  android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +20,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.Button
+
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,12 +35,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.R
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.Functions.formatShopifyDate
 import com.example.m_commerce.presentation.utils.Functions.getOrderStatusColors
@@ -47,7 +53,11 @@ import com.example.m_commerce.presentation.utils.theme.primaryBlue
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderScreen(viewModel: OrderViewModel = hiltViewModel(), onOrderClicked: (OrderEntity) -> Unit){
+fun OrderScreen(
+    viewModel: OrderViewModel = hiltViewModel(),
+    onOrderClicked: (OrderEntity) -> Unit,
+    onExploreProductsClicked: () -> Unit,
+    ){
 
 
     LaunchedEffect(Unit){
@@ -72,8 +82,49 @@ fun OrderScreen(viewModel: OrderViewModel = hiltViewModel(), onOrderClicked: (Or
             }
             is ResponseState.Success -> {
                 val ordersData = ordersState.data as List<OrderEntity>
+                if(!ordersData.isNotEmpty()){
+                    OrderList(ordersData, onOrderClicked)
+                }else{
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                        Image(painter = painterResource(id = R.drawable.no_order), contentDescription = "No Orders")
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "No order placed yet",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.Black,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "You have not placed and order yet. Place add items to your cart and checkout when you are ready",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center,
+                            maxLines = 3
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = onExploreProductsClicked,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = primaryBlue,
+                                contentColor = Color.White
+                            )
+                        ){
+                            Text(
+                                text = "Explore Products",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                    }
+                }
 
-                OrderList(ordersData, onOrderClicked)
             }
         }
     }

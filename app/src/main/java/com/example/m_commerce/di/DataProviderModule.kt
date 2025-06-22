@@ -16,6 +16,7 @@ import retrofit2.Retrofit
 import javax.inject.Singleton
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.data.datasource.remote.restful.PaymobRetrofitHelper
+import com.example.m_commerce.presentation.utils.ConnectivityHelper
 
 
 @Module
@@ -64,5 +65,11 @@ object DataProviderModule {
     @Singleton
     fun providePaymobRetrofit(): Retrofit {
         return PaymobRetrofitHelper.getRetrofit()
+    }
+
+    @Provides
+    @Singleton
+    fun provideConnectivityHelper(@ApplicationContext context: Context): ConnectivityHelper {
+        return ConnectivityHelper(context)
     }
 }
