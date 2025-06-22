@@ -191,6 +191,12 @@ query GetDraftOrders(
                     }
                 }
             }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
+            }
         }
     }
 }
@@ -288,6 +294,119 @@ mutation DraftOrderUpdate(
                         }
                     }
                 }
+            }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+
+mutation updateDraftOrderBillingAddress(
+    $id: ID!,
+    $billingAddress: MailingAddressInput
+){
+    draftOrderUpdate(
+        id: $id
+        input: {
+            billingAddress: $billingAddress
+        }
+    ){
+        draftOrder {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                        variants(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    availableForSale
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
             }
         }
         userErrors {

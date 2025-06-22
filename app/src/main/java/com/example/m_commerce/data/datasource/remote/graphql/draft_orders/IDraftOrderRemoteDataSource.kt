@@ -1,9 +1,11 @@
 package com.example.m_commerce.data.datasource.remote.graphql.draft_orders
 
 import com.apollographql.apollo.api.Optional
+import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.entities.LineItem
+import com.example.m_commerce.service1.UpdateDraftOrderBillingAddressMutation
 import kotlinx.coroutines.flow.Flow
 
 interface IDraftOrderRemoteDataSource {
@@ -19,6 +21,11 @@ interface IDraftOrderRemoteDataSource {
 
     suspend fun updateDraftOrder(
         id: String,
-        lineItems: List<Item>,
+        lineItems: List<Item>
+    ): DraftOrder
+
+    suspend fun updateDraftOrderBillingAddress(
+        id: String,
+        billingAddress: BillingAddress
     ): DraftOrder
 }

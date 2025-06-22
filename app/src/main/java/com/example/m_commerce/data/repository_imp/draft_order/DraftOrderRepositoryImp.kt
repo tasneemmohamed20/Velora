@@ -2,6 +2,7 @@ package com.example.m_commerce.data.repository_imp.draft_order
 
 import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.data.datasource.remote.graphql.draft_orders.IDraftOrderRemoteDataSource
+import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import com.example.m_commerce.domain.repository.IDraftOrderRepository
@@ -30,4 +31,13 @@ class DraftOrderRepositoryImp @Inject constructor(private val remoteDataSource: 
     ): DraftOrder {
         return remoteDataSource.updateDraftOrder(id, lineItems)
     }
+
+    override suspend fun updateDraftOrderBillingAddress(
+        id: String,
+        billingAddress: BillingAddress
+    ): DraftOrder {
+        return remoteDataSource.updateDraftOrderBillingAddress(id, billingAddress)
+    }
+
+
 }

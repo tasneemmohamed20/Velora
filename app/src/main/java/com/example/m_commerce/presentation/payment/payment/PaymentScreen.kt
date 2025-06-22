@@ -1,5 +1,6 @@
-package com.example.m_commerce.presentation.payment
+package com.example.m_commerce.presentation.payment.payment
 
+import android.net.Uri
 import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -22,7 +23,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.m_commerce.domain.entities.payment.OrderItem
-import com.example.m_commerce.presentation.utils.Constants
 
 
 @Composable
@@ -71,7 +71,7 @@ fun PaymentScreen(
                                     Log.d("PaymentScreen", "URL: $url")
 
                                     if (url.contains("accept.paymobsolutions.com/api/acceptance/post_pay")) {
-                                        val uri = android.net.Uri.parse(url)
+                                        val uri = Uri.parse(url)
                                         val isSuccess = uri.getQueryParameter("success") == "true"
                                         val txnResponse = uri.getQueryParameter("txn_response_code")
 

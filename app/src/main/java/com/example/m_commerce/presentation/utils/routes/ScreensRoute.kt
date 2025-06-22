@@ -62,4 +62,13 @@ sealed class ScreensRoute {
         val items: ArrayList<OrderItem>,
         val totalAmountCents: Int
     ) : ScreensRoute()
+
+    @Serializable
+    data class Checkout(
+        val items: ArrayList<OrderItem>,
+        val totalAmountCents: Int,
+        val subTotal : Double,
+        val estimatedFee : Double,
+        val itemsCount: Int
+    ) : ScreensRoute()
 }
