@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -44,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -85,15 +88,21 @@ fun CartScreen(
     }
 
     if (itemToRemove != null) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { itemToRemove = null },
             title = { Text("Remove Item") },
             text = { Text("Are you sure you want to remove this item from your cart?") },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.removeItem(itemToRemove!!)
-                    itemToRemove = null
-                }) { Text("Remove") }
+                TextButton(
+                    onClick = {
+                        if (itemToRemove == "ALL") {
+                            viewModel.deleteDraftOrder()
+                        } else {
+                            viewModel.removeItem(itemToRemove!!)
+                        }
+                        itemToRemove = null
+                    }
+                ) { Text("Remove") }
             },
             dismissButton = {
                 TextButton(onClick = { itemToRemove = null }) { Text("Cancel") }
@@ -112,17 +121,36 @@ fun CartScreen(
             )
         }
         is ResponseState.Failure -> {
-            Box(
-                modifier = Modifier
-                    .background(Color.White)
+            Column(
+                Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .background(Color.White)
             ) {
-                Text(
-                    text = "Your cart is empty",
-                    textAlign = TextAlign.Center
-                )
+                CartHeader(onBack)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Empty Cart",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .padding(8.dp),
+                            colorFilter = ColorFilter.tint(Color.Blue)
+                        )
+                        Text(
+                            text = "Your cart is empty",
+                            textAlign = TextAlign.Center,
+                            color = Color.Blue
+                        )
+                    }
+                }
             }
         }
 
@@ -161,7 +189,6 @@ fun CartScreen(
                                 }
                             } else {
                                 items(nodes) { item ->
-
                                     CartItemRow(
                                         cartItem = CartItem(
                                             name = item.title ?: item.name ?: "Unknown Item",
@@ -184,14 +211,24 @@ fun CartScreen(
                                                     viewModel.updateQuantity(itemId, newQty)
                                                 }
                                             } else {
+                                                if ((itemsCount ?: 0) > 1)  {
+                                                item.id?.let { itemId ->
+                                                    viewModel.requestRemoveItem(item.id)
+                                                }
+                                                }else {
+                                                itemToRemove = "ALL"
+                                            }
+                                            }
+                                        },
+                                        onRemove = {
+                                            if ((itemsCount ?: 0) > 1)  {
                                                 item.id?.let { itemId ->
                                                     viewModel.requestRemoveItem(item.id)
                                                 }
                                             }
-                                        },
-                                        onRemove = {
-                                            item.id?.let { itemId ->
-                                                viewModel.requestRemoveItem(item.id)
+                                            else {
+//                                                viewModel.deleteDraftOrder()
+                                                itemToRemove = "ALL"
                                             }
                                         }
                                     )

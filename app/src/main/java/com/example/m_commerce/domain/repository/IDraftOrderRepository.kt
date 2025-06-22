@@ -16,7 +16,7 @@ interface IDraftOrderRepository {
         quantity: Int
     ): DraftOrder
 
-    suspend fun getDraftOrderById(id: String): Flow<DraftOrder>?
+    suspend fun getDraftOrderById(id: String): Flow<List<DraftOrder>>?
 
     suspend fun updateDraftOrder(
         id: String,

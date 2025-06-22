@@ -22,7 +22,7 @@ class DraftOrderRepositoryImp @Inject constructor(private val remoteDataSource: 
         return remoteDataSource.createDraftOrder(lineItems, variantId, note, email, quantity)
     }
 
-    override suspend fun getDraftOrderById(id: String): Flow<DraftOrder>? {
+    override suspend fun getDraftOrderById(id: String): Flow<List<DraftOrder>>? {
         return remoteDataSource.getDraftOrderById(id)
     }
 

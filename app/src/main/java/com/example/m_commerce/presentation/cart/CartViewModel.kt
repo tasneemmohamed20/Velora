@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.volley.VolleyLog.e
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.DraftOrder
@@ -55,12 +56,25 @@ class CartViewModel @Inject constructor(
     private suspend fun getDraftOrder(customerId: String, noteType: note) {
         try {
             draftOrderUseCase(customerId)?.collect { draftOrders ->
-                if (draftOrders.note2 == noteType.name) {
-                    currentOrder = draftOrders
-                    _cartState.value = ResponseState.Success(draftOrders)
-                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
-                    Log.d("CartViewModel", "Found cart: ${draftOrders.note2}")
-                    Log.d("CartViewModel", "Found cart: ${draftOrders}")
+//                if (draftOrders.note2 == noteType.name) {
+//                    currentOrder = draftOrders
+//                    _cartState.value = ResponseState.Success(draftOrders)
+//                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
+//                    Log.d("CartViewModel", "Found cart: ${draftOrders.note2}")
+//                    Log.d("CartViewModel", "Found cart: ${draftOrders}")
+//                } else{
+////                    _cartState.value = ResponseState.Failure(Exception("Cart not found"))
+//                }
+                draftOrders.find { it.note2 == "cart" }?.let { draftOrder ->
+                    currentOrder = draftOrder
+                    _cartState.value = ResponseState.Success(draftOrder)
+                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrder.id.toString())
+                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrder.note2}")
+                    Log.d("LoginViewModel", "Draft order: ${draftOrder}")
+                    Log.d("LoginViewModel", "Draft order ID: ${draftOrder.id}")
+                } ?: run {
+                    _cartState.value = ResponseState.Failure(Exception("Cart not found"))
+                    Log.d("LoginViewModel", "Cart not found")
                 }
             }
         } catch (e: Exception) {
@@ -141,6 +155,15 @@ class CartViewModel @Inject constructor(
     fun requestRemoveItem(variantId: String) {
         viewModelScope.launch {
             _removeItemRequest.emit(variantId)
+        }
+    }
+
+    fun deleteDraftOrder() {
+        viewModelScope.launch {
+        val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
+
+        draftOrderUseCase.deleteDraftOrder(draftOrderId)
+            _cartState.value = ResponseState.Failure(Exception("Cart not found"))
         }
     }
 }

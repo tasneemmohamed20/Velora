@@ -57,17 +57,30 @@ class ProductDetailsViewModel @Inject constructor(
         try {
             withContext(Dispatchers.IO) {
                 draftOrderUseCase(customerId)?.collect { draftOrders ->
-                    if (draftOrders.note2 == noteType.name) {
-                        _cartState.value = ResponseState.Success(draftOrders)
+//                    if (draftOrders.note2 == noteType.name) {
+//                        _cartState.value = ResponseState.Success(draftOrders)
+//                        hasExistingOrder = true
+//                        currentLineItems = draftOrders.lineItems?.nodes?.filterNotNull()?.map { node ->
+//                            LineItem(
+//                                variantId = node.variantId ?: "",
+//                                quantity = node.quantity ?: 1
+//                            )
+//                        } ?: emptyList()
+//
+//                        Log.d("ProductDetailsViewModel", "Existing cart found: $currentLineItems")
+//                    }
+                    draftOrders.find { it.note2 == noteType.name }?.let { draftOrder ->
+                        _cartState.value = ResponseState.Success(draftOrder)
                         hasExistingOrder = true
-                        currentLineItems = draftOrders.lineItems?.nodes?.filterNotNull()?.map { node ->
+                        currentLineItems = draftOrder.lineItems?.nodes?.filterNotNull()?.map { node ->
                             LineItem(
                                 variantId = node.variantId ?: "",
                                 quantity = node.quantity ?: 1
                             )
                         } ?: emptyList()
-
                         Log.d("ProductDetailsViewModel", "Existing cart found: $currentLineItems")
+                    } ?: run {
+                        _cartState.value = ResponseState.Failure(Exception("Cart not found"))
                     }
                 }
             }
