@@ -132,10 +132,10 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
         return draftOrder
     }
 
-    override suspend fun getDraftOrderById(id: String): Flow<DraftOrder>? = flow {
+    override suspend fun getDraftOrderById(id: String): Flow<List<DraftOrder>>? = flow {
         val response = shopifyService.query(GetDraftOrdersQuery(Optional.present(id))).execute()
 
-        val draftOrder = response.data?.draftOrders?.nodes?.firstOrNull()?.let { draft ->
+        val draftOrder = response.data?.draftOrders?.nodes?.map { draft ->
             DraftOrder(
                 acceptAutomaticDiscounts = draft.acceptAutomaticDiscounts,
                 allowDiscountCodesInCheckout = draft.allowDiscountCodesInCheckout,
@@ -393,6 +393,7 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
             "Draft order update failed ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()}"
         )) as DraftOrder
     }
+
     override suspend fun deleteDraftOrder(id: String): Boolean {
         return try {
 

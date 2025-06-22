@@ -157,11 +157,11 @@ class LoginViewModel  @Inject constructor(
             Log.d("LoginViewModel", "Fetching draft orders for customer ID: $customerId")
             draftOrderUseCase(customerId)?.collect { draftOrders ->
                 Log.d("LoginViewModel", "Draft orders: ${draftOrders}")
-                if (draftOrders.note2 == "cart") {
+                draftOrders.find { it.note2 == "cart" }?.let { draftOrder ->
                     hasExistingOrder = true
-                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrders.note2}")
-                    Log.d("LoginViewModel", "Draft order ID: ${draftOrders.id}")
-                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
+                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrder.note2}")
+                    Log.d("LoginViewModel", "Draft order ID: ${draftOrder.id}")
+                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrder.id.toString())
                 }
             }
         } catch (e: Exception) {
