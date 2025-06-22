@@ -397,7 +397,6 @@ private fun VariantOptionsSection(
     }
 }
 
-
 @Composable
 private fun ProductBottomSheet(
     product: Product,

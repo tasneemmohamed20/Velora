@@ -2,9 +2,9 @@ package com.example.m_commerce.data.datasource.remote.graphql.draft_orders
 
 import android.util.Log
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.di.AdminApollo
+import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.DraftOrderLineItemConnection
 import com.example.m_commerce.domain.entities.Image
@@ -20,13 +20,14 @@ import com.example.m_commerce.service1.DraftOrderCreateMutation
 import com.example.m_commerce.service1.DraftOrderDeleteMutation
 import com.example.m_commerce.service1.DraftOrderUpdateMutation
 import com.example.m_commerce.service1.GetDraftOrdersQuery
+import com.example.m_commerce.service1.UpdateDraftOrderBillingAddressMutation
 import com.example.m_commerce.service1.type.DraftOrderLineItemInput
+import com.example.m_commerce.service1.type.MailingAddressInput
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.toString
 
 
 class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shopifyService: ApolloClient) : IDraftOrderRemoteDataSource{
@@ -231,8 +232,15 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                         }
                     )
                 },
-
-            )
+                billingAddress = draft.billingAddress?.let { address ->
+                    BillingAddress(
+                        address1 = address.address1,
+                        address2 = address.address2,
+                        city = address.city,
+                        phone = address.phone
+                    )
+                },
+                )
         } ?: throw Exception("Failed to fetch the Draft Order: No response data")
 
         emit(draftOrder)
@@ -261,7 +269,6 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
         id: String,
         lineItems: List<Item>
     ): DraftOrder {
-
 
         val draftOrderLineItems = lineItems.map { item ->
             val sanitizedVariantId = sanitizeVariantId(item.variantID)
@@ -309,12 +316,75 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
                             )
                         } ?: emptyList()
                     )
+                },
+                billingAddress = draft.billingAddress?.let { address ->
+                    BillingAddress(
+                        address1 = address.address1,
+                        address2 = address.address2,
+                        city = address.city,
+                        phone = address.phone
+                    )
                 }
             )
         } ?: throw Exception("Failed to update draft order: ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()?.message ?: "No response data"}")
     }
 
-    override suspend fun deleteDraftOrder(id: String): Boolean {
+    override suspend fun updateDraftOrderBillingAddress(
+        id: String,
+        billingAddress: BillingAddress
+    ): DraftOrder {
+        val response = withContext(Dispatchers.IO) {
+            shopifyService.mutation(
+                UpdateDraftOrderBillingAddressMutation(
+                    id = id,
+                    billingAddress = Optional.presentIfNotNull(billingAddress?.let { billingAddress ->
+                        MailingAddressInput(
+                            address1 = Optional.Present(billingAddress.address1),
+                            address2 = Optional.Present(billingAddress.address2),
+                            city = Optional.Present(billingAddress.city),
+                            phone = Optional.Present(billingAddress.phone),
+                        )
+                    })
+                )
+            ).execute()
+        }
+
+        response.data?.draftOrderUpdate?.userErrors?.firstOrNull()?.let { error ->
+            Log.e("DraftOrderUpdate", "Error: ${error.message}")
+        }
+        Log.d("DraftOrderUpdate", "Draft order updated successfully ${ response.data?.draftOrderUpdate?.draftOrder?.billingAddress}")
+        return (response.data?.draftOrderUpdate?.draftOrder?.let { draft ->
+            DraftOrder(
+                id = draft.id,
+                name = draft.name,
+                status = draft.status?.toString(),
+                totalPrice = draft.totalPrice?.toString()?.toDoubleOrNull(),
+                updatedAt = draft.updatedAt?.toString(),
+                lineItems = draft.lineItems?.let { lineItems ->
+                    DraftOrderLineItemConnection(
+                        nodes = lineItems.nodes?.map { node ->
+                            LineItem(
+                                id = node.id,
+                                title = node.title,
+                                quantity = node.quantity,
+                                requiresShipping = node.requiresShipping,
+                                taxable = node.taxable
+                            )
+                        } ?: emptyList()
+                    )
+                },
+                billingAddress = draft.billingAddress?.let { address ->
+                    BillingAddress(
+                        address1 = address.address1,
+                        address2 = address.address2,
+                        city = address.city,
+                        phone = address.phone
+                    )
+                }
+            )
+        } ?: Log.e("DraftOrderUpdate", "Draft order update failed ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()}")) as DraftOrder
+
+      override suspend fun deleteDraftOrder(id: String): Boolean {
         return try {
 
 

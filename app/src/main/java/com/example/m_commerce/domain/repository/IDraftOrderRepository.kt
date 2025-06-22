@@ -1,5 +1,6 @@
 package com.example.m_commerce.domain.repository
 
+import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.domain.entities.Item
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +19,12 @@ interface IDraftOrderRepository {
 
     suspend fun updateDraftOrder(
         id: String,
-        lineItems: List<Item>,
+        lineItems: List<Item>
+    ): DraftOrder
+
+    suspend fun updateDraftOrderBillingAddress(
+        id: String,
+        billingAddress: BillingAddress
     ): DraftOrder
 
     suspend fun deleteDraftOrder(id: String): Boolean

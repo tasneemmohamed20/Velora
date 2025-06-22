@@ -9,7 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,10 +32,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,150 +60,15 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import kotlin.compareTo
 import kotlin.text.toInt
 import kotlin.times
-
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun CartHeader(onBack: () -> Unit) {
-    CustomTopAppBar(
-        title = "Cart",
-        onBackClick = onBack,
-    )
-    Spacer(Modifier.height(10.dp))
-}
-
-@Composable
-fun VoucherSection(voucherCode: String, onVoucherChange: (String) -> Unit) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = "Save on your order",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = Color.Black
-        )
-        Spacer(Modifier.height(6.dp))
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
-                .border(1.dp, Color(0xFFECECEC), RoundedCornerShape(12.dp))
-                .padding(horizontal = 10.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_menu_save),
-                contentDescription = null,
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            TextField(
-                value = voucherCode,
-                onValueChange = onVoucherChange,
-                placeholder = { Text("Enter voucher code", color = Color.Gray) },
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.weight(1f)
-            )
-            Button(
-                onClick = { /* Submit voucher */ },
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
-            ) {
-                Text("Submit", color = Color.White, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsCount: Int, totalPrice: Double) {
-    var item : String? = null
-    item = if (itemsCount > 1 ){
-        "items"
-    } else {
-        "item"
-    }
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = "Payment summary",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = Color.Black
-        )
-        Spacer(Modifier.height(8.dp))
-        SummaryRow("Subtotal - $itemsCount items", "EGP %.2f".format(subtotal))
-        SummaryRow("Shipping fee", "FREE")
-        SummaryRow("Estimated fee", "EGP %.2f".format(estimatedFee))
-        HorizontalDivider(Modifier.padding(8.dp))
-        SummaryRow("Total price", "EGP %.2f".format(totalPrice))   }
-}
-
-@Composable
-fun BottomButtons(onAddItems: () -> Unit, onCheckout: () -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        OutlinedButton(
-            onClick = onAddItems,
-            shape = RoundedCornerShape(32.dp),
-            border = BorderStroke(1.dp, Color.Blue),
-            modifier = Modifier
-                .weight(1f)
-                .height(54.dp)
-        ) {
-            Text(
-                "Add items",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-        }
-        Spacer(Modifier.width(16.dp))
-        Button(
-            onClick = onCheckout,
-            shape = RoundedCornerShape(32.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-            modifier = Modifier
-                .weight(1f)
-                .height(54.dp)
-        ) {
-            Text(
-                "Checkout",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CartScreen(
     onBack: () -> Unit,
-    onAddItems:() -> Unit,
-    onCheckout:(order:DraftOrder, total : Int) -> Unit,
+    onCheckout:(order:DraftOrder, total : Int, subtotal: Double?, estimatedFee: Double?, itemsCount: Int?) -> Unit,
     viewModel: CartViewModel = hiltViewModel(),
     modifier: Modifier = Modifier.background(Color.White)
 ) {
@@ -277,7 +140,7 @@ fun CartScreen(
             ) {
                 CartHeader(onBack)
 
-                LazyColumn {
+                LazyColumn(modifier = Modifier.weight(1f)) {
                     when (val order = draftOrder) {
                         is DraftOrder -> {
                             val nodes = order.lineItems?.nodes ?: emptyList()
@@ -342,8 +205,6 @@ fun CartScreen(
                     }
 
                     item { Spacer(Modifier.height(18.dp)) }
-                    item { VoucherSection(voucherCode) { voucherCode = it } }
-                    item { Spacer(Modifier.height(18.dp)) }
                     item {
                         PaymentSummarySection(
                             subtotal = subtotal ?: 0.0,
@@ -353,24 +214,100 @@ fun CartScreen(
                         )
                     }
                     item { Spacer(Modifier.height(16.dp)) }
-                    item {
-                        BottomButtons(
-                            onAddItems = onAddItems,
-                            onCheckout = {
-                                when (val state = cartState) {
-                                    is ResponseState.Success -> {
-                                        val order = state.data as DraftOrder
-                                        // Convert to cents and provide default value of 0 if null
-                                        val totalAmountCents = (order.totalPrice?.times(100))?.toInt() ?: 0
-                                        onCheckout(order, totalAmountCents)
-                                    }
-                                    else -> {}
-                                }
-                            }
-                        )
-                    }
-                    item { Spacer(Modifier.height(8.dp)) }
                 }
+                BottomButtons(
+                    onCheckout = {
+                        when (val state = cartState) {
+                            is ResponseState.Success -> {
+                                val order = state.data as DraftOrder
+                                val totalAmountCents = (order.totalPrice?.times(100))?.toInt() ?: 0
+                                val subtotal = order.subtotalPrice
+                                val estimatedFee = order.totalTax
+                                val itemsCount = order.totalQuantityOfLineItems
+                                onCheckout(order, totalAmountCents, subtotal, estimatedFee, itemsCount)
+                            }
+                            else -> {}
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun CartHeader(onBack: () -> Unit) {
+    CustomTopAppBar(
+        title = "Cart",
+        onBackClick = onBack,
+    )
+    Spacer(Modifier.height(10.dp))
+}
+
+@Composable
+fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsCount: Int, totalPrice: Double) {
+    var item : String? = null
+    item = if (itemsCount > 1 ){
+        "items"
+    } else {
+        "item"
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = "Payment summary",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Color.Black
+        )
+        Spacer(Modifier.height(8.dp))
+        SummaryRow("Subtotal - $itemsCount items", "EGP %.2f".format(subtotal))
+        SummaryRow("Shipping fee", "FREE")
+        SummaryRow("Estimated fee", "EGP %.2f".format(estimatedFee))
+        HorizontalDivider(Modifier.padding(8.dp))
+        SummaryRow("Total price", "EGP %.2f".format(totalPrice))   }
+}
+
+@Composable
+fun BottomButtons(onCheckout: () -> Unit, isEnabled: Boolean = true) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(90.dp),
+        shadowElevation = 16.dp,
+        tonalElevation = 8.dp,
+        color = Color.White,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = onCheckout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Blue,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                ),
+                enabled = isEnabled
+            ) {
+                Text(
+                    "Checkout",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
         }
     }

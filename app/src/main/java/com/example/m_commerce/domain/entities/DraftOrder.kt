@@ -39,12 +39,19 @@ data class DraftOrder(
     val updatedAt: String? = null,
     val visibleToCustomer: Boolean? = null,
     val userErrors: List<UserError>? = null,
-    val lineItems: DraftOrderLineItemConnection? = null
+    val lineItems: DraftOrderLineItemConnection? = null,
+    val billingAddress: BillingAddress? = null
 
 )
 
 data class DraftOrderLineItemConnection(
     val nodes: List<LineItem>? = null
+)
+data class BillingAddress(
+    val address1: String? = null,
+    val address2: String? = null,
+    val city: String? = null,
+    val phone: String? = null,
 )
 
 data class LineItem(

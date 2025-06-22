@@ -1,4 +1,4 @@
-package com.example.m_commerce.presentation.payment
+package com.example.m_commerce.presentation.payment.payment
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
