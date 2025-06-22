@@ -1,7 +1,10 @@
 package com.example.m_commerce.presentation.utils.routes
 
 import com.example.m_commerce.domain.entities.OrderEntity
+import android.net.Uri
+import com.example.m_commerce.domain.entities.payment.OrderItem
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Serializable
 sealed class ScreensRoute {
@@ -58,4 +61,19 @@ sealed class ScreensRoute {
 
     @Serializable
     class ProductDetails(val productId: String): ScreensRoute()
+
+    @Serializable
+    data class Payment(
+        val items: ArrayList<OrderItem>,
+        val totalAmountCents: Int
+    ) : ScreensRoute()
+
+    @Serializable
+    data class Checkout(
+        val items: ArrayList<OrderItem>,
+        val totalAmountCents: Int,
+        val subTotal : Double,
+        val estimatedFee : Double,
+        val itemsCount: Int
+    ) : ScreensRoute()
 }

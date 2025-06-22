@@ -1,5 +1,6 @@
 package com.example.m_commerce.presentation.productDetails
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,14 +29,25 @@ import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.ui.tooling.preview.Preview
 
 
+val TAG = "ProductDetailsScreen"
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsScreen(
     productId: String,
     onBack: () -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel()
 ) {
+
+    val bottomSheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedVariantId by remember { mutableStateOf<String?>(null) }
+    var selectedColor by remember { mutableStateOf<String?>(null) }
+    var selectedSize by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
     }
@@ -48,6 +60,27 @@ fun ProductDetailsScreen(
         is ResponseState.Failure -> Text("Failed to load product")
         is ResponseState.Success -> {
             val product = (productState as ResponseState.Success).data as Product
+            Log.d(TAG, "Product: ${product.id}")
+
+            if (showBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showBottomSheet = false },
+                    sheetState = bottomSheetState
+                ) {
+                    ProductBottomSheet(
+                        product = product,
+                        selectedColor = selectedColor,
+                        selectedSize = selectedSize,
+                        onConfirm = { quantity ->
+                            selectedVariantId?.let { variantId ->
+                                viewModel.addToCart(variantId, quantity)
+                                Log.d(TAG, "Added to cart with variant ID: $variantId, quantity: $quantity")
+                            }
+                            showBottomSheet = false
+                        }
+                    )
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -59,7 +92,6 @@ fun ProductDetailsScreen(
                     urls = product.images,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
@@ -69,46 +101,23 @@ fun ProductDetailsScreen(
                     )
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Row {
-                        repeat(5) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Rating",
-                                tint = Color(0xFFFFC107)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Reviews",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    TextButton(onClick = { }) {
-                        Text("View More")
-                    }
-                }
+                Text(
+                    text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 VariantOptionsSection(
                     variants = product.variants,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    onVariantSelected = { variantId ->
+                        selectedVariantId = variantId
+                    },
+                    selectedColor = selectedColor,
+                    selectedSize = selectedSize,
+                    onColorSelected = { color -> selectedColor = color },
+                    onSizeSelected = { size -> selectedSize = size }
                 )
                 Text(
                     text = "Description",
@@ -155,7 +164,12 @@ fun ProductDetailsScreen(
                         }
 
                         Button(
-                            onClick = {},
+                            onClick = {
+                                Log.d(TAG, "Selected Variant ID: $selectedVariantId")
+                                if (selectedVariantId != null) {
+                                    showBottomSheet = true
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                                 .height(52.dp),
@@ -225,38 +239,137 @@ private fun ImageCarousel(urls: List<String>, modifier: Modifier = Modifier) {
 }
 
 
+//@Composable
+//private fun VariantOptionsSection(
+//    variants: List<ProductVariant>,
+//    modifier: Modifier = Modifier
+//) {
+//    val colorOptions = variants
+//        .flatMap { it.selectedOptions }
+//        .filter { it.name.equals("Color", ignoreCase = true) }
+//        .map { it.value }
+//        .distinct()
+//
+//    val sizeOptions = variants
+//        .flatMap { it.selectedOptions }
+//        .filter { it.name.equals("Size", ignoreCase = true) }
+//        .map { it.value }
+//        .distinct()
+//
+//    Column(modifier = modifier) {
+//        if (colorOptions.isNotEmpty()) {
+//            Text(
+//                text = "Colors",
+//                style = MaterialTheme.typography.titleMedium.copy(
+//                    fontWeight = FontWeight.Bold
+//                )
+//            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//            LazyRow {
+//                items(colorOptions) { color ->
+//                    ElevatedFilterChip(
+//                        selected = false,
+//                        onClick = {},
+//                        label = { Text(color) },
+//                        modifier = Modifier.padding(end = 8.dp)
+//                    )
+//                }
+//            }
+//            Spacer(modifier = Modifier.height(16.dp))
+//        }
+//
+//        if (sizeOptions.isNotEmpty()) {
+//            Text(
+//                text = "Sizes",
+//                style = MaterialTheme.typography.titleMedium.copy(
+//                    fontWeight = FontWeight.Bold
+//                )
+//            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//            LazyRow {
+//                items(sizeOptions) { size ->
+//                    ElevatedFilterChip(
+//                        selected = false,
+//                        onClick = {},
+//                        label = { Text(size) },
+//                        modifier = Modifier.padding(end = 8.dp)
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
 @Composable
 private fun VariantOptionsSection(
     variants: List<ProductVariant>,
-    modifier: Modifier = Modifier
-) {
+    modifier: Modifier = Modifier,
+    onVariantSelected: (String) -> Unit = {},
+    selectedColor: String? = null,
+    selectedSize: String? = null,
+    onColorSelected: (String?) -> Unit,
+    onSizeSelected: (String?) -> Unit
+){
+    var selectedVariantId by remember { mutableStateOf<String?>(null) }
+
     val colorOptions = variants
-        .flatMap { it.selectedOptions }
-        .filter { it.name.equals("Color", ignoreCase = true) }
-        .map { it.value }
+        .flatMap { variant ->
+            variant.selectedOptions?.filterNotNull() ?: emptyList()
+        }
+        .filter { option ->
+            option.name.equals("Color", ignoreCase = true)
+        }
+        .distinctBy { option ->
+            option.value
+        }
+
+    val filteredSizeOptions = variants
+        .filter { variant ->
+            selectedColor == null || variant.selectedOptions?.any { option ->
+                option?.let {
+                    it.name.equals("Color", ignoreCase = true) &&
+                            it.value == selectedColor
+                } ?: false
+            } ?: false
+        }
+        .flatMap { variant ->
+            variant.selectedOptions?.filterNotNull() ?: emptyList()
+        }
+        .filter { option ->
+            option.name.equals("Size", ignoreCase = true)
+        }
+        .map { option ->
+            option.value
+        }
         .distinct()
 
-    val sizeOptions = variants
-        .flatMap { it.selectedOptions }
-        .filter { it.name.equals("Size", ignoreCase = true) }
-        .map { it.value }
-        .distinct()
+    LaunchedEffect(selectedColor, selectedSize) {
+        if (selectedColor != null && selectedSize != null) {
+            val matchingVariant = variants.find { variant ->
+                variant.selectedOptions?.any { it?.name.equals("Color", ignoreCase = true) && it?.value == selectedColor } == true &&
+                        variant.selectedOptions.any { it?.name.equals("Size", ignoreCase = true) && it?.value == selectedSize }
+            }
+            selectedVariantId = matchingVariant?.id
+            selectedVariantId?.let { onVariantSelected(it) }
+        }
+    }
 
     Column(modifier = modifier) {
         if (colorOptions.isNotEmpty()) {
             Text(
                 text = "Colors",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                )
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow {
                 items(colorOptions) { color ->
                     ElevatedFilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text(color) },
+                        selected = selectedColor == color.value,
+                        onClick = {
+                            onColorSelected(if (selectedColor == color.value) null else color.value)
+                            onSizeSelected(null)
+                        },
+                        label = { Text(color.value) },
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 }
@@ -264,19 +377,17 @@ private fun VariantOptionsSection(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        if (sizeOptions.isNotEmpty()) {
+        if (filteredSizeOptions.isNotEmpty()) {
             Text(
                 text = "Sizes",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                )
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow {
-                items(sizeOptions) { size ->
+                items(filteredSizeOptions) { size ->
                     ElevatedFilterChip(
-                        selected = false,
-                        onClick = {},
+                        selected = selectedSize == size,
+                        onClick = { onSizeSelected(if (selectedSize == size) null else size) },
                         label = { Text(size) },
                         modifier = Modifier.padding(end = 8.dp)
                     )
@@ -287,24 +398,109 @@ private fun VariantOptionsSection(
 }
 
 @Composable
-private fun RatingSection(
-    rating: Float,
-    modifier: Modifier = Modifier
+private fun ProductBottomSheet(
+    product: Product,
+    selectedColor: String?,
+    selectedSize: String?,
+    onConfirm: (Int) -> Unit
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+    var quantity by remember { mutableStateOf(1) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
     ) {
-        Row {
-            repeat(5) { index ->
-                val starColor = if (index < rating) Color(0xFFFFC107) else Color.Gray
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Rating",
-                    tint = starColor,
-                    modifier = Modifier.size(20.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(product.images.firstOrNull()),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(MaterialTheme.shapes.small),
+                contentScale = ContentScale.Crop
+            )
+
+            Column {
+                Text(
+                    text = product.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Color: ${selectedColor ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Size: ${selectedSize ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Quantity",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                IconButton(
+                    onClick = { if (quantity > 1) quantity-- },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            CircleShape
+                        )
+                ) {
+                    Text("-", style = MaterialTheme.typography.titleMedium)
+                }
+                Text(
+                    text = quantity.toString(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                IconButton(
+                    onClick = { quantity++ },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            CircleShape
+                        )
+                ) {
+                    Text("+", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { onConfirm(quantity) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+
+        ) {
+            Text("CONFIRM")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
+
+

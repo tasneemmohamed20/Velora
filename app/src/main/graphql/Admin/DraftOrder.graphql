@@ -1,0 +1,427 @@
+mutation DraftOrderCreate(
+    $email: String!,
+    $note: String,
+    $quantity: Int!,
+    $variantId: ID!,
+) {
+    draftOrderCreate(
+        input: {
+            email: $email
+            note: $note
+            lineItems: [
+                {
+                    quantity: $quantity
+                    variantId: $variantId
+                }
+            ]
+        }
+    ) {
+        draftOrder {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                    }
+                    variant {
+                        id
+                    }
+                }
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+
+query GetDraftOrders(
+    $query: String,
+
+) {
+    draftOrders(
+        first: 2,
+        query: $query,
+    ) {
+        nodes {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                        variants(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    availableForSale
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    variant {
+                        id
+                    }
+                }
+            }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
+            }
+        }
+    }
+}
+
+
+mutation DraftOrderUpdate(
+    $id: ID!,
+    $lineItems: [DraftOrderLineItemInput!]!
+) {
+    draftOrderUpdate(
+        id: $id
+        input: {
+            lineItems: $lineItems
+        }
+    ){
+        draftOrder {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                        variants(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    availableForSale
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+
+mutation updateDraftOrderBillingAddress(
+    $id: ID!,
+    $billingAddress: MailingAddressInput
+){
+    draftOrderUpdate(
+        id: $id
+        input: {
+            billingAddress: $billingAddress
+        }
+    ){
+        draftOrder {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                        variants(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    availableForSale
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+
+mutation DraftOrderDelete($id: ID!) {
+    draftOrderDelete(input: { id: $id }) {
+        deletedId
+        userErrors {
+            field
+            message
+        }
+    }
+}

@@ -58,6 +58,7 @@ import com.example.m_commerce.presentation.account.settings.view_model.AddressMa
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
@@ -70,7 +71,8 @@ import kotlinx.coroutines.launch
 fun AddressInfo(
     onBack: () -> Unit,
     onSave: (Address) -> Unit,
-    viewModel: AddressMapViewModel
+    viewModel: AddressMapViewModel,
+    goToMap: () -> Unit = {}
 ) {
     val locationState by viewModel.locationState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -102,7 +104,8 @@ fun AddressInfo(
                     onBack = onBack,
                     onSave = onSave,
                     viewModel = viewModel,
-                    initialAddress = editingAddress
+                    initialAddress = editingAddress,
+                    goToMap = goToMap
                 )
             }
         }
@@ -115,23 +118,60 @@ private fun AddressInfoContent(
     onBack: () -> Unit,
     onSave: (Address) -> Unit,
     viewModel: AddressMapViewModel,
-    initialAddress: Address?
+    initialAddress: Address?,
+    goToMap: () -> Unit = {}
 ){
-    var addressType by remember { mutableStateOf(initialAddress?.type ?: AddressType.HOME) }
-    var buildingName by remember { mutableStateOf(initialAddress?.building ?: "") }
-    var aptNumber by remember { mutableStateOf(initialAddress?.apartment ?: "") }
-    var floor by remember { mutableStateOf(initialAddress?.floor ?: "") }
-    var street by remember { mutableStateOf(initialAddress?.street ?: "") }
-    var additionalDirections by remember { mutableStateOf(initialAddress?.additionalDirections ?: "") }
-    var addressLabel by remember { mutableStateOf(initialAddress?.addressLabel ?: "") }
-
-    val currentLocation by viewModel.selectedLocation.collectAsState()
+    val isAddMode by viewModel.isAddMode.collectAsState()
+    val currentLocation by viewModel.currentLocation.collectAsState()
+    val selectedLocation by viewModel.selectedLocation.collectAsState()
     val address by viewModel.address.collectAsState()
-    var selectedCountry by remember { mutableStateOf("+20") }
-
     val phoneNumber by viewModel.phoneNumber.collectAsState()
     val isPhoneValid by viewModel.isPhoneValid.collectAsState()
+
+    var addressType by remember { mutableStateOf(AddressType.HOME) }
+    var buildingName by remember { mutableStateOf("") }
+    var aptNumber by remember { mutableStateOf("") }
+    var floor by remember { mutableStateOf("") }
+    var street by remember { mutableStateOf("") }
+    var additionalDirections by remember { mutableStateOf("") }
+    var addressLabel by remember { mutableStateOf("") }
     var formattedAddress by remember { mutableStateOf("") }
+    var selectedCountry by remember { mutableStateOf("EG") }
+
+    val mapLocation = if (isAddMode) {
+        selectedLocation ?: currentLocation
+    } else {
+        currentLocation
+    }
+    LaunchedEffect(initialAddress, isAddMode) {
+        if (!isAddMode && initialAddress != null) {
+            addressType = initialAddress.type
+            buildingName = initialAddress.building
+            aptNumber = initialAddress.apartment
+            floor = initialAddress.floor ?: ""
+            street = initialAddress.street
+            additionalDirections = initialAddress.additionalDirections ?: ""
+            addressLabel = initialAddress.addressLabel ?: ""
+        } else {
+            // Add mode - reset fields
+            addressType = AddressType.HOME
+            buildingName = ""
+            aptNumber = ""
+            floor = ""
+            street = ""
+            additionalDirections = ""
+            addressLabel = ""
+
+        }
+    }
+
+    formattedAddress = remember(address) {
+        address.split(",")
+            .filterNot { it.trim().isEmpty() }
+            .take(2)
+            .joinToString(", ")
+            .trim()
+    }
 
     val hasAddressChanged = remember(
         addressType, buildingName, aptNumber, floor, street,
@@ -179,7 +219,7 @@ private fun AddressInfoContent(
                     .height(120.dp)
                     .clip(RoundedCornerShape(20.dp))
             ) {
-                currentLocation?.let { location ->
+                mapLocation?.let { location ->
                     GoogleMap(
                         modifier = Modifier.fillMaxSize(),
                         cameraPositionState = rememberCameraPositionState {
@@ -238,9 +278,28 @@ private fun AddressInfoContent(
                     )
                 }
                 TextButton(
-                    onClick = { onBack() }
+                    onClick = {
+                        if (isAddMode) {
+                            onBack()
+                        } else {
+                            viewModel.storeFormState(
+                                addressType = addressType,
+                                buildingName = buildingName,
+                                aptNumber = aptNumber,
+                                floor = floor,
+                                street = street,
+                                additionalDirections = additionalDirections,
+                                addressLabel = addressLabel
+                            )
+
+                        }
+                    }
                 ) {
+                    if (isAddMode) {
                     Text("Change", color = Color.Blue)
+                    }else{
+                        Text("", color = Color.Blue)
+                    }
                 }
             }
 

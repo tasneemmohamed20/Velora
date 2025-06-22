@@ -12,7 +12,7 @@ data class Product(
     val description: String,
     val price: PriceDetails,
     val images: List<String>,
-    val variants: List<ProductVariant> = emptyList(),
+    val variants: List<ProductVariant>,
     val rating: Float = 0f,
     val quantity: Int = 0,
     val numberOfReviews: Int = 0
@@ -33,6 +33,21 @@ data class Price(
 @Parcelize
 data class ProductVariant(
     val id: String,
+    val title: String?,
+    val availableForSale: Boolean?,
+    val selectedOptions: List<SelectedOption?>?
+)
+
+enum class note {
+    cart,
+    fav;
+
+    companion object {
+        fun get(value: String): note? {
+            return note.entries.find { it.name == value }
+        }
+    }
+}
     val title: String,
     val availableForSale: Boolean,
     val selectedOptions: List<SelectedOption>

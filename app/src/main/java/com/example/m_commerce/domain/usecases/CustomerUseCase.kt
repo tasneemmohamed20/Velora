@@ -9,7 +9,6 @@ class CustomerUseCase @Inject constructor(private val repository: ICustomerRepos
 
     suspend operator fun invoke(
         id: String?,
-        phone: String?,
-        addresses: CustomerAddresses
-    ) = repository.updateCustomerData(id, phone, addresses)
+        addresses: List<CustomerAddresses>
+    ) = repository.updateCustomerData(id, addresses)
 }

@@ -15,7 +15,7 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import javax.inject.Singleton
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-
+import com.example.m_commerce.data.datasource.remote.restful.PaymobRetrofitHelper
 
 
 @Module
@@ -60,5 +60,9 @@ object DataProviderModule {
         return SharedPreferencesHelper(context)
     }
 
-
+    @Provides
+    @Singleton
+    fun providePaymobRetrofit(): Retrofit {
+        return PaymobRetrofitHelper.getRetrofit()
+    }
 }

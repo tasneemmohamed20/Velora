@@ -108,7 +108,8 @@ fun AddressMap(
     onBackClick: () -> Unit = {},
     onConfirmLocation: (String) -> Unit = {},
     viewModel: AddressMapViewModel,
-    onSearchClicked: () -> Unit
+    onSearchClicked: () -> Unit,
+    isFromEdit: Boolean = false
 ) {
     val locationState by viewModel.locationState.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
@@ -166,7 +167,11 @@ fun AddressMap(
         }
 
         BottomBar(
-            onConfirmClick = { onConfirmLocation(address) },
+            onConfirmClick = {
+                currentLocation?.let { location ->
+                    viewModel.confirmSelectedLocation(location)
+                    onConfirmLocation(address)
+                } },
             isEnabled = isMapIdle && address.isNotEmpty()
         )
     }

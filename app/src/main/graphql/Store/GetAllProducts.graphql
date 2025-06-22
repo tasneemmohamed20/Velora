@@ -18,6 +18,11 @@ query GetAllProducts {
                         }
                     }
                 }
+                variants(first: 1) {
+                    nodes {
+                        id
+                    }
+                }
             }
         }
     }

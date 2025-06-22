@@ -33,7 +33,9 @@ class CustomerRemoteDataSourceImp @Inject constructor(@AdminApollo private val s
                     CustomerAddresses(
                         address1 = address.address1,
                         address2 = address.address2,
-                        formatted = address.formatted.toString()
+                        phone = address.phone,
+                        city = address.city,
+                        id = address.id
                     )
                 }
             )
@@ -44,20 +46,18 @@ class CustomerRemoteDataSourceImp @Inject constructor(@AdminApollo private val s
 
     override suspend fun updateCustomerData(
         id: String?,
-        phone: String?,
-        addresses: CustomerAddresses?
+        addresses: List<CustomerAddresses>?
     ): Flow<Customer> = flow {
         val response = withContext(Dispatchers.IO) {
             shopifyService.mutation(CustomerUpdateMutation(
                 input = CustomerInput(
                     id = Optional.present(id),
-                    phone = Optional.presentIfNotNull(phone),
-                    addresses = Optional.presentIfNotNull(addresses?.let { address ->
-                        listOf(
-                            MailingAddressInput(
-                                address1 = Optional.presentIfNotNull(address.address1),
-                                address2 = Optional.presentIfNotNull(address.address2),
-                            )
+                    addresses = Optional.presentIfNotNull(addresses?.map { address ->
+                        MailingAddressInput(
+                            address1 = Optional.presentIfNotNull(address.address1),
+                            address2 = Optional.presentIfNotNull(address.address2),
+                            city = Optional.presentIfNotNull(address.city),
+                            phone = Optional.presentIfNotNull(address.phone)
                         )
                     })
                 )
@@ -75,11 +75,13 @@ class CustomerRemoteDataSourceImp @Inject constructor(@AdminApollo private val s
                     CustomerAddresses(
                         address1 = address.address1,
                         address2 = address.address2,
-                        formatted = address.formatted.toString()
+                        phone = address.phone,
+                        city = address.city,
+                        id = address.id
                     )
                 }
             )
-        } ?: throw Exception("Failed to update customer: No response data")
+        } ?: Customer("", "", "", "", "", null)
 
         emit(customer)
     }

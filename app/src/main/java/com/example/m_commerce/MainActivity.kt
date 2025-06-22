@@ -1,5 +1,6 @@
 package com.example.m_commerce
 
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -37,10 +39,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.toRoute
+import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.home.HomeScreen
@@ -48,13 +53,18 @@ import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.order.orders_list.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
+import com.example.m_commerce.presentation.account.settings.view.AddressInfo
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.authentication.login.LoginScreen
+import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
+import com.example.m_commerce.presentation.cart.CartScreen
+import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.order.order_details.OrderDetails
-import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
+import com.example.m_commerce.presentation.order.OrderScreen import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
@@ -62,9 +72,13 @@ import com.example.m_commerce.presentation.start.StartScreen
 
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.google.android.gms.maps.model.LatLng
 
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.serialization.json.Json
+import kotlin.div
+import kotlin.toString
 
 private const val TAG = "MainActivity"
 
@@ -102,27 +116,33 @@ fun MainActivity.MainScreen(){
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
             Log.i(TAG, "MainScreen: route ${destination.route}")
-            when(destination.route){
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap" ,
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo"
-                    -> {
-                        showBottomNavBar.value = false
-                        showTopAppBar.value = false
-                        showBackButton = false
-                    }
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"->{
+            when {
+                destination.route in listOf(
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Cart"
+                ) || destination.route?.startsWith("checkout") == true -> {
+                    showBottomNavBar.value = false
+                    showTopAppBar.value = false
+                    showBackButton = false
+                }
+                destination.route in listOf(
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"
+                ) -> {
                     showBottomNavBar.value = true
                     showTopAppBar.value = false
                 }
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}" ,
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search" ,
-                "com.example.m_commerce.presentation.utils.routes.ScreensRoute.ProductDetails/{productId}" -> {
+                destination.route in listOf(
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.ProductDetails/{productId}"
+                ) -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
                     topAppBarTitleState = "Products"
@@ -184,7 +204,7 @@ fun MainActivity.MainScreen(){
                         IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
                             Icon(Icons.Outlined.Search, contentDescription = "Search Product")
                         }
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { navHostController.navigate(ScreensRoute.Cart) }) {
                             Icon(Icons.Outlined.ShoppingCart, contentDescription = "ShoppingCart")
                         }
                     }
@@ -217,11 +237,63 @@ fun MainActivity.NavHostSetup(){
             }
         }
 
-        composable<ScreensRoute.Cart>{}
+        composable<ScreensRoute.Cart> {
+            CartScreen(
+                onBack = { navHostController.popBackStack() },
+                onCheckout = { order, totalAmountCents, subtotal, estimatedFee, itemsCount->
+                    val orderItems = order.lineItems?.nodes?.map { node ->
+                        OrderItem(
+                            name = node.title ?: node.name ?: "Unknown Item",
+                            description = node.title ?: "",
+                            amountCents = (totalAmountCents.times(100)).toDouble(),
+                            quantity = node.quantity ?: 1,
+                            itemId = node.id ?: ""
+                        )
+                    } ?: emptyList()
 
-        composable<ScreensRoute.Favorites>{
-
+                    val itemsJson = Uri.encode(Json.encodeToString(ArrayList(orderItems)))
+                    navHostController.navigate("checkout/$itemsJson/$totalAmountCents/$subtotal/$estimatedFee/$itemsCount")
+                }
+            )
         }
+
+        composable(
+            route = "checkout/{items}/{totalAmountCents}/{subtotal}/{estimatedFee}/{itemsCount}",
+            arguments = listOf(
+                navArgument("items") { type = NavType.StringType },
+                navArgument("totalAmountCents") { type = NavType.IntType },
+                navArgument("subtotal") { type = NavType.StringType },
+                navArgument("estimatedFee") { type = NavType.StringType },
+                navArgument("itemsCount") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val itemsJson = backStackEntry.arguments?.getString("items") ?: "[]"
+            val totalAmountCents = backStackEntry.arguments?.getInt("totalAmountCents") ?: 0
+            val items = Json.decodeFromString<List<OrderItem>>(Uri.decode(itemsJson))
+            val subtotal = backStackEntry.arguments?.getString("subtotal")?.toDoubleOrNull() ?: 0.0
+            val estimatedFee =
+                backStackEntry.arguments?.getString("estimatedFee")?.toDoubleOrNull() ?: 0.0
+            val itemsCount = backStackEntry.arguments?.getInt("itemsCount") ?: 0
+            CheckoutScreen(
+                onBack = { navHostController.popBackStack() },
+                totalPrice = totalAmountCents / 100.0,
+                items = items,
+                onConfirmOrder = { paymentMethod, orderItems, totalAmountCents ->
+                    when (paymentMethod) {
+                        PaymentMethod.PAYMOB -> {
+                            val itemsJson = Uri.encode(Json.encodeToString(ArrayList(orderItems)))
+                            navHostController.navigate("payment/$itemsJson/$totalAmountCents")
+                        }
+
+                        PaymentMethod.CASH -> {}
+                    }
+                },
+                subtotal = subtotal,
+                estimatedFee = estimatedFee,
+                itemsCount = itemsCount,
+            )
+        }
+
         composable<ScreensRoute.Settings>{
             SettingsScreen(
                 onAddressClick = {
@@ -240,7 +312,67 @@ fun MainActivity.NavHostSetup(){
                 },
                 onOrderClick = {
                     navHostController.navigate(ScreensRoute.Order)
+
                 }
+            )
+        }
+
+        composable<ScreensRoute.Addresses> {
+            AddressesScreen(
+                viewModel = viewModel,
+                onBack = {
+                    navHostController.popBackStack()
+                },
+                onAddClicked = {
+                    navHostController.navigate(ScreensRoute.AddressMap)
+                    Log.d(TAG, "NavHostSetup: $it")
+                },
+                onAddressClick = { address ->
+                    viewModel.setEditingAddress(address)
+                    viewModel.updateCurrentLocation(
+                        LatLng(address.latitude, address.longitude)
+                    )
+                    navHostController.navigate(ScreensRoute.AddressInfo)
+                }
+            )
+        }
+
+
+      composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.saveAddressToCustomer(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
+                goToMap = {
+                    navHostController.navigate(ScreensRoute.AddressMap) {
+                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
+                    }
+
+                }
+            )
+        }
+
+        composable<ScreensRoute.AddressMap> {
+
+            AddressMap(
+                onSearchClicked = {
+                    navHostController.navigate(ScreensRoute.MapSearch)
+                },
+                onBackClick = {
+                    navHostController.popBackStack()
+                },
+                onConfirmLocation = {
+                    navHostController.navigate(ScreensRoute.AddressInfo)
+                },
+                viewModel = viewModel,
+                isFromEdit = navHostController.previousBackStackEntry?.destination?.route == ScreensRoute.AddressInfo.toString()
+
             )
         }
 
@@ -298,40 +430,6 @@ fun MainActivity.NavHostSetup(){
             })
         }
 
-        composable<ScreensRoute.Addresses> {
-            AddressesScreen(
-                viewModel = viewModel,
-                onBack = {
-                    navHostController.popBackStack()
-                },
-                onAddClicked = {
-                    navHostController.navigate(ScreensRoute.AddressMap)
-                    Log.d(TAG, "NavHostSetup: $it")
-                },
-                onAddressClick = { address ->
-                    viewModel.setEditingAddress(address)
-                    viewModel.updateCurrentLocation(
-                        LatLng(address.latitude, address.longitude)
-                    )
-                    navHostController.navigate(ScreensRoute.AddressInfo)
-                }
-            )
-        }
-
-        composable<ScreensRoute.AddressMap> {
-
-            AddressMap(
-                onSearchClicked = {
-                    navHostController.navigate(ScreensRoute.MapSearch)
-                },
-                onBackClick = {
-                    navHostController.popBackStack()
-                },
-                onConfirmLocation = {},
-                viewModel = viewModel
-            )
-        }
-
         composable<ScreensRoute.Search> {
             SearchScreen(
                 onBack = { navHostController.popBackStack() },
@@ -340,6 +438,7 @@ fun MainActivity.NavHostSetup(){
                 }
             )
         }
+
         composable<ScreensRoute.MapSearch> {
             MapSearch(
                 onBack = { navHostController.popBackStack() },
@@ -351,6 +450,25 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
+        composable<ScreensRoute.AddressInfo> {
+            AddressInfo(
+                onBack = { navHostController.popBackStack() },
+                onSave = { address ->
+                    viewModel.saveAddressToCustomer(address)
+                    navHostController.popBackStack(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        inclusive = false
+                    )
+                },
+                viewModel = viewModel,
+                goToMap = {
+                    navHostController.navigate(ScreensRoute.AddressMap) {
+                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable<ScreensRoute.ProductDetails> { backStackEntry ->
             val entry = backStackEntry.toRoute<ScreensRoute.ProductDetails>()
             ProductDetailsScreen(
@@ -358,5 +476,25 @@ fun MainActivity.NavHostSetup(){
                 onBack = { navHostController.popBackStack() }
             )
         }
+
+        composable(
+            route = "payment/{items}/{totalAmountCents}",
+            arguments = listOf(
+                navArgument("items") { type = NavType.StringType },
+                navArgument("totalAmountCents") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val itemsJson = backStackEntry.arguments?.getString("items") ?: "[]"
+            val totalAmountCents = backStackEntry.arguments?.getInt("totalAmountCents") ?: 0
+            val items = Json.decodeFromString<List<OrderItem>>(Uri.decode(itemsJson))
+
+            PaymentScreen(
+                items = items,
+                totalAmountCents = totalAmountCents,
+                onPaymentComplete = {  },
+                onPaymentError = { }
+            )
+        }
+
     }
 }

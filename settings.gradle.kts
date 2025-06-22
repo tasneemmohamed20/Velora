@@ -9,6 +9,13 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+
+//        maven {
+//            url = rootProject.projectDir.toURI().resolve("libs")
+//        }
+//        maven {
+//            url = uri("https://jitpack.io")
+//        }
     }
 }
 dependencyResolutionManagement {
@@ -16,6 +23,16 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+//        maven {
+//            url = uri("https://sdk.paymob.com/maven")
+//        }
+//        maven {
+//            url = rootProject.projectDir.toURI().resolve("libs")
+//        }
+//        maven {
+//            url = uri("https://jitpack.io")
+//        }
     }
 }
 

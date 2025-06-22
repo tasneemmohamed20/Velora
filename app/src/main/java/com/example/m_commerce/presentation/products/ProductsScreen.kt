@@ -130,6 +130,8 @@ fun ProductCard(
     val itemWidth = (screenWidth - 32.dp) / 2
 
     Log.i("TAG", "ProductCard: $productDetails")
+    val variantId = productDetails.variants.firstOrNull()?.id ?: "No variant ID"
+    Log.i("TAG", "ProductCard: $variantId")
     Card(
         modifier = modifier
             .width(itemWidth)

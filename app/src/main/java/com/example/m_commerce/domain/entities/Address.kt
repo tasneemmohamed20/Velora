@@ -1,6 +1,5 @@
 package com.example.m_commerce.domain.entities
 
-
 enum class AddressType {
     HOME,
     APARTMENT,
@@ -8,6 +7,7 @@ enum class AddressType {
 }
 
 data class Address(
+    var id: String? = null,
     var type: AddressType,
     var area: String,
     var building: String,
