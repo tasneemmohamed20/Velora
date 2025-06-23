@@ -187,4 +187,17 @@ class CheckoutViewModel @Inject constructor(
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+//        _selectedLocation.value = null
+//        _selectedAddress.value = null
+//        _discountCodes.value = emptyList()
+        _voucherText.value = ""
+        _voucherError.value = null
+        _appliedDiscount.value = 0.0
+        _isApplyingVoucher.value = false
+//        showSuccessDialog.value = false
+//        showErrorDialog.value = false
+    }
 }
