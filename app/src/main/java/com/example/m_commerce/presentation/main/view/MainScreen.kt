@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.main.view
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,8 +48,6 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.m_commerce.MainActivity
-import com.example.m_commerce.NavHostSetup
 import com.example.m_commerce.presentation.main.viewmodel.MainViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.components.CustomSnackbar
@@ -83,7 +82,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
 
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
-
+            Log.i("TAG", "MainScreen:${destination.route} ")
             when {
                 destination.route in listOf(
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
