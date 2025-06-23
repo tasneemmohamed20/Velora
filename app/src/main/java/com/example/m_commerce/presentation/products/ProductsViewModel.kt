@@ -1,5 +1,6 @@
 package com.example.m_commerce.presentation.products
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,7 +39,7 @@ class ProductsViewModel @Inject constructor(
     val selectedOption: State<String> = _selectedOption
 
 
-    val options = listOf("ALL", "SHOES", "ACCESSORIES")
+    val options = listOf("ALL", "SHOES", "ACCESSORIES", "T-SHIRTS")
 
     fun setSelectedOption(option: String) {
         _selectedOption.value = option

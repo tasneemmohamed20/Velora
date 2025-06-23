@@ -2,16 +2,19 @@ package com.example.m_commerce.presentation.main.view
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -44,6 +51,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.m_commerce.presentation.main.viewmodel.MainViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
+import com.example.m_commerce.presentation.utils.components.CustomSnackbar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 
 
@@ -57,6 +65,21 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
     var topAppBarTitleState by remember { mutableStateOf("Velora") }
     var showBackButton by remember { mutableStateOf(false) }
     val isConnected by mainViewModel.isConnected.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var previousConnectionState by remember { mutableStateOf<Boolean?>(null) }
+
+    LaunchedEffect(isConnected) {
+        if (previousConnectionState != null && previousConnectionState != isConnected) {
+            snackbarHostState.showSnackbar(
+                message = if (isConnected)
+                    "Your internet connection was restored"
+                else
+                    "You are currently offline",
+                duration = SnackbarDuration.Short
+            )
+        }
+        previousConnectionState = isConnected
+    }
 
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
@@ -110,9 +133,23 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
             }
         }
     }
-
-
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(12.dp)
+            ){
+                snackbarData ->  Snackbar(
+                    shape = RoundedCornerShape(size = 16.dp),
+                    containerColor = if(isConnected) Color(0xff31C440) else Color.Black.copy(alpha = 0.8f)
+                ){
+                    CustomSnackbar(
+                        message = snackbarData.visuals.message,
+                        icon = if (isConnected) Icons.Default.CheckCircle else Icons.Default.WifiOff
+                    )
+                }
+            }
+        },
         bottomBar = {
             if(showBottomNavBar.value){
                 BottomNavigationBar {
@@ -145,7 +182,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                             IconButton(onClick = { navHostController.popBackStack() }) {
                                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                             }
-                        } else null
+                        }
                     },
                     actions = {
                         IconButton(onClick = { navHostController.navigate(ScreensRoute.Search) }) {
@@ -164,21 +201,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-
-            if (!isConnected) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White.copy(alpha = 0.9f)),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    NoInternetLottie()
-                    Text("No Internet Connection", color = Color.Red)
-                }
-            }else{
-                NavHostSetup()
-            }
+            NavHostSetup()
         }
     }
 
@@ -205,3 +228,5 @@ fun NoInternetLottie(modifier: Modifier = Modifier) {
         )
     }
 }
+
+

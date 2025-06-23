@@ -82,47 +82,11 @@ fun OrderScreen(
             }
             is ResponseState.Success -> {
                 val ordersData = ordersState.data as List<OrderEntity>
-                if(!ordersData.isNotEmpty()){
+
+                if(ordersData.isNotEmpty()){
                     OrderList(ordersData, onOrderClicked)
                 }else{
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                        Image(painter = painterResource(id = R.drawable.no_order), contentDescription = "No Orders")
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            text = "No order placed yet",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.Black,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = "You have not placed and order yet. Place add items to your cart and checkout when you are ready",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center,
-                            maxLines = 3
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Button(
-                            onClick = onExploreProductsClicked,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = primaryBlue,
-                                contentColor = Color.White
-                            )
-                        ){
-                            Text(
-                                text = "Explore Products",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        }
-                    }
+                    NoOrderFound(onExploreProductsClicked)
                 }
 
             }
@@ -226,6 +190,49 @@ fun OrderCard(order: OrderEntity, onOrderClicked: (OrderEntity) -> Unit, modifie
                     tint = Color.Black
                 )
             }
+        }
+    }
+}
+
+
+@Composable
+fun NoOrderFound(onExploreProductsClicked: () -> Unit){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(painter = painterResource(id = R.drawable.no_order), contentDescription = "No Orders")
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "No order placed yet",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Black,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "You have not placed any order yet. Place add items to your cart and checkout when you are ready",
+            style = MaterialTheme.typography.titleSmall,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 3
+        )
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = onExploreProductsClicked,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = primaryBlue,
+                contentColor = Color.White
+            )
+        ){
+            Text(
+                text = "Explore Products",
+                style = MaterialTheme.typography.titleMedium,
+            )
         }
     }
 }

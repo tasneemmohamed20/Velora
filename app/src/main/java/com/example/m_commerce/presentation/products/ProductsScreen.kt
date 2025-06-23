@@ -1,22 +1,27 @@
 
 package com.example.m_commerce.presentation.products
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,15 +48,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
+import com.example.m_commerce.R
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
+import com.example.m_commerce.presentation.utils.theme.primaryBlue
 
 @Composable
 fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,onProductClick: (String) -> Unit){
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(type) {
         viewModel.getProductsByType(type)
         viewModel.getCurrencyPref()
     }
@@ -80,8 +89,12 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,
                 }
                 is ResponseState.Success -> {
                     val productsData = productsState.data as List<Product>
+                    if(productsData.isNotEmpty()){
+                        ProductsList(productsData, currencyPrefState, Modifier.weight(2F),onProductClick = onProductClick)
+                    }else {
+                        NoProductsFound()
+                    }
 
-                    ProductsList(productsData, currencyPrefState, Modifier.weight(2F),onProductClick = onProductClick)
                 }
             }
         }
@@ -184,41 +197,42 @@ fun ProductCard(
     }
 }
 
-
 @Composable
-fun FilterChips(modifier: Modifier = Modifier, viewModel: ProductsViewModel){
-
-    Row(
+fun FilterChips(modifier: Modifier = Modifier, viewModel: ProductsViewModel) {
+    LazyRow(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        viewModel.options.forEach{ option ->
+        items(viewModel.options) { option ->
             val isSelected = viewModel.selectedOption.value == option
 
             OutlinedButton(
                 onClick = {
                     viewModel.setSelectedOption(option)
                     viewModel.geFilteredProduct(option)
-                          },
+                },
                 shape = RoundedCornerShape(50),
-                border = if (isSelected) BorderStroke(2.dp, Color.Black) else BorderStroke(0.dp, Color.Transparent),
+                border = if (isSelected)
+                    BorderStroke(2.dp, Color.Black)
+                else
+                    BorderStroke(0.dp, Color.Transparent),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = WhiteSmoke,
                     contentColor = Color.Black
                 ),
-            ){
+            ) {
                 Text(
                     text = option,
                     fontSize = 12.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-
                 )
             }
         }
     }
 }
+
 
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -227,3 +241,23 @@ fun ProductPreview(){
     ProductsScreen(type= "vans", onProductClick = {})
 }
 
+
+@Composable
+fun NoProductsFound(){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(painter = painterResource(id = R.drawable.no_data), contentDescription = "No Products")
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "No products found",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Black,
+        )
+        Spacer(Modifier.height(12.dp))
+    }
+}
