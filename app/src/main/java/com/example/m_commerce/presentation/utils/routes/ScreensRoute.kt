@@ -76,4 +76,7 @@ sealed class ScreensRoute {
         val estimatedFee : Double,
         val itemsCount: Int
     ) : ScreensRoute()
+
+    @Serializable
+    data object VouchersScreen : ScreensRoute()
 }
