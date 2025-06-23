@@ -72,6 +72,7 @@ import com.example.m_commerce.presentation.start.StartScreen
 
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.vouchers.VouchersScreen
 import com.google.android.gms.maps.model.LatLng
 
 import dagger.hilt.android.AndroidEntryPoint
@@ -131,7 +132,8 @@ fun MainActivity.MainScreen(){
                 destination.route in listOf(
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.VouchersScreen"
                 ) -> {
                     showBottomNavBar.value = true
                     showTopAppBar.value = false
@@ -224,7 +226,7 @@ fun MainActivity.MainScreen(){
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Start,
+        startDestination = ScreensRoute.Home,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -318,8 +320,8 @@ fun MainActivity.NavHostSetup(){
                 },
                 onOrderClick = {
                     navHostController.navigate(ScreensRoute.Order)
-
-                }
+                },
+                onVeloraVouchersClick = {navHostController.navigate(ScreensRoute.VouchersScreen)}
             )
         }
 
@@ -344,7 +346,7 @@ fun MainActivity.NavHostSetup(){
         }
 
 
-      composable<ScreensRoute.AddressInfo> {
+        composable<ScreensRoute.AddressInfo> {
             AddressInfo(
                 onBack = { navHostController.popBackStack() },
                 onSave = { address ->
@@ -501,6 +503,12 @@ fun MainActivity.NavHostSetup(){
                     navHostController.navigate(ScreensRoute.Home)
                                     },
                 onPaymentError = { Log.i("PaymentScreen", "onPaymentError: ") }
+            )
+        }
+
+        composable<ScreensRoute.VouchersScreen> {
+            VouchersScreen(
+                onBackClick = {navHostController.popBackStack()},
             )
         }
 

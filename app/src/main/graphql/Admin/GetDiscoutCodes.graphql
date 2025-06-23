@@ -1,0 +1,18 @@
+query CodeDiscountNodes {
+    codeDiscountNodes(first: 50) {
+        nodes {
+            id
+            codeDiscount {
+                ... on DiscountCodeBasic {
+                    customerSelection {
+                        ... on DiscountCustomerAll {
+                            allCustomers
+                        }
+                    }
+                    summary
+                    title
+                }
+            }
+        }
+    }
+}

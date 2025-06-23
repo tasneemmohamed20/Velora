@@ -33,4 +33,8 @@ interface IDraftOrderRemoteDataSource {
     suspend fun deleteDraftOrder(id: String): Boolean
 
     suspend fun completeAndDeleteDraftOrder(draftOrderId: String): Boolean
+    suspend fun updateDraftOrderApplyVoucher(
+        id: String,
+        discountCode: List<String>
+    ): DraftOrder
 }

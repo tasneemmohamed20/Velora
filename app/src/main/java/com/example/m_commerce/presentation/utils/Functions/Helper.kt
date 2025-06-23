@@ -1,7 +1,11 @@
 package com.example.m_commerce.presentation.utils.Functions
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import com.example.m_commerce.domain.entities.Product
@@ -87,3 +91,11 @@ fun formatStreetAndArea(raw: String): String {
 
     return "$street St.\n$area"
 }
+
+fun copyToClipboard(context: Context, text: String) {
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clipData = ClipData.newPlainText("Voucher Code", text)
+    clipboardManager.setPrimaryClip(clipData)
+    Toast.makeText(context, "Voucher code copied to clipboard", Toast.LENGTH_SHORT).show()
+}
+

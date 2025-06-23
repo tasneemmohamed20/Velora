@@ -102,7 +102,7 @@ query GetDraftOrders(
 
 ) {
     draftOrders(
-        first: 2,
+        first: 5,
         query: $query,
     ) {
         nodes {
@@ -407,6 +407,118 @@ mutation updateDraftOrderBillingAddress(
                 address2
                 city
                 phone
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+
+mutation updateDraftOrderApplyDiscountCode(
+    $id: ID!,
+    $discountCodes : [String!]
+){
+    draftOrderUpdate(
+        id: $id
+        input: {
+            discountCodes: $discountCodes
+        }
+    ){
+        draftOrder {
+            acceptAutomaticDiscounts
+            allowDiscountCodesInCheckout
+            billingAddressMatchesShippingAddress
+            completedAt
+            createdAt
+            currencyCode
+            defaultCursor
+            discountCodes
+            email
+            hasTimelineComment
+            id
+            invoiceEmailTemplateSubject
+            invoiceSentAt
+            invoiceUrl
+            legacyResourceId
+            marketName
+            marketRegionCountryCode
+            name
+            note2
+            phone
+            poNumber
+            presentmentCurrencyCode
+            ready
+            reserveInventoryUntil
+            status
+            subtotalPrice
+            tags
+            taxExempt
+            taxesIncluded
+            totalPrice
+            totalQuantityOfLineItems
+            totalShippingPrice
+            totalTax
+            totalWeight
+            transformerFingerprint
+            updatedAt
+            visibleToCustomer
+            lineItems(first: 50) {
+                nodes {
+                    custom
+                    discountedTotal
+                    discountedUnitPrice
+                    grams
+                    id
+                    isGiftCard
+                    name
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    requiresShipping
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    uuid
+                    variantTitle
+                    vendor
+                    image {
+                        url
+                    }
+                    product {
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                            }
+                        }
+                        variants(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    availableForSale
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            billingAddress {
+                address1
+                address2
+                city
+                phone
+            }
+            totalDiscountsSet {
+                presentmentMoney {
+                    amount
+                }
             }
         }
         userErrors {
