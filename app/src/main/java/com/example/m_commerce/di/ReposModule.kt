@@ -1,11 +1,15 @@
 package com.example.m_commerce.di
 
+import com.example.m_commerce.data.datasource.remote.graphql.favorite.FavoriteRemoteDataSourceImpl
+import com.example.m_commerce.data.datasource.remote.graphql.favorite.IFavoriteRemoteDataSource
 import com.example.m_commerce.data.datasource.remote.graphql.order.IOrderRemoteDataSource
 import com.example.m_commerce.data.datasource.remote.graphql.product.IProductRemoteDataSource
 import com.example.m_commerce.data.datasource.remote.graphql.order.OrderRemoteDataSourceImp
 import com.example.m_commerce.data.datasource.remote.graphql.product.ProductRemoteDataSourceImp
+import com.example.m_commerce.data.repository_imp.favorite_repo.FavoriteRepositoryImp
 import com.example.m_commerce.data.repository_imp.order_repo.OrderRepositoryImp
 import com.example.m_commerce.data.repository_imp.products_repo.ProductsRepositoryImp
+import com.example.m_commerce.domain.repository.IFavoriteRepository
 import com.example.m_commerce.domain.repository.IOrderRepository
 import com.example.m_commerce.domain.repository.IProductsRepository
 import dagger.Binds
@@ -39,5 +43,13 @@ abstract class ReposModule {
     @Binds
     @Singleton
     abstract fun bindIOrderRepository(orderRepo: OrderRepositoryImp): IOrderRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFavoriteRepository(favoriteRepositoryImpl: FavoriteRepositoryImp): IFavoriteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFavoriteRemoteDataSource(favoriteRemoteDataSourceImpl: FavoriteRemoteDataSourceImpl): IFavoriteRemoteDataSource
 
 }

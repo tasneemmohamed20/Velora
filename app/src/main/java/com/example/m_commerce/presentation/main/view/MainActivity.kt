@@ -9,11 +9,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.toRoute
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
@@ -36,6 +43,7 @@ import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.cart.CartScreen
+import com.example.m_commerce.presentation.favorite.FavoriteView
 import com.example.m_commerce.presentation.main.view.MainScreen
 import com.example.m_commerce.presentation.order.order_details.OrderDetails
 import com.example.m_commerce.presentation.payment.checkout.CheckoutScreen
@@ -343,6 +351,28 @@ fun MainActivity.NavHostSetup(){
                 onBack = { navHostController.popBackStack() }
             )
         }
+
+        composable<ScreensRoute.Favorites> {
+            val context = LocalContext.current
+            val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
+            val customerEmail = remember(Unit) { sharedPreferencesHelper.getCustomerEmail() }
+
+            if (customerEmail == null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = "Please login to view favorites",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                FavoriteView(
+                    onProductClick = { productId ->
+                        navHostController.navigate(ScreensRoute.ProductDetails(productId))
+                    }
+                )
+            }
+        }
+
 
         composable(
             route = "payment/{items}/{totalAmountCents}",
