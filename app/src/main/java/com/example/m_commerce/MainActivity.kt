@@ -30,9 +30,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressMap
 import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
@@ -50,6 +53,7 @@ import com.example.m_commerce.presentation.account.settings.view_model.AddressMa
 import com.example.m_commerce.presentation.authentication.login.LoginScreen
 import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.cart.CartScreen
+import com.example.m_commerce.presentation.favorite.FavoriteView
 import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.order.OrderScreen
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
@@ -215,8 +219,25 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
-        composable<ScreensRoute.Favorites>{
+        composable<ScreensRoute.Favorites> {
+            val context = LocalContext.current
+            val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
+            val customerEmail = remember(Unit) { sharedPreferencesHelper.getCustomerEmail() }
 
+            if (customerEmail == null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = "Please login to view favorites",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                FavoriteView(
+                    onProductClick = { productId ->
+                        navHostController.navigate(ScreensRoute.ProductDetails(productId))
+                    }
+                )
+            }
         }
         composable<ScreensRoute.Settings>{
             SettingsScreen(

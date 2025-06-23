@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -40,78 +41,85 @@ class LoginViewModel  @Inject constructor(
             return
         }
 
-        _loginState.value = ResponseState.Loading
-
         viewModelScope.launch {
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val user = auth.currentUser
-                        if (user?.isEmailVerified == true) {
-                            fetchShopifyCustomerId(email)
-                            _loginState.value = ResponseState.Success("Welcome back! You have successfully logged in")
-                            val customerEmail = sharedPreferencesHelper.getCustomerEmail()
-                            viewModelScope.launch {
-                                customerEmail?.let {
-                                    try {
-                                        getDraftOrder(it).let { hasExistingOrder ->
-                                            if (hasExistingOrder) {
-                                                Log.d("LoginViewModel", "Draft order already exists for customer: $customerEmail")
-                                            } else {
-                                                Log.d("LoginViewModel", "No existing draft order found for customer: $customerEmail")
-                                            }
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e("LoginViewModel", "Error checking draft order", e)
-                                    }
-                                }
-                            }
-                        } else {
-                            auth.signOut()
-                            _loginState.value = ResponseState.Failure(
-                                Throwable("Your email is not verified yet Please check your inbox and verify your email to proceed")
-                            )
-                        }
-                    } else {
-                        val errorMessage = when {
-                            task.exception?.message == null -> "Login failed. Please try again"
-                            task.exception?.message!!.contains("no user record") ->
-                                "No account found with this email"
-                            task.exception?.message!!.contains("password is invalid") ->
-                                "Incorrect password. Please try again"
-                            else -> "Login failed. Please check your credentials and try again"
-                        }
+            try {
+                _loginState.value = ResponseState.Loading
 
-                        _loginState.value = ResponseState.Failure(Throwable(errorMessage))
+                val authResult = withContext(Dispatchers.IO) {
+                    auth.signInWithEmailAndPassword(email, password).await()
+                }
+
+                val user = authResult.user
+                if (user?.isEmailVerified != true) {
+                    auth.signOut()
+                    _loginState.value = ResponseState.Failure(
+                        Throwable("Please verify your email first")
+                    )
+                    return@launch
+                }
+
+                sharedPreferencesHelper.saveCustomerEmail(email)
+
+                val shopifyJob = viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        fetchShopifyCustomerIdSuspend(email)
+                    } catch (e: Exception) {
+                        Log.e("LoginViewModel", "Shopify fetch failed", e)
                     }
                 }
+
+                val draftOrderJob = viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        val hasOrder = getDraftOrder(email)
+                        Log.d("LoginViewModel",
+                            if (hasOrder) "Draft order exists for: $email"
+                            else "No draft order for: $email"
+                        )
+                    } catch (e: Exception) {
+                        Log.e("LoginViewModel", "Draft order check failed", e)
+                    }
+                }
+
+                // Update UI state immediately after Firebase auth
+                _loginState.value = ResponseState.Success("Welcome back!")
+
+                // Wait for background tasks to complete
+                shopifyJob.join()
+                draftOrderJob.join()
+
+            } catch (e: Exception) {
+                val errorMessage = when {
+                    e.message?.contains("no user record") == true -> "No account found"
+                    e.message?.contains("password is invalid") == true -> "Incorrect password"
+                    else -> "Login failed: ${e.message}"
+                }
+                _loginState.value = ResponseState.Failure(Throwable(errorMessage))
+            }
         }
     }
 
-    private fun fetchShopifyCustomerId(email: String) {
+    private suspend fun fetchShopifyCustomerIdSuspend(email: String) = withContext(Dispatchers.IO) {
         val client = OkHttpClient()
-
         val query = """
-            query {
-              customers(first: 1, query: "email:$email") {
-                edges {
-                  node {
-                    id
-                    email
-                    firstName
-                    lastName
-                  }
-                }
+        query {
+          customers(first: 1, query: "email:$email") {
+            edges {
+              node {
+                id
+                email
+                firstName
+                lastName
               }
             }
-        """.trimIndent()
+          }
+        }
+    """.trimIndent()
 
         val json = JsonObject().apply {
             addProperty("query", query)
         }
 
         val body = json.toString().toRequestBody("application/json".toMediaType())
-
         val request = Request.Builder()
             .url("https://$shopDomain/admin/api/2024-10/graphql.json")
             .addHeader("X-Shopify-Access-Token", accessToken)
@@ -119,55 +127,65 @@ class LoginViewModel  @Inject constructor(
             .post(body)
             .build()
 
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    client.newCall(request).execute().use { response ->
-                        val responseBody = response.body?.string() ?: ""
-                        val gson = Gson()
-                        val jsonObject = gson.fromJson(responseBody, JsonObject::class.java)
-                        val customers = jsonObject
-                            .getAsJsonObject("data")
-                            .getAsJsonObject("customers")
-                            .getAsJsonArray("edges")
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw Exception("API call failed with code: ${response.code}")
+            }
 
-                        if (customers.size() > 0) {
-                            val customer = customers[0].asJsonObject
-                                .getAsJsonObject("node")
-                            val customerId = customer.get("id").asString
-                            val customerEmail = customer.get("email").asString
-                            sharedPreferencesHelper.saveCustomerId(customerId)
-                            sharedPreferencesHelper.saveCustomerEmail(customerEmail)
-                            Log.d("LoginViewModel", "Full customer data: ${customer.toString()}")
-                        }
-                        else {
-                            Log.d("LoginViewModel", "No Shopify customer found for email: $email")
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("LoginError", "Failed to fetch Shopify customer ID", e)
+            val responseBody = response.body?.string() ?: ""
+            Log.d("LoginViewModel", "Raw response: $responseBody")
+
+            val gson = Gson()
+            val jsonObject = gson.fromJson(responseBody, JsonObject::class.java)
+
+            if (jsonObject.has("errors")) {
+                throw Exception("GraphQL query failed")
+            }
+
+            val customers = jsonObject
+                .getAsJsonObject("data")
+                .getAsJsonObject("customers")
+                .getAsJsonArray("edges")
+
+            if (customers.size() > 0) {
+                val customer = customers[0].asJsonObject
+                    .getAsJsonObject("node")
+                val customerId = customer.get("id").asString
+                val customerEmail = customer.get("email").asString
+
+                sharedPreferencesHelper.saveCustomerId(customerId)
+                sharedPreferencesHelper.saveCustomerEmail(customerEmail)
+
+                Log.d("LoginViewModel", "Saved customer data - ID: $customerId, Email: $customerEmail")
             }
         }
     }
 
     private suspend fun getDraftOrder(customerId: String): Boolean {
-        var hasExistingOrder = false
+//        var hasExistingOrder = false
+        var hasCartOrder = false
+        var hasFavOrder = false
         try {
             Log.d("LoginViewModel", "Fetching draft orders for customer ID: $customerId")
             draftOrderUseCase(customerId)?.collect { draftOrders ->
                 Log.d("LoginViewModel", "Draft orders: ${draftOrders}")
-                if (draftOrders.note2 == "cart") {
-                    hasExistingOrder = true
-                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrders.note2}")
-                    Log.d("LoginViewModel", "Draft order ID: ${draftOrders.id}")
-                    sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
+                when (draftOrders.note2) {
+                    "cart" -> {
+                        hasCartOrder = true
+                        Log.d("LoginViewModel", "Found cart draft order: ${draftOrders.id}")
+                        sharedPreferencesHelper.saveCartDraftOrderId(draftOrders.id.toString())
+                    }
+                    "fav" -> {
+                        hasFavOrder = true
+                        Log.d("LoginViewModel", "Found favorite draft order: ${draftOrders.id}")
+
+                    }
                 }
             }
         } catch (e: Exception) {
 
             Log.e("LoginViewModel", "Error getting draft orders", e)
         }
-        return hasExistingOrder
+        return hasCartOrder || hasFavOrder
     }
 }

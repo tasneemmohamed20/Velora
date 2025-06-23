@@ -59,7 +59,7 @@ android {
         compose = true
     }
 
-    buildFeatures { dataBinding = true }
+//    buildFeatures { dataBinding = true }
 }
 
 dependencies {

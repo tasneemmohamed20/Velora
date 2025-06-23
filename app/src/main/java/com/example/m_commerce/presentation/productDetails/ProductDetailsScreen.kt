@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.productDetails
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -29,7 +30,9 @@ import com.example.m_commerce.ResponseState
 import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.m_commerce.domain.entities.note
 
 
 val TAG = "ProductDetailsScreen"
@@ -47,11 +50,22 @@ fun ProductDetailsScreen(
     var selectedVariantId by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
     var selectedSize by remember { mutableStateOf<String?>(null) }
-
+    val favoriteState by viewModel.favoriteState.collectAsState()
+    val context = LocalContext.current
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
     }
-
+    LaunchedEffect(favoriteState) {
+        when (favoriteState) {
+            is ResponseState.Success -> {
+                Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+            }
+            is ResponseState.Failure -> {
+                Toast.makeText(context, "Failed to add to favorites", Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
+        }
+    }
     val productState by viewModel.productState.collectAsState()
 
 
@@ -73,7 +87,7 @@ fun ProductDetailsScreen(
                         selectedSize = selectedSize,
                         onConfirm = { quantity ->
                             selectedVariantId?.let { variantId ->
-                                viewModel.addToCart(variantId, quantity)
+                                viewModel.addToCart(variantId, quantity,note.cart)
                                 Log.d(TAG, "Added to cart with variant ID: $variantId, quantity: $quantity")
                             }
                             showBottomSheet = false
@@ -150,7 +164,13 @@ fun ProductDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
-                            onClick = { },
+                            onClick = {
+                                selectedVariantId?.let { variantId ->
+                                    viewModel.addToCart(variantId, quantity = 1,note.fav)
+                                } ?: run {
+                                    Toast.makeText(context, "Please select product options first", Toast.LENGTH_SHORT).show()
+                                }
+                            },
                             modifier = Modifier
                                 .size(70.dp)
                                 .clip(CircleShape)
@@ -238,67 +258,6 @@ private fun ImageCarousel(urls: List<String>, modifier: Modifier = Modifier) {
     }
 }
 
-
-//@Composable
-//private fun VariantOptionsSection(
-//    variants: List<ProductVariant>,
-//    modifier: Modifier = Modifier
-//) {
-//    val colorOptions = variants
-//        .flatMap { it.selectedOptions }
-//        .filter { it.name.equals("Color", ignoreCase = true) }
-//        .map { it.value }
-//        .distinct()
-//
-//    val sizeOptions = variants
-//        .flatMap { it.selectedOptions }
-//        .filter { it.name.equals("Size", ignoreCase = true) }
-//        .map { it.value }
-//        .distinct()
-//
-//    Column(modifier = modifier) {
-//        if (colorOptions.isNotEmpty()) {
-//            Text(
-//                text = "Colors",
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    fontWeight = FontWeight.Bold
-//                )
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            LazyRow {
-//                items(colorOptions) { color ->
-//                    ElevatedFilterChip(
-//                        selected = false,
-//                        onClick = {},
-//                        label = { Text(color) },
-//                        modifier = Modifier.padding(end = 8.dp)
-//                    )
-//                }
-//            }
-//            Spacer(modifier = Modifier.height(16.dp))
-//        }
-//
-//        if (sizeOptions.isNotEmpty()) {
-//            Text(
-//                text = "Sizes",
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    fontWeight = FontWeight.Bold
-//                )
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            LazyRow {
-//                items(sizeOptions) { size ->
-//                    ElevatedFilterChip(
-//                        selected = false,
-//                        onClick = {},
-//                        label = { Text(size) },
-//                        modifier = Modifier.padding(end = 8.dp)
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 private fun VariantOptionsSection(
@@ -503,5 +462,4 @@ private fun ProductBottomSheet(
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
 
