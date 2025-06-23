@@ -3,8 +3,6 @@ package com.example.m_commerce.presentation.main.view
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,6 +47,8 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.m_commerce.MainActivity
+import com.example.m_commerce.NavHostSetup
 import com.example.m_commerce.presentation.main.viewmodel.MainViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.components.CustomSnackbar
@@ -101,7 +101,8 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                 destination.route in listOf(
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses"
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.VouchersScreen"
                 ) -> {
                     showBottomNavBar.value = true
                     showTopAppBar.value = false

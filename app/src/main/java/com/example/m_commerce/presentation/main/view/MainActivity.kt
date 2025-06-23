@@ -60,6 +60,7 @@ import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.cart.CartScreen
+import com.example.m_commerce.presentation.main.view.MainScreen
 import com.example.m_commerce.presentation.order.order_details.OrderDetails
 import com.example.m_commerce.presentation.payment.checkout.CheckoutScreen
 import com.example.m_commerce.presentation.payment.checkout.PaymentMethod
@@ -70,8 +71,9 @@ import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.start.StartScreen
 
-import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
+
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.vouchers.VouchersScreen
 import com.google.android.gms.maps.model.LatLng
 
 import dagger.hilt.android.AndroidEntryPoint
@@ -80,14 +82,12 @@ import kotlinx.serialization.json.Json
 
 private const val TAG = "MainActivity"
 
-@AndroidEntryPoint // marks this activity for Hilt dependency injection
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        enableEdgeToEdge()
 
         setContent {
             MCommerceTheme {
@@ -98,7 +98,6 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-
 
 
 
