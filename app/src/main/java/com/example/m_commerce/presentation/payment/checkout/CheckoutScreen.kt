@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.presentation.checkout.CheckoutViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
 //import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -152,7 +153,7 @@ fun CheckoutScreen(
             Spacer(Modifier.height(24.dp))
 
             if(checkoutViewModel.showErrorDialog.value){
-//                ErrorAlertDialog(message = "Failed to complete order. Please try again.", onDismiss = {checkoutViewModel.toggleErrorAlert()})
+                ErrorAlertDialog(message = "Failed to complete order. Please try again.", onDismiss = {checkoutViewModel.toggleErrorAlert()})
             }
 
             if (checkoutViewModel.showSuccessDialog.value) {
