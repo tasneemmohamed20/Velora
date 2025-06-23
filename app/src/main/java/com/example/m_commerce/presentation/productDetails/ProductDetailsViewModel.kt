@@ -55,21 +55,15 @@ class ProductDetailsViewModel @Inject constructor(
 
         try {
             withContext(Dispatchers.IO) {
+
                 draftOrderUseCase(customerId)?.collect { draftOrders ->
-//                    if (draftOrders.note2 == noteType.name) {
-//                        _cartState.value = ResponseState.Success(draftOrders)
-//                        hasExistingOrder = true
-//                        currentLineItems = draftOrders.lineItems?.nodes?.filterNotNull()?.map { node ->
-//                            LineItem(
-//                                variantId = node.variantId ?: "",
-//                                quantity = node.quantity ?: 1
-//                            )
-//                        } ?: emptyList()
-//
-//                        Log.d("ProductDetailsViewModel", "Existing cart found: $currentLineItems")
-//                    }
                     draftOrders.find { it.note2 == noteType.name }?.let { draftOrder ->
                         _cartState.value = ResponseState.Success(draftOrder)
+                        if(noteType == note.cart) {
+                            sharedPreferencesHelper.saveCartDraftOrderId(draftOrder.id.toString())
+                        }else if(noteType == note.fav) {
+                            sharedPreferencesHelper.saveFavoriteDraftOrderId(draftOrder.id.toString())
+                        }
                         hasExistingOrder = true
                         currentLineItems = draftOrder.lineItems?.nodes?.filterNotNull()?.map { node ->
                             LineItem(
@@ -77,7 +71,7 @@ class ProductDetailsViewModel @Inject constructor(
                                 quantity = node.quantity ?: 1
                             )
                         } ?: emptyList()
-                        Log.d("ProductDetailsViewModel", "Existing cart found: $currentLineItems")
+                        Log.d("ProductDetailsViewModel", "Existing ${noteType.name} found: $currentLineItems")
                     } ?: run {
                         _cartState.value = ResponseState.Failure(Exception("Cart not found"))
                     }
@@ -92,7 +86,7 @@ class ProductDetailsViewModel @Inject constructor(
         return Pair(hasExistingOrder, currentLineItems)
     }
 
-    fun addToCart(variantId: String, quantity: Int) {
+    fun addToCart(variantId: String, quantity: Int, noteType : note) {
         cartScope.launch {
             try {
                 _cartState.value = ResponseState.Loading
@@ -102,18 +96,18 @@ class ProductDetailsViewModel @Inject constructor(
                 val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
 
                 try {
-                    val (hasExistingOrder, currentLineItems) = getDraftOrder(customerEmail.toString(), note.cart)
+                    val (hasExistingOrder, currentLineItems) = getDraftOrder(customerEmail.toString(), noteType)
                     Log.d("ProductDetailsViewModel", "Draft order check complete: hasExistingOrder=$hasExistingOrder, currentLineItems=$currentLineItems")
                     if (hasExistingOrder) {
-                        updateExistingCart(variantId, currentLineItems, quantity)
+                        updateExistingCart(variantId, currentLineItems, quantity, noteType)
                         Log.d("ProductDetailsViewModel", "Existing cart updated")
                     } else {
-                        createNewCart(variantId, customerEmail, quantity)
+                        createNewCart(variantId, customerEmail, quantity, noteType)
                         Log.d("ProductDetailsViewModel", "New cart created")
                     }
                 } catch (e: Exception) {
                     // If getDraftOrder fails, create a new cart
-                    createNewCart(variantId, customerEmail, quantity)
+                    createNewCart(variantId, customerEmail, quantity, noteType)
                     Log.d("ProductDetailsViewModel", "Created new cart after getDraftOrder failed")
                 }
 
@@ -129,7 +123,7 @@ class ProductDetailsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun createNewCart(variantId: String, customerEmail: String, quantity: Int) {
+    private suspend fun createNewCart(variantId: String, customerEmail: String, quantity: Int, noteType: note) {
         val lineItems = listOf(
             LineItem(
                 id = variantId,
@@ -143,7 +137,7 @@ class ProductDetailsViewModel @Inject constructor(
             draftOrderUseCase(
                 lineItems = lineItems,
                 variantId = variantId,
-                note = Optional.present(note.cart.name),
+                note = Optional.present(noteType.name),
                 email = customerEmail,
                 quantity = quantity
             )
@@ -157,7 +151,7 @@ class ProductDetailsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateExistingCart(variantId: String, existingLineItems: List<LineItem>, quantity: Int) {
+    private suspend fun updateExistingCart(variantId: String, existingLineItems: List<LineItem>, quantity: Int, noteType: note) {
         try {
             // Convert LineItem list to Item list while preserving quantities
             val existingItems = existingLineItems.mapNotNull { lineItem ->
@@ -178,31 +172,51 @@ class ProductDetailsViewModel @Inject constructor(
             Log.d("ProductDetailsViewModel", "Existing items before update: $updatedItems")
 
             val existingItemIndex = updatedItems.indexOfFirst { it.variantID == formattedVariantId }
-
-            if (existingItemIndex != -1) {
-                val currentQuantity = updatedItems[existingItemIndex].quantity ?: 0
-                val newQuantity = currentQuantity + quantity
-                if (newQuantity > 0) {
-                    updatedItems[existingItemIndex] = Item(
-                        variantID = formattedVariantId,
-                        quantity = newQuantity
+            if (noteType == note.cart) {
+                if (existingItemIndex != -1) {
+                    val currentQuantity = updatedItems[existingItemIndex].quantity ?: 0
+                    val newQuantity = currentQuantity + quantity
+                    if (newQuantity > 0) {
+                        updatedItems[existingItemIndex] = Item(
+                            variantID = formattedVariantId,
+                            quantity = newQuantity
+                        )
+                    } else {
+                        // Remove if total quantity becomes 0 or negative
+                        updatedItems.removeAt(existingItemIndex)
+                    }
+                } else if (quantity > 0) {
+                    // Add new item if it doesn't exist and quantity > 0
+                    updatedItems.add(
+                        Item(
+                            variantID = formattedVariantId,
+                            quantity = quantity
+                        )
                     )
-                } else {
-                    // Remove if total quantity becomes 0 or negative
-                    updatedItems.removeAt(existingItemIndex)
                 }
-            } else if (quantity > 0) {
-                // Add new item if it doesn't exist and quantity > 0
-                updatedItems.add(Item(
-                    variantID = formattedVariantId,
-                    quantity = quantity
-                ))
+            }
+            else {
+                updatedItems.find { it.variantID == formattedVariantId
+                }?.let {
+                    updatedItems.removeAt(updatedItems.indexOf(it))
+                }?: run {
+                    updatedItems.add(
+                        Item(
+                            variantID = formattedVariantId,
+                            quantity = quantity
+                        )
+                    )
+                }
             }
 
             Log.d("ProductDetailsViewModel", "Updated items after modification: $updatedItems")
 
-            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
-                ?: throw IllegalStateException("Draft order ID not found")
+            var draftOrderId = ""
+            if(noteType.name == note.cart.name){
+                draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
+            } else if(noteType.name == note.fav.name){
+                draftOrderId = sharedPreferencesHelper.getFavoriteDraftOrderId().toString()
+            }
 
             val updatedDraftOrder = withContext(Dispatchers.IO) {
                 draftOrderUseCase(
