@@ -24,4 +24,7 @@ class FavoriteProductsUseCases @Inject constructor(
         draftOrderId: String,
         lineItems: List<Item>
     ): DraftOrder = repository.updateDraftOrder(draftOrderId, lineItems)
+
+    suspend fun deleteDraftOrder(draftOrderId: String) =
+        repository.deleteDraftOrder(draftOrderId)
 }

@@ -93,7 +93,6 @@ class FavoriteViewModel @Inject constructor(
         }
     }
 
-
     private fun lineItemToProduct(lineItem: LineItem): Product {
         val isUsd = sharedPreferencesHelper.getCurrencyPreference()
         val usdToEgp = sharedPreferencesHelper.getUsdToEgpValue()
@@ -132,5 +131,33 @@ class FavoriteViewModel @Inject constructor(
                 )
             } ?: emptyList()
         )
+    }
+
+    fun removeProductFromFavorites(variantIdToRemove: String) {
+        viewModelScope.launch {
+            val draftOrderId = sharedPreferencesHelper.getFavoriteDraftOrderId()
+            val currentProducts = favoriteProducts.value
+            android.util.Log.d("FavoriteViewModel", "Current product variant IDs: ${currentProducts.map { it.variants.firstOrNull()?.id }}")
+            android.util.Log.d("FavoriteViewModel", "Variant ID to remove: $variantIdToRemove")
+            val updatedItems = currentProducts
+                .filter { it.variants.firstOrNull()?.id != variantIdToRemove }
+                .map { product ->
+                    Item(
+                        variantID = product.variants.firstOrNull()?.id.orEmpty(),
+                        quantity = 1
+                    )
+                }
+            if (draftOrderId != null) {
+                if (updatedItems.isEmpty()) {
+                    android.util.Log.d("FavoriteViewModel", "Deleting draft order: $draftOrderId")
+                    favoriteProductsUseCases.deleteDraftOrder(draftOrderId)
+                    sharedPreferencesHelper.saveFavoriteDraftOrderId("")
+                    refreshFavorites()
+                } else {
+                    android.util.Log.d("FavoriteViewModel", "Updating draft order: $draftOrderId with items: $updatedItems")
+                    updateFavoriteDraftOrder(draftOrderId, updatedItems)
+                }
+            }
+        }
     }
 }

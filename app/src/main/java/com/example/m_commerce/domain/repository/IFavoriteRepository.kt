@@ -12,4 +12,5 @@ interface IFavoriteRepository {
 
     suspend fun updateDraftOrder(draftOrderId: String, lineItems: List<Item>): DraftOrder
 
+    suspend fun deleteDraftOrder(draftOrderId: String)
 }

@@ -55,7 +55,11 @@ fun FavoriteView(
                 FavoriteProductCard(
                     product = product,
                     onProductClick = onProductClick,
-                    onDeleteClick = {}
+                    onDeleteClick = { productId ->
+                        product.variants.firstOrNull()?.id?.let { variantId ->
+                            viewModel.removeProductFromFavorites(variantId)
+                        }
+                    }
                 )
             }
         }
@@ -89,7 +93,9 @@ private fun FavoriteProductCard(
                     contentScale = ContentScale.Crop
                 )
                 IconButton(
-                    onClick = { product.id?.let(onDeleteClick) },
+                    onClick = {
+                        product.variants.firstOrNull()?.id?.let(onDeleteClick)
+                    },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)

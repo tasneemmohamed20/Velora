@@ -20,4 +20,6 @@ class FavoriteRepositoryImp @Inject constructor(
     override suspend fun updateDraftOrder(draftOrderId: String, lineItems: List<Item>): DraftOrder =
         favoriteRemoteDataSource.updateDraftOrder(draftOrderId, lineItems)
 
+    override suspend fun deleteDraftOrder(draftOrderId: String) =
+        favoriteRemoteDataSource.deleteDraftOrder(draftOrderId)
 }

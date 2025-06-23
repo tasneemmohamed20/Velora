@@ -8,6 +8,7 @@ import com.example.m_commerce.service1.DraftOrderCreateMutation
 import com.example.m_commerce.service1.DraftOrderUpdateMutation
 import com.example.m_commerce.service1.GetDraftOrdersQuery
 import com.example.m_commerce.service1.type.DraftOrderLineItemInput
+import com.example.m_commerce.service1.DraftOrderDeleteMutation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -203,5 +204,25 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
                 }
             )
         } ?: throw Exception("Failed to update draft order: ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()?.message ?: "No response data"}")
+    }
+
+    override suspend fun deleteDraftOrder(draftOrderId: String) {
+        try {
+            val response = withContext(Dispatchers.IO) {
+                apolloClient.mutation(
+                   DraftOrderDeleteMutation(id = draftOrderId)
+                ).execute()
+            }
+            val success = response.data?.draftOrderDelete?.userErrors?.isEmpty() ?: false
+            if (!success) {
+                response.data?.draftOrderDelete?.userErrors?.forEach { error ->
+                    android.util.Log.e("DraftOrderDelete", "Error: ${error.message}, Field: ${error.field}")
+                }
+                throw Exception("Failed to delete draft order")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("DraftOrderDelete", "Failed to delete draft order", e)
+            throw e
+        }
     }
 }
