@@ -32,4 +32,6 @@ class DraftOrderUseCase @Inject constructor(private val repository: IDraftOrderR
 
     suspend fun deleteDraftOrder(id: String) = repository.deleteDraftOrder(id)
 
+    suspend fun updateDraftOrderApplyVoucher(id: String, voucherCode: List<String>) =
+        repository.updateDraftOrderApplyVoucher(id, voucherCode)
 }

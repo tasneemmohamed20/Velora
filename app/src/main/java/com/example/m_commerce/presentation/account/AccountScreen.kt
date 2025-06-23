@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +32,7 @@ fun AccountScreen(
     onOrderClick: () -> Unit = {},
     onOffersClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    onVeloraPayClick: () -> Unit = {},
+    onVeloraVouchersClick: () -> Unit = {},
     onHelpClick: () -> Unit = {},
     onAboutClick: () -> Unit = {},
     viewModel: AccountViewModel = hiltViewModel()
@@ -111,9 +110,9 @@ fun AccountScreen(
                 onClick = onNotificationsClick
             )
             AccountMenuItem(
-                icon = painterResource(id = R.drawable.pay),
-                label = "Velora pay",
-                onClick = onVeloraPayClick
+                icon = Icons.Outlined.LocalOffer,
+                label = "Velora Vouchera",
+                onClick = onVeloraVouchersClick
             )
             AccountMenuItem(
                 icon = Icons.Outlined.Email,
@@ -132,17 +131,6 @@ fun AccountScreen(
 @Composable
 fun AccountMenuItem(
     icon: ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    AccountMenuItemImpl(label = label, onClick = onClick) {
-        Icon(icon, contentDescription = label, tint = Color(0xFF3669C9), modifier = Modifier.size(22.dp))
-    }
-}
-
-@Composable
-fun AccountMenuItem(
-    icon: Painter,
     label: String,
     onClick: () -> Unit
 ) {
@@ -178,7 +166,7 @@ fun AccountScreenPreview() {
         onOrderClick = {},
         onOffersClick = {},
         onNotificationsClick = {},
-        onVeloraPayClick = {},
+        onVeloraVouchersClick = {},
         onHelpClick = {},
         onAboutClick = {}
     )

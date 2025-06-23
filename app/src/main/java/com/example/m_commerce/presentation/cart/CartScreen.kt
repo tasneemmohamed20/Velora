@@ -79,7 +79,9 @@ fun CartScreen(
     var totalPrice: Double? = null
 
     val removeItemRequest = viewModel.removeItemRequest
-    var itemToRemove by remember { mutableStateOf<String?>(null) }
+    var itemToRemove by remember {
+        mutableStateOf<String?>(null)
+    }
 
     LaunchedEffect(Unit) {
         removeItemRequest.collect { variantId ->
@@ -95,9 +97,12 @@ fun CartScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        Log.d("CartScreen", "Removing item: $itemToRemove")
                         if (itemToRemove == "ALL") {
+                            Log.d("CartScreen", "Removing all items")
                             viewModel.deleteDraftOrder()
                         } else {
+                            Log.d("CartScreen", "Removing item: $itemToRemove")
                             viewModel.removeItem(itemToRemove!!)
                         }
                         itemToRemove = null
@@ -211,6 +216,7 @@ fun CartScreen(
                                                     viewModel.updateQuantity(itemId, newQty)
                                                 }
                                             } else {
+
                                                 if ((itemsCount ?: 0) > 1)  {
                                                 item.id?.let { itemId ->
                                                     viewModel.requestRemoveItem(item.id)
@@ -221,15 +227,21 @@ fun CartScreen(
                                             }
                                         },
                                         onRemove = {
-                                            if ((itemsCount ?: 0) > 1)  {
+                                            if (((itemsCount ?: 0) > 1))  {
+                                                if(item.quantity == (itemsCount ?: 0)){
+                                                    itemToRemove = "ALL"
+                                                }else {
                                                 item.id?.let { itemId ->
                                                     viewModel.requestRemoveItem(item.id)
+                                                }
                                                 }
                                             }
                                             else {
 //                                                viewModel.deleteDraftOrder()
                                                 itemToRemove = "ALL"
+                                                Log.d("TAG", "onRemove: ${itemToRemove}")
                                             }
+                                            Log.d("TAG", "onRemove: ${itemToRemove}")
                                         }
                                     )
                                     HorizontalDivider(modifier = Modifier.padding(8.dp))

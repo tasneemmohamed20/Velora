@@ -23,6 +23,7 @@ import com.example.m_commerce.service1.DraftOrderCreateMutation
 import com.example.m_commerce.service1.DraftOrderDeleteMutation
 import com.example.m_commerce.service1.DraftOrderUpdateMutation
 import com.example.m_commerce.service1.GetDraftOrdersQuery
+import com.example.m_commerce.service1.UpdateDraftOrderApplyDiscountCodeMutation
 import com.example.m_commerce.service1.UpdateDraftOrderBillingAddressMutation
 import com.example.m_commerce.service1.type.DraftOrderLineItemInput
 import com.example.m_commerce.service1.type.MailingAddressInput
@@ -446,6 +447,52 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
         }
     }
 
+    override suspend fun updateDraftOrderApplyVoucher(
+        id: String,
+        discountCode: List<String>
+    ): DraftOrder {
+        val response = withContext(Dispatchers.IO) {
+            shopifyService.mutation(
+                UpdateDraftOrderApplyDiscountCodeMutation(
+                    id = id,
+                    discountCodes = Optional.presentIfNotNull(discountCode)
+                )
+            ).execute()
+        }
 
+        response.data?.draftOrderUpdate?.userErrors?.firstOrNull()?.let { error ->
+            Log.e("DraftOrderUpdate", "Error: ${error.message}")
+        }
+        Log.i("DraftOrderUpdate", "Response: ${response.data?.draftOrderUpdate?.draftOrder?.discountCodes}")
+
+        return (response.data?.draftOrderUpdate?.draftOrder?.let { draft ->
+            DraftOrder(
+                id = draft.id,
+                name = draft.name,
+                status = draft.status?.toString(),
+                discountCodes = draft.discountCodes,
+                totalPrice = draft.totalPrice?.toString()?.toDoubleOrNull(),
+                totalDiscountsSet = draft.totalDiscountsSet?.presentmentMoney?.amount.toString(),
+                updatedAt = draft.updatedAt?.toString(),
+                lineItems = draft.lineItems?.let { lineItems ->
+                    DraftOrderLineItemConnection(
+                        nodes = lineItems.nodes?.map { node ->
+                            LineItem(
+                                id = node.id,
+                                title = node.title,
+                                quantity = node.quantity,
+                                requiresShipping = node.requiresShipping,
+                                taxable = node.taxable
+                            )
+                        } ?: emptyList()
+                    )
+                },
+
+            )
+        } ?: Log.e(
+            "DraftOrderUpdate",
+            "Draft order update failed ${response.data?.draftOrderUpdate?.userErrors?.firstOrNull()}"
+        )) as DraftOrder
+    }
 }
 
