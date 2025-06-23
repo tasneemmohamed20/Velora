@@ -1,7 +1,6 @@
 
 package com.example.m_commerce.presentation.products
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -10,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,7 +51,7 @@ import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
-import com.example.m_commerce.presentation.utils.theme.primaryBlue
+
 
 @Composable
 fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,onProductClick: (String) -> Unit){
@@ -92,7 +90,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,
                     if(productsData.isNotEmpty()){
                         ProductsList(productsData, currencyPrefState, Modifier.weight(2F),onProductClick = onProductClick)
                     }else {
-                        NoProductsFound()
+                        NoProductsFound(text = "No Products Found")
                     }
 
                 }
@@ -243,7 +241,7 @@ fun ProductPreview(){
 
 
 @Composable
-fun NoProductsFound(){
+fun NoProductsFound(text: String){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -254,9 +252,10 @@ fun NoProductsFound(){
         Image(painter = painterResource(id = R.drawable.no_data), contentDescription = "No Products")
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "No products found",
+            text = text,
             style = MaterialTheme.typography.titleLarge,
             color = Color.Black,
+            textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(12.dp))
     }

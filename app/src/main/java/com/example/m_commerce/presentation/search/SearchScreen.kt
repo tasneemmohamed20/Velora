@@ -29,7 +29,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.Color
-
+import com.example.m_commerce.presentation.products.NoProductsFound
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -145,7 +145,7 @@ fun SearchScreen(
                     is ResponseState.Success -> {
                         val products = productsState.data as List<Product>
                         if (products.isEmpty()) {
-                            Text("No products found")
+                            NoProductsFound(text = "No products found, check for spelling, or can try with other words")
                         } else {
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(2),
