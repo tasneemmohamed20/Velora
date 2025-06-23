@@ -93,9 +93,7 @@ private fun FavoriteProductCard(
                     contentScale = ContentScale.Crop
                 )
                 IconButton(
-                    onClick = {
-                        product.variants.firstOrNull()?.id?.let(onDeleteClick)
-                    },
+                    onClick = { product.id?.let(onDeleteClick) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
