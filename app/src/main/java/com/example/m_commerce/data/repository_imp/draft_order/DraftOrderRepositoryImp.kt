@@ -48,4 +48,11 @@ class DraftOrderRepositoryImp @Inject constructor(private val remoteDataSource: 
     override suspend fun completeDraftOrder(draftOrderId: String): Boolean {
         return remoteDataSource.completeAndDeleteDraftOrder(draftOrderId)
     }
+
+    override suspend fun updateDraftOrderApplyVoucher(
+        id: String,
+        discountCode: List<String>
+    ): DraftOrder {
+        return remoteDataSource.updateDraftOrderApplyVoucher(id, discountCode)
+    }
 }

@@ -40,8 +40,8 @@ data class DraftOrder(
     val visibleToCustomer: Boolean? = null,
     val userErrors: List<UserError>? = null,
     val lineItems: DraftOrderLineItemConnection? = null,
-    val billingAddress: BillingAddress? = null
-
+    val billingAddress: BillingAddress? = null,
+    val totalDiscountsSet: String? = null,
 )
 
 data class DraftOrderLineItemConnection(

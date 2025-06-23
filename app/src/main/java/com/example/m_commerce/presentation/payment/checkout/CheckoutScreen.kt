@@ -7,8 +7,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CreditCard
@@ -67,6 +68,11 @@ fun CheckoutScreen(
     val location by checkoutViewModel.selectedLocation.collectAsState()
     val selectedAddress by checkoutViewModel.selectedAddress.collectAsState()
 
+    val voucherText by checkoutViewModel.voucherText.collectAsState()
+    val voucherError by checkoutViewModel.voucherError.collectAsState()
+    val appliedDiscount by checkoutViewModel.appliedDiscount.collectAsState()
+    val isApplyingVoucher by checkoutViewModel.isApplyingVoucher.collectAsState()
+    val totalPriceAfterDiscount = totalPrice - appliedDiscount
     Log.d("CheckoutScreen", "CheckoutScreen: $location")
     Scaffold(
         topBar = {
@@ -78,7 +84,7 @@ fun CheckoutScreen(
         bottomBar = {
             ConfirmOrderBottomBar(
                 onConfirmOrder = {
-                    onConfirmOrder(selectedPaymentMethod, items, (totalPrice * 100).toInt())
+                    onConfirmOrder(selectedPaymentMethod, items, (totalPriceAfterDiscount * 100).toInt())
                     if(selectedPaymentMethod == PaymentMethod.CASH){
                             checkoutViewModel.completeDraftOrder()
                     }
@@ -100,6 +106,15 @@ fun CheckoutScreen(
             )
             Spacer(Modifier.height(16.dp))
 
+            VoucherSection(
+                voucherText = voucherText,
+                voucherError = voucherError,
+                appliedDiscount = appliedDiscount,
+                isApplyingVoucher = isApplyingVoucher,
+                onVoucherTextChange = checkoutViewModel::updateVoucherText,
+                onApplyVoucher = checkoutViewModel::applyVoucher
+            )
+            Spacer(Modifier.height(16.dp))
 
             PayWithSection(
                 selectedMethod = selectedPaymentMethod,
@@ -131,7 +146,8 @@ fun CheckoutScreen(
                 subtotal = subtotal,
                 estimatedFee = estimatedFee,
                 itemsCount = itemsCount,
-                totalPrice = totalPrice
+                totalPrice = totalPrice,
+                appliedDiscount = appliedDiscount
             )
             Spacer(Modifier.height(24.dp))
 
@@ -212,7 +228,7 @@ private fun MapAndAddressSection(location: LatLng, address: String) {
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .fillMaxWidth()
                 .height(120.dp)
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(Color.Gray.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
@@ -244,6 +260,107 @@ private fun MapAndAddressSection(location: LatLng, address: String) {
                 text = address,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+private fun VoucherSection(
+    voucherText: String,
+    voucherError: String?,
+    appliedDiscount: Double,
+    isApplyingVoucher: Boolean,
+    onVoucherTextChange: (String) -> Unit,
+    onApplyVoucher: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = "Save on your order",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Voucher icon
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = "Voucher",
+                tint = Color.Gray,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Text field without border
+            BasicTextField(
+                value = voucherText,
+                onValueChange = onVoucherTextChange,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 12.dp),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.Black),
+                decorationBox = { innerTextField ->
+                    if (voucherText.isEmpty()) {
+                        Text(
+                            text = "Enter voucher code",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Gray
+                        )
+                    }
+                    innerTextField()
+                }
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            if (isApplyingVoucher) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color(0xFFFF5722),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                TextButton(
+                    onClick = onApplyVoucher,
+                    enabled = voucherText.isNotBlank()
+                ) {
+                    Text(
+                        text = "Submit",
+                        color = Color.Blue,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+
+        if (voucherError != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = voucherError,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Red,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        } else if (appliedDiscount > 0) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Discount applied: EGP %.2f".format(appliedDiscount),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Green,
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
     }
@@ -292,7 +409,7 @@ private fun PayWithSection(
             )
         } else {
             Text(
-                "Cash on delivery limit is 5000 EGP",
+                text = "Cash on delivery limit is 5000 EGP",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
@@ -349,7 +466,13 @@ private fun PaymentOptionCard(
 }
 
 @Composable
-private fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsCount: Int, totalPrice: Double) {
+private fun PaymentSummarySection(
+    subtotal: Double,
+    estimatedFee: Double,
+    itemsCount: Int,
+    totalPrice: Double,
+    appliedDiscount: Double
+) {
     val itemsLabel = if (itemsCount > 1) "items" else "item"
     Column(
         Modifier
@@ -364,10 +487,13 @@ private fun PaymentSummarySection(subtotal: Double, estimatedFee: Double, itemsC
         )
         Spacer(Modifier.height(8.dp))
         SummaryRow("Subtotal - $itemsCount $itemsLabel", "EGP %.2f".format(subtotal))
+        if (appliedDiscount > 0) {
+            SummaryRow("Discount", "-EGP %.2f".format(appliedDiscount))
+        }
         SummaryRow("Shipping fee", "FREE")
         SummaryRow("Estimated fee", "EGP %.2f".format(estimatedFee))
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        SummaryRow("Total price", "EGP %.2f".format(totalPrice), isBold = true)
+        SummaryRow("Total price", "EGP %.2f".format(totalPrice - appliedDiscount), isBold = true)
     }
 }
 
