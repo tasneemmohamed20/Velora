@@ -41,10 +41,11 @@ class AddressMapViewModel @Inject constructor (
     private val geoCodingRepository: IGeoCodingRepository,
     private val placesClient: PlacesClient,
     sharedPreferencesHelper: SharedPreferencesHelper,
-    private val customerUseCase: CustomerUseCase
+    private val customerUseCase: CustomerUseCase,
+    private val workManager: WorkManager
 ) : ViewModel() {
     private val TAG = "AddressMapViewModel"
-    private val workManager = WorkManager.getInstance(context)
+//    private val workManager = WorkManager.getInstance(context)
 
     private val _locationState = MutableStateFlow<ResponseState>(ResponseState.Loading)
     val locationState: StateFlow<ResponseState> = _locationState
@@ -164,7 +165,7 @@ class AddressMapViewModel @Inject constructor (
                 .collect { address ->
                     _address.value = address
                     _isLoading.value = false
-                    Log.d(TAG, "Address: $address")
+//                    Log.d(TAG, "Address: $address")
                 }
         }
     }

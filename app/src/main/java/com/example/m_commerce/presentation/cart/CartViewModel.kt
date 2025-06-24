@@ -44,10 +44,10 @@ class CartViewModel @Inject constructor(
                 val customerEmail = sharedPreferencesHelper.getCustomerEmail()
                     ?: throw Exception("Customer email not found")
                 getDraftOrder(customerEmail, note.cart)
-                Log.d("CartViewModel", note.cart.name)
+//                Log.d("CartViewModel", note.cart.name)
             } catch (e: Exception) {
                 _cartState.value = ResponseState.Failure(e)
-                Log.e("CartViewModel", "Error loading cart items", e)
+//                Log.e("CartViewModel", "Error loading cart items", e)
             }
         }
     }
@@ -68,12 +68,12 @@ class CartViewModel @Inject constructor(
                     currentOrder = draftOrder
                     _cartState.value = ResponseState.Success(draftOrder)
                     sharedPreferencesHelper.saveCartDraftOrderId(draftOrder.id.toString())
-                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrder.note2}")
-                    Log.d("LoginViewModel", "Draft order: ${draftOrder}")
-                    Log.d("LoginViewModel", "Draft order ID: ${draftOrder.id}")
+//                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrder.note2}")
+//                    Log.d("LoginViewModel", "Draft order: ${draftOrder}")
+//                    Log.d("LoginViewModel", "Draft order ID: ${draftOrder.id}")
                 } ?: run {
                     _cartState.value = ResponseState.Failure(Exception("Cart not found"))
-                    Log.d("LoginViewModel", "Cart not found")
+//                    Log.d("LoginViewModel", "Cart not found")
                 }
             }
         } catch (e: Exception) {
@@ -88,7 +88,7 @@ class CartViewModel @Inject constructor(
             try {
                 _cartState.value = ResponseState.Loading
 
-                    Log.d("CartViewModel", "Current Order: $currentOrder")
+//                    Log.d("CartViewModel", "Current Order: $currentOrder")
                 val updatedItems = currentOrder?.lineItems?.nodes?.mapNotNull { node ->
                     if (node.id == variantId) {
                         Item(
@@ -102,7 +102,7 @@ class CartViewModel @Inject constructor(
                         )
                     }
                 } ?: emptyList()
-                Log.d("CartViewModel", "Updated Items: $updatedItems")
+//                Log.d("CartViewModel", "Updated Items: $updatedItems")
                 val updatedOrder = draftOrderUseCase(
                     id = draftOrderID.toString(),
                     lineItems = updatedItems

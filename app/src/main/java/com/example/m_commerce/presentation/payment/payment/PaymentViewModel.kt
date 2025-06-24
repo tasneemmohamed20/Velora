@@ -11,7 +11,6 @@ import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.domain.entities.payment.OrderResponse
 import com.example.m_commerce.domain.entities.payment.PaymentKeyResponse
 import com.example.m_commerce.domain.usecases.CompleteDraftOrder
-import com.example.m_commerce.domain.usecases.DraftOrderUseCase
 import com.example.m_commerce.domain.usecases.PaymentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +22,6 @@ import javax.inject.Inject
 class PaymentViewModel @Inject constructor(
     private val paymentUseCase: PaymentUseCase,
     private val completeDraftOrder: CompleteDraftOrder,
-    private val draftOrderDelete: DraftOrderUseCase,
     private val sharedPreferencesHelper: SharedPreferencesHelper,
 ) : ViewModel() {
 
@@ -71,7 +69,7 @@ class PaymentViewModel @Inject constructor(
                 ).collect { response ->
                     _orderState.value = response
                     getPaymentKey(response.id.toString(), amountCents)
-                    Log.d("PaymentViewModel", "Order created with ID: ${response.id}")
+//                    Log.d("PaymentViewModel" ,"Order created with ID: ${response.id}")
                 }
             } catch (e: Exception) {
                 _error.value = e.message ?: "Order creation failed"
@@ -101,7 +99,7 @@ class PaymentViewModel @Inject constructor(
                     billingData = billingData
                 ).collect { response ->
                     _paymentKeyState.value = response
-                    Log.d("PaymentViewModel", "Payment key received: ${response.token}")
+//                    Log.d("PaymentViewModel", "Payment key received: ${response.token}")
                 }
             } catch (e: Exception) {
                 _error.value = e.message ?: "Payment key generation failed"
@@ -111,7 +109,7 @@ class PaymentViewModel @Inject constructor(
 
 
     fun completeDraftOrder(){
-        Log.i("completeDraftOrder", "customerId: ${sharedPreferencesHelper.getCustomerId()} ")
+//        Log.i("completeDraftOrder", "customerId: ${sharedPreferencesHelper.getCustomerId()} ")
         viewModelScope.launch {
             val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
             val result = completeDraftOrder(draftOrderId)
