@@ -89,7 +89,6 @@ fun LoginScreen(
             is ResponseState.Success -> {
                 LaunchedEffect(Unit) {
                     Toast.makeText(context, (loginState as ResponseState.Success).data as String, Toast.LENGTH_SHORT).show()
-                    // i will put here the navigation to the home screen later onn
                     onLoginSuccess()
                 }
             }
