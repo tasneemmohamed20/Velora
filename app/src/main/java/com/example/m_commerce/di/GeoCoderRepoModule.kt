@@ -1,8 +1,8 @@
 package com.example.m_commerce.di
 
-import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceContract
-import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceImp
-import com.example.m_commerce.data.repository_imp.settings_repo.GeoCodingRepositoryImp
+import com.example.m_commerce.data.datasource.remote.restful.geocoding_address.GeocodingAddressRemoteDataSourceImp
+import com.example.m_commerce.data.datasource.remote.restful.geocoding_address.IGeocodingAddressRemoteDataSource
+import com.example.m_commerce.data.repository_imp.Geocoding_repo.GeoCodingRepositoryImp
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
 import dagger.Binds
 import dagger.Module
@@ -18,7 +18,7 @@ abstract class GeoCoderRepoModule {
 
     @Binds
     @Singleton
-    abstract fun bindRemoteDataSource(impl: RemoteDataSourceImp): RemoteDataSourceContract
+    abstract fun bindGeoCoderRemoteDataSource(impl: GeocodingAddressRemoteDataSourceImp): IGeocodingAddressRemoteDataSource
 
     @Binds
     @Singleton

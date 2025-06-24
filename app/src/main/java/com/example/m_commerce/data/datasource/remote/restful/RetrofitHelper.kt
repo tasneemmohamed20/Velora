@@ -8,7 +8,7 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
+object CurrencyRetrofitClient {
     private const val BASE_URL = "https://api.currencyfreaks.com/v2.0/rates/"
 
     fun getRetrofit(): Retrofit {
@@ -20,7 +20,6 @@ object RetrofitClient {
 
 }
 
-
 object RetrofitGeoHelper{
     private const val BASE_URL = "https://maps.googleapis.com/"
 
@@ -29,6 +28,7 @@ object RetrofitGeoHelper{
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
     }
 }
 
