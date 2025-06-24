@@ -104,7 +104,7 @@ class FavoriteViewModel @Inject constructor(
         }
 
         return Product(
-            id = lineItem.id ?: "",
+            id = lineItem.product?.id ?: "",
             title = lineItem.title ?: "",
             productType = lineItem.product?.productType ?: "",
             description = lineItem.name ?: "",

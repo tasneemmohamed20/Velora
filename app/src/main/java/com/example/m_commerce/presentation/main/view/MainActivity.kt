@@ -367,6 +367,7 @@ fun MainActivity.NavHostSetup(){
             } else {
                 FavoriteView(
                     onProductClick = { productId ->
+                        Log.d("ProductClick", "Navigating with productId: $productId")
                         navHostController.navigate(ScreensRoute.ProductDetails(productId))
                     }
                 )

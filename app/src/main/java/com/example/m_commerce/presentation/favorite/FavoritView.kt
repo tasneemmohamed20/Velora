@@ -54,7 +54,7 @@ fun FavoriteView(
                 val product = favoriteProducts[index]
                 FavoriteProductCard(
                     product = product,
-                    onProductClick = onProductClick,
+                    onProductClick = { onProductClick(product.id) },
                     onDeleteClick = { productId ->
                         product.variants.firstOrNull()?.id?.let { variantId ->
                             viewModel.removeProductFromFavorites(variantId)
@@ -76,7 +76,7 @@ private fun FavoriteProductCard(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(0.8f)
-            .clickable { product.id?.let(onProductClick) },
+            .clickable { onProductClick(product.id) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(8.dp)
     ) {

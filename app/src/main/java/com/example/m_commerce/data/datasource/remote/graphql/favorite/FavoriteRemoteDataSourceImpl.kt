@@ -69,63 +69,62 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
             ).execute()
 
             var draftOrders = response.data?.draftOrders?.nodes?.mapNotNull { draft ->
-                    DraftOrder(
-                        id = draft.id,
-                        email = draft.email,
-                        name = draft.name,
-                        note2 = draft.note2,
-                        totalPrice = draft.totalPrice?.toString()?.toDoubleOrNull(),
-                        lineItems = draft.lineItems?.let { lineItems ->
-                            DraftOrderLineItemConnection(
-                                nodes = lineItems.nodes?.map { node ->
-                                    LineItem(
-                                        id = node.id,
-                                        name = node.name,
-                                        originalTotal = node.originalTotal?.toString()?.toDoubleOrNull(),
-                                        originalUnitPrice = node.originalUnitPrice?.toString()?.toDoubleOrNull(),
-                                        title = node.title,
-                                        variantTitle = node.variantTitle,
-                                        vendor = node.vendor,
-                                        image = node.image?.let { image ->
-                                            Image(
-                                                url = image.url?.toString()
+                DraftOrder(
+                    id = draft.id,
+                    email = draft.email,
+                    name = draft.name,
+                    note2 = draft.note2,
+                    totalPrice = draft.totalPrice?.toString()?.toDoubleOrNull(),
+                    lineItems = draft.lineItems?.let { lineItems ->
+                        DraftOrderLineItemConnection(
+                            nodes = lineItems.nodes?.mapNotNull { node ->
+                                val productNode = node.product
+                                if (productNode == null) return@mapNotNull null
+                                LineItem(
+                                    id = node.id,
+                                    name = node.name,
+                                    originalTotal = node.originalTotal?.toString()?.toDoubleOrNull(),
+                                    originalUnitPrice = node.originalUnitPrice?.toString()?.toDoubleOrNull(),
+                                    title = node.title,
+                                    variantTitle = node.variantTitle,
+                                    vendor = node.vendor,
+                                    image = node.image?.let { image ->
+                                        Image(
+                                            url = image.url?.toString()
+                                        )
+                                    },
+                                    product = Product(
+                                        id = productNode.id ?: "",
+                                        title = productNode.title ?: "",
+                                        productType = productNode.productType ?: "",
+                                        description = productNode.description ?: "",
+                                        price = PriceDetails(
+                                            minVariantPrice = Price(
+                                                amount = productNode.priceRange?.minVariantPrice?.amount?.toString() ?: "0",
+                                                currencyCode = productNode.priceRange?.minVariantPrice?.currencyCode?.name ?: ""
                                             )
-                                        },
-                                        product = node.product?.let { product ->
-                                            Product(
-                                                id = "",
-                                                title = "",
-                                                productType = "",
-                                                description = "",
-                                                price = PriceDetails(
-                                                    minVariantPrice = Price(
-                                                        amount = product.priceRange.minVariantPrice.amount.toString(),
-                                                        currencyCode = ""
-                                                    )
-                                                ),
-                                                images =  emptyList(),
-                                                variants = product.variants.edges.map { edge ->
-                                                    ProductVariant(
-                                                        id = edge.node.id,
-                                                        title = edge.node.title,
-                                                        availableForSale = edge.node.availableForSale == true,
-                                                        selectedOptions = edge.node.selectedOptions?.map { option ->
-                                                            SelectedOption(
-                                                                name = option.name,
-                                                                value = option.value
-                                                            )
-                                                        }
+                                        ),
+                                        images = productNode.images?.edges?.mapNotNull { it.node.url?.toString() } ?: emptyList(),
+                                        variants = productNode.variants?.edges?.map { edge ->
+                                            ProductVariant(
+                                                id = edge.node.id ?: "",
+                                                title = edge.node.title,
+                                                availableForSale = edge.node.availableForSale,
+                                                selectedOptions = edge.node.selectedOptions?.map { option ->
+                                                    SelectedOption(
+                                                        name = option.name ?: "",
+                                                        value = option.value ?: ""
                                                     )
                                                 }
                                             )
-                                        },
-                                        variantId = node.variant?.id
-
-                                    )
-                                }
-                            )
-                        }
-                    )
+                                        } ?: emptyList()
+                                    ),
+                                    variantId = node.variant?.id
+                                )
+                            } ?: emptyList()
+                        )
+                    }
+                )
             } ?: emptyList()
             emit(draftOrders)
         } catch (e: Exception) {

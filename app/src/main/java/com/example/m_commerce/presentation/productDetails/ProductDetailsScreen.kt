@@ -52,7 +52,10 @@ fun ProductDetailsScreen(
 
     val productState by viewModel.productState.collectAsState()
 
-
+    LaunchedEffect(productId) {
+        Log.d(TAG, "Received productId: $productId")
+        viewModel.loadProduct(productId)
+    }
     when (productState) {
         is ResponseState.Loading ->  Box(
             contentAlignment = Alignment.Center,
