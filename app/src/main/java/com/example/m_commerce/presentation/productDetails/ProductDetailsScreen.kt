@@ -27,6 +27,7 @@ import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import com.example.m_commerce.domain.entities.note
 
 
 val TAG = "ProductDetailsScreen"
@@ -76,7 +77,7 @@ fun ProductDetailsScreen(
                         selectedSize = selectedSize,
                         onConfirm = { quantity ->
                             selectedVariantId?.let { variantId ->
-                                viewModel.addToCart(variantId, quantity)
+                                viewModel.addToCart(variantId, quantity, note.cart)
                                 Log.d(TAG, "Added to cart with variant ID: $variantId, quantity: $quantity")
                             }
                             showBottomSheet = false
@@ -153,7 +154,13 @@ fun ProductDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
-                            onClick = { },
+                            onClick = {
+                                viewModel.addToCart(
+                                    variantId = product.variants.first().id,
+                                    quantity = 1,
+                                    noteType = note.fav
+                                )
+                            },
                             modifier = Modifier
                                 .size(70.dp)
                                 .clip(CircleShape)

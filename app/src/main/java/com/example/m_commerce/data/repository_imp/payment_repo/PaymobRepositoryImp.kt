@@ -1,6 +1,6 @@
-package com.example.m_commerce.data.repository_imp.payment
+package com.example.m_commerce.data.repository_imp.payment_repo
 
-import com.example.m_commerce.data.datasource.remote.restful.remote.RemoteDataSourceContract
+import com.example.m_commerce.data.datasource.remote.restful.payment.IPaymentRemoteDataSource
 import com.example.m_commerce.domain.entities.payment.AuthResponse
 import com.example.m_commerce.domain.entities.payment.BillingData
 import com.example.m_commerce.domain.entities.payment.OrderItem
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class PaymobRepositoryImp @Inject constructor(
-    private val remoteDataSource: RemoteDataSourceContract
+    private val remoteDataSource: IPaymentRemoteDataSource
 ) : IPaymobRepository {
 
     override suspend fun getAuthenticationToken(): Flow<AuthResponse> {

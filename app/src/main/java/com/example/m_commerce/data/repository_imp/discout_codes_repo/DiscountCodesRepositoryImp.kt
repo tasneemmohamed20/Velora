@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.repository_imp.discout_codes
+package com.example.m_commerce.data.repository_imp.discout_codes_repo
 
 import com.example.m_commerce.data.datasource.remote.graphql.discount_codes.IDiscountCodesRemoteDataSource
 import com.example.m_commerce.domain.entities.DiscountCodes

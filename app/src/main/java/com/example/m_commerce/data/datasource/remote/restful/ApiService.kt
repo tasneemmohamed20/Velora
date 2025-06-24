@@ -1,4 +1,4 @@
-package com.example.m_commerce.data.datasource.remote.restful.remote
+package com.example.m_commerce.data.datasource.remote.restful
 
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.domain.entities.GeocodingResponse
@@ -14,19 +14,15 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-interface ApiServices {
+interface CurrencyApiServices {
     @GET("latest")
     suspend fun getCurrentRate(
         @Query("apikey") apiKey: String,
     ): CurrencyExchangeResponse
 
+}
 
-    @GET("maps/api/geocode/json")
-    suspend fun getAddressFromGeocoding(
-        @Query("latlng") latlng: String,
-        @Query("key") apiKey: String
-    ): GeocodingResponse
-
+interface PaymentApiServices {
     @POST("api/auth/tokens")
     @Headers("Content-Type: application/json")
     suspend fun getAuthToken(
@@ -44,5 +40,12 @@ interface ApiServices {
     suspend fun getPaymentKey(
         @Body paymentKeyRequest: PaymentKeyRequest
     ): PaymentKeyResponse
+}
 
+interface GeocodingApiServices {
+    @GET("maps/api/geocode/json")
+    suspend fun getAddressFromGeocoding(
+        @Query("latlng") latlng: String,
+        @Query("key") apiKey: String
+    ): GeocodingResponse
 }

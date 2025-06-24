@@ -2,22 +2,23 @@ package com.example.m_commerce.di
 
 import android.content.Context
 import com.apollographql.apollo.ApolloClient
-import com.example.m_commerce.data.datasource.remote.restful.PlacesClientHelper
-import com.example.m_commerce.data.datasource.remote.restful.RetrofitClient
+import com.example.m_commerce.data.datasource.remote.restful.CurrencyApiServices
+import com.example.m_commerce.data.datasource.remote.restful.GeocodingApiServices
+import com.example.m_commerce.data.datasource.remote.restful.PaymentApiServices
+import com.example.m_commerce.data.datasource.remote.restful.CurrencyRetrofitClient
+import com.example.m_commerce.data.datasource.remote.restful.RetrofitGeoHelper
+import com.example.m_commerce.data.datasource.remote.restful.PaymobRetrofitHelper
 import com.example.m_commerce.presentation.utils.Constants
-
+import com.example.m_commerce.presentation.utils.ConnectivityHelper
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
+import com.example.m_commerce.data.datasource.remote.restful.PlacesClientHelper
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
 import javax.inject.Singleton
-import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-import com.example.m_commerce.data.datasource.remote.restful.PaymobRetrofitHelper
-import com.example.m_commerce.presentation.utils.ConnectivityHelper
-
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -25,8 +26,23 @@ object DataProviderModule {
 
     @Provides
     @Singleton
-    fun provideGeoRetrofit(): Retrofit {
-        return RetrofitClient.getRetrofit()
+    @GeocodingApiService
+    fun provideGeoRetrofit(): GeocodingApiServices {
+        return RetrofitGeoHelper.getRetrofit().create(GeocodingApiServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @CurrencyApiService
+    fun provideCurrencyRetrofit(): CurrencyApiServices {
+        return CurrencyRetrofitClient.getRetrofit().create(CurrencyApiServices::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @PaymentApiService
+    fun providePaymobRetrofit(): PaymentApiServices {
+        return PaymobRetrofitHelper.getRetrofit().create(PaymentApiServices::class.java)
     }
 
     @Provides
@@ -39,7 +55,7 @@ object DataProviderModule {
     @Singleton
     @StoreApollo
     fun provideStoreApolloClient(): ApolloClient {
-         return ApolloClient.Builder()
+        return ApolloClient.Builder()
             .httpHeaders(Constants.storeHeaders)
             .serverUrl(Constants.STOREFRONT_URL)
             .build()
@@ -59,12 +75,6 @@ object DataProviderModule {
     @Singleton
     fun provideSharedPreferencesHelper(@ApplicationContext context: Context): SharedPreferencesHelper {
         return SharedPreferencesHelper(context)
-    }
-
-    @Provides
-    @Singleton
-    fun providePaymobRetrofit(): Retrofit {
-        return PaymobRetrofitHelper.getRetrofit()
     }
 
     @Provides

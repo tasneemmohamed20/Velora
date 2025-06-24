@@ -405,11 +405,12 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
             }
 
             val success = response.data?.draftOrderDelete?.userErrors?.isEmpty() ?: false
-                response.data?.draftOrderDelete?.userErrors?.forEach { error ->
-                    Log.e("DraftOrderDelete", "Error: ${error.message}, Field: ${error.field}")
-                }
-                Log.e("DraftOrderDelete", "${response.data?.draftOrderDelete?.userErrors} + $success" )
-              success
+            response.data?.draftOrderDelete?.userErrors?.forEach { error ->
+                Log.e("DraftOrderDelete", "Error: ${error.message}, Field: ${error.field}")
+            }
+            Log.e("DraftOrderDelete", "${response.data?.draftOrderDelete?.userErrors} + $success" )
+
+            success
         } catch (e: Exception) {
             Log.e("DraftOrderDelete", "Failed to delete draft order", e)
             false
