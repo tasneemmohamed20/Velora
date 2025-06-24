@@ -20,7 +20,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import okhttp3.Response
 import javax.inject.Inject
 
 
@@ -61,7 +60,7 @@ class CheckoutViewModel @Inject constructor(
         fetchDiscountCodes()
     }
 
-    private fun fetchCustomerAndSetLocation() {
+    fun fetchCustomerAndSetLocation() {
         viewModelScope.launch {
             val customerId = sharedPreferencesHelper.getCustomerId().toString()
             val customer: Flow<Customer> = customerUseCase(customerId)
@@ -105,10 +104,10 @@ class CheckoutViewModel @Inject constructor(
     fun completeDraftOrder(){
 
         viewModelScope.launch {
-            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
-            val result = completeDraftOrder(draftOrderId)
+            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
+            val result = draftOrderId?.let { completeDraftOrder(it) }
 
-            if (result) {
+            if (result == true) {
                 toggleSuccessAlert()
             } else {
                 toggleErrorAlert()
