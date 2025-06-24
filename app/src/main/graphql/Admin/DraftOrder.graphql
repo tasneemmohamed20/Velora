@@ -78,6 +78,8 @@ mutation DraftOrderCreate(
                         url
                     }
                     product {
+                        id
+                        title
                         priceRange {
                             minVariantPrice {
                                 amount
@@ -167,9 +169,21 @@ query GetDraftOrders(
                         url
                     }
                     product {
+                        id
+                        title
+                        productType
+                        description
                         priceRange {
                             minVariantPrice {
                                 amount
+                                currencyCode
+                            }
+                        }
+                        images(first: 5) {
+                            edges {
+                                node {
+                                    url
+                                }
                             }
                         }
                         variants(first: 10) {
@@ -274,6 +288,8 @@ mutation DraftOrderUpdate(
                         url
                     }
                     product {
+                        id
+                        title
                         priceRange {
                             minVariantPrice {
                                 amount
