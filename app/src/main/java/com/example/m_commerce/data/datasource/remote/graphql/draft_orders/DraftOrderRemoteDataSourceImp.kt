@@ -430,18 +430,11 @@ class DraftOrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val
 
             if (userErrors.isNotEmpty()) {
                 userErrors.forEach {
-                    Log.e("completeDraftOrder", "Error: ${it.message} (Field: ${it.field})")
                 }
                 return false
             }
 
-            val completedOrderId = response.data?.draftOrderComplete?.draftOrder?.id
-            Log.i("completeDraftOrder", "Successfully completed: $completedOrderId")
-
-
             val deletionSuccess = deleteDraftOrder(draftOrderId)
-            Log.i("deleteDraftOrder", "Deletion success: $deletionSuccess")
-
             deletionSuccess
         } catch (e: Exception) {
             false

@@ -1,16 +1,13 @@
 package com.example.m_commerce.data.datasource.remote.graphql.order
 
-import android.util.Log
+
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.di.AdminApollo
 import com.example.m_commerce.domain.entities.OrderEntity
-import com.example.m_commerce.domain.entities.OrderCreateResponse
 import com.example.m_commerce.domain.entities.Price
 import com.example.m_commerce.domain.entities.PriceDetails
 import com.example.m_commerce.domain.entities.Product
-import com.example.m_commerce.domain.entities.UserError
 import com.example.m_commerce.presentation.utils.Functions.formatStreetAndArea
-import com.example.m_commerce.service1.CompleteDraftOrderMutation
 import com.example.m_commerce.service1.GetOrdersByCustomerQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -61,10 +58,5 @@ class OrderRemoteDataSourceImp @Inject constructor(@AdminApollo private val shop
         } ?: emptyList()
         emit(orders)
     }
-
-    override fun getOrderById(): Flow<OrderEntity> {
-        TODO("Not yet implemented")
-    }
-
 
 }

@@ -110,11 +110,12 @@ class PaymentViewModel @Inject constructor(
 
     fun completeDraftOrder(){
 //        Log.i("completeDraftOrder", "customerId: ${sharedPreferencesHelper.getCustomerId()} ")
-        viewModelScope.launch {
-            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
-            val result = completeDraftOrder(draftOrderId)
 
-            if (result) {
+        viewModelScope.launch {
+            val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId()
+            val result = draftOrderId?.let { completeDraftOrder(it) }
+
+            if (result == true) {
                 toggleSuccessAlert()
             } else {
                 toggleErrorAlert()
