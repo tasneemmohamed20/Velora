@@ -1,6 +1,7 @@
 package com.example.m_commerce.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.apollographql.apollo.ApolloClient
 import com.example.m_commerce.data.datasource.remote.restful.CurrencyApiServices
 import com.example.m_commerce.data.datasource.remote.restful.GeocodingApiServices
@@ -81,5 +82,15 @@ object DataProviderModule {
     @Singleton
     fun provideConnectivityHelper(@ApplicationContext context: Context): ConnectivityHelper {
         return ConnectivityHelper(context)
+    }
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object WorkManagerModule {
+        @Provides
+        @Singleton
+        fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
+            return WorkManager.getInstance(context)
+        }
     }
 }

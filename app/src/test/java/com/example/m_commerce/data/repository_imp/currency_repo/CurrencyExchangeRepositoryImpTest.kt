@@ -3,6 +3,7 @@ package com.example.m_commerce.data.repository_imp.currency_repo
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.data.datasource.remote.restful.currency_exchange.FakeCurrencyExchangeDataSource
 import com.example.m_commerce.domain.repository.ICurrencyExchangeRepository
+import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -21,7 +22,7 @@ class CurrencyExchangeRepositoryImpTest {
 
     @Before
     fun setUp() {
-        mockSharedPreferencesHelper = mock(SharedPreferencesHelper::class.java)
+        mockSharedPreferencesHelper = mockk(relaxed = true)
         fakeRemoteDataSource = FakeCurrencyExchangeDataSource()
         repository =
             CurrencyExchangeRepositoryImp(fakeRemoteDataSource, mockSharedPreferencesHelper)

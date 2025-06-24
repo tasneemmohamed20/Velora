@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     private val customerUseCase: CustomerUseCase,
-    sharedPreferencesHelper: SharedPreferencesHelper
+    sharedPreferencesHelper: SharedPreferencesHelper,
 ) : ViewModel() {
 
     private val _customerState = MutableStateFlow<Customer?>(null)
@@ -38,12 +38,12 @@ class AccountViewModel @Inject constructor(
             _isLoading.value = true
             customerUseCase(id)
                 .catch { e ->
-                    Log.e("AccountViewModel", "getCustomerData: ${e.message}")
+//                    Log.e("AccountViewModel", "getCustomerData: ${e.message}")
                     _error.value = e.message
                     _isLoading.value = false
                 }
                 .collect { customer ->
-                    Log.i("AccountViewModel", "getCustomerData: $customer")
+//                    Log.i("AccountViewModel", "getCustomerData: $customer")
                     _customerState.value = customer
                     _isLoading.value = false
                 }

@@ -30,12 +30,12 @@ class SettingsViewModel @Inject constructor(
                 currencyExchangeUseCase().collect { response ->
                     _currencyExchange.emit(response)
                     saveUsdToEgpValue(response.rates.EGP.toFloat())
-                    Log.d("SettingsViewModel", "Currency exchange rate: ${response.rates.EGP}")
+//                    Log.d("SettingsViewModel", "Currency exchange rate: ${response.rates.EGP}")
                 }
             } catch (e: Exception) {
                 _error.emit(e.message ?: "Unknown error occurred")
 
-                Log.e("SettingsViewModel", "Error fetching currency exchange rate: ${e.message}")
+//                Log.e("SettingsViewModel", "Error fetching currency exchange rate: ${e.message}")
             }
         }
     }
