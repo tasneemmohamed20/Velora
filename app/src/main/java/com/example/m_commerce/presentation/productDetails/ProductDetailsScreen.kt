@@ -9,8 +9,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -27,7 +25,10 @@ import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.ui.graphics.Color
 import com.example.m_commerce.domain.entities.note
+import com.example.m_commerce.presentation.favorite.FavoriteHeartIcon
+import com.example.m_commerce.presentation.favorite.FavoriteViewModel
 
 
 val TAG = "ProductDetailsScreen"
@@ -37,37 +38,36 @@ val TAG = "ProductDetailsScreen"
 fun ProductDetailsScreen(
     productId: String,
     onBack: () -> Unit,
-    viewModel: ProductDetailsViewModel = hiltViewModel()
+    viewModel: ProductDetailsViewModel = hiltViewModel(),
+    favoriteViewModel: FavoriteViewModel = hiltViewModel() // Add FavoriteViewModel
 ) {
-
     val bottomSheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedVariantId by remember { mutableStateOf<String?>(null) }
     var selectedColor by remember { mutableStateOf<String?>(null) }
     var selectedSize by remember { mutableStateOf<String?>(null) }
 
+    val favoriteVariantIds by favoriteViewModel.favoriteVariantIds.collectAsState()
+
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
+        favoriteViewModel.loadFavorites() // Load favorites when screen opens
     }
 
     val productState by viewModel.productState.collectAsState()
 
-    LaunchedEffect(productId) {
-        Log.d(TAG, "Received productId: $productId")
-        viewModel.loadProduct(productId)
-    }
     when (productState) {
-        is ResponseState.Loading ->  Box(
+        is ResponseState.Loading -> Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             CircularProgressIndicator()
         }
         is ResponseState.Failure -> Text("Failed to load product")
         is ResponseState.Success -> {
             val product = (productState as ResponseState.Success).data as Product
-            Log.d(TAG, "Product: ${product.id}")
+            val firstVariantId = product.variants.firstOrNull()?.id ?: ""
+            val isFavorited = favoriteVariantIds.contains(firstVariantId)
 
             if (showBottomSheet) {
                 ModalBottomSheet(
@@ -95,23 +95,36 @@ fun ProductDetailsScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
-                ImageCarousel(
-                    urls = product.images,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Box {
+                    ImageCarousel(
+                        urls = product.images,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = product.title,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = product.title,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -126,6 +139,7 @@ fun ProductDetailsScreen(
                     onColorSelected = { color -> selectedColor = color },
                     onSizeSelected = { size -> selectedSize = size }
                 )
+
                 Text(
                     text = "Description",
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -139,13 +153,11 @@ fun ProductDetailsScreen(
             }
 
             Box(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 8.dp,
                     color = MaterialTheme.colorScheme.surface
                 ) {
@@ -156,25 +168,19 @@ fun ProductDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
-                            onClick = {
-                                viewModel.addToCart(
-                                    variantId = product.variants.first().id,
-                                    quantity = 1,
-                                    noteType = note.fav
-                                )
+                        FavoriteHeartIcon(
+                            isFavorited = isFavorited,
+                            onToggle = {
+                                favoriteViewModel.toggleProductFavorite(product, firstVariantId)
                             },
                             modifier = Modifier
                                 .size(70.dp)
-                                .clip(CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite",
-                                modifier = Modifier.size(42.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                                .background(
+                                    MaterialTheme.colorScheme.surface,
+                                    CircleShape
+                                ),
+                            size = 42.dp
+                        )
 
                         Button(
                             onClick = {
@@ -210,7 +216,6 @@ fun ProductDetailsScreen(
 
 @Composable
 private fun ImageCarousel(urls: List<String>, modifier: Modifier = Modifier) {
-
     val pagerState = rememberPagerState { urls.size }
 
     Column(modifier = modifier) {
@@ -250,68 +255,6 @@ private fun ImageCarousel(urls: List<String>, modifier: Modifier = Modifier) {
         }
     }
 }
-
-
-//@Composable
-//private fun VariantOptionsSection(
-//    variants: List<ProductVariant>,
-//    modifier: Modifier = Modifier
-//) {
-//    val colorOptions = variants
-//        .flatMap { it.selectedOptions }
-//        .filter { it.name.equals("Color", ignoreCase = true) }
-//        .map { it.value }
-//        .distinct()
-//
-//    val sizeOptions = variants
-//        .flatMap { it.selectedOptions }
-//        .filter { it.name.equals("Size", ignoreCase = true) }
-//        .map { it.value }
-//        .distinct()
-//
-//    Column(modifier = modifier) {
-//        if (colorOptions.isNotEmpty()) {
-//            Text(
-//                text = "Colors",
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    fontWeight = FontWeight.Bold
-//                )
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            LazyRow {
-//                items(colorOptions) { color ->
-//                    ElevatedFilterChip(
-//                        selected = false,
-//                        onClick = {},
-//                        label = { Text(color) },
-//                        modifier = Modifier.padding(end = 8.dp)
-//                    )
-//                }
-//            }
-//            Spacer(modifier = Modifier.height(16.dp))
-//        }
-//
-//        if (sizeOptions.isNotEmpty()) {
-//            Text(
-//                text = "Sizes",
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    fontWeight = FontWeight.Bold
-//                )
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            LazyRow {
-//                items(sizeOptions) { size ->
-//                    ElevatedFilterChip(
-//                        selected = false,
-//                        onClick = {},
-//                        label = { Text(size) },
-//                        modifier = Modifier.padding(end = 8.dp)
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 private fun VariantOptionsSection(
@@ -515,5 +458,4 @@ private fun ProductBottomSheet(
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
 

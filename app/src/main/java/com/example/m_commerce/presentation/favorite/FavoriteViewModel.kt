@@ -1,5 +1,6 @@
 package com.example.m_commerce.presentation.favorite
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,11 +33,15 @@ class FavoriteViewModel @Inject constructor(
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _favoriteVariantIds = MutableStateFlow<Set<String>>(emptySet())
+    val favoriteVariantIds: StateFlow<Set<String>> = _favoriteVariantIds
+
     fun loadFavorites() {
         viewModelScope.launch {
             val email = sharedPreferencesHelper.getCustomerEmail()
             if (email == null) {
                 _favoriteProducts.value = emptyList()
+                _favoriteVariantIds.value = emptySet()
                 return@launch
             }
 
@@ -55,10 +60,13 @@ class FavoriteViewModel @Inject constructor(
 
                     val uniqueProducts = allProducts.distinctBy { it.id }
 
-                    android.util.Log.d("FavoriteViewModel", "Draft Orders: ${matchingDraftOrders.size}")
-                    android.util.Log.d("FavoriteViewModel", "Total Products: ${uniqueProducts.size}")
+                    val variantIds = uniqueProducts.flatMap { product ->
+                        product.variants.map { it.id }
+                    }.toSet()
+
 
                     _favoriteProducts.value = uniqueProducts
+                    _favoriteVariantIds.value = variantIds
 
                     if (matchingDraftOrders.isNotEmpty()) {
                         sharedPreferencesHelper.saveFavoriteDraftOrderId(
@@ -67,8 +75,8 @@ class FavoriteViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("FavoriteViewModel", "Error loading favorites", e)
                 _favoriteProducts.value = emptyList()
+                _favoriteVariantIds.value = emptySet()
             } finally {
                 _isLoading.value = false
             }
@@ -79,6 +87,85 @@ class FavoriteViewModel @Inject constructor(
         loadFavorites()
     }
 
+    fun isProductFavorited(variantId: String): Boolean {
+        return _favoriteVariantIds.value.contains(variantId)
+    }
+
+    fun toggleProductFavorite(product: Product, variantId: String) {
+        viewModelScope.launch {
+            try {
+                val isCurrentlyFavorited = isProductFavorited(variantId)
+
+                if (isCurrentlyFavorited) {
+                    _favoriteVariantIds.value = _favoriteVariantIds.value - variantId
+                    _favoriteProducts.value = _favoriteProducts.value.filter {
+                        it.variants.firstOrNull()?.id != variantId
+                    }
+                } else {
+                    _favoriteVariantIds.value = _favoriteVariantIds.value + variantId
+                    _favoriteProducts.value = _favoriteProducts.value + product
+                }
+
+                _isLoading.value = true
+
+                try {
+                    if (isCurrentlyFavorited) {
+                        removeProductFromFavorites(variantId)
+                    } else {
+                        addProductToFavorites(product, variantId)
+                    }
+                } catch (e: Exception) {
+                    if (isCurrentlyFavorited) {
+                        _favoriteVariantIds.value = _favoriteVariantIds.value + variantId
+                        _favoriteProducts.value = _favoriteProducts.value + product
+                    } else {
+                        _favoriteVariantIds.value = _favoriteVariantIds.value - variantId
+                        _favoriteProducts.value = _favoriteProducts.value.filter {
+                            it.variants.firstOrNull()?.id != variantId
+                        }
+                    }
+                    throw e
+                }
+            } catch (e: Exception) {
+                Log.e("FavoriteViewModel", "Error toggling favorite", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private suspend fun addProductToFavorites(product: Product, variantId: String) {
+        val email = sharedPreferencesHelper.getCustomerEmail()
+        if (email == null) {
+            Log.e("FavoriteViewModel", "No customer email found")
+            return
+        }
+
+        try {
+            val existingDraftOrderId = sharedPreferencesHelper.getFavoriteDraftOrderId()
+
+            if (existingDraftOrderId.isNullOrEmpty()) {
+                val newDraftOrder = favoriteProductsUseCases.addToFavorites(email, variantId, 1)
+                sharedPreferencesHelper.saveFavoriteDraftOrderId(newDraftOrder.id.toString())
+            } else {
+                val currentProducts = favoriteProducts.value
+                val updatedItems = currentProducts.map { existingProduct ->
+                    Item(
+                        variantID = existingProduct.variants.firstOrNull()?.id.orEmpty(),
+                        quantity = 1
+                    )
+                }.toMutableList()
+
+                updatedItems.add(Item(variantID = variantId, quantity = 1))
+
+                favoriteProductsUseCases.updateDraftOrder(existingDraftOrderId, updatedItems)
+            }
+
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
     fun updateFavoriteDraftOrder(draftOrderId: String, lineItems: List<Item>) {
         viewModelScope.launch {
             try {
@@ -86,7 +173,7 @@ class FavoriteViewModel @Inject constructor(
                 val updatedDraftOrder = favoriteProductsUseCases.updateDraftOrder(draftOrderId, lineItems)
                 refreshFavorites()
             } catch (e: Exception) {
-                android.util.Log.e("FavoriteViewModel", "Error updating draft order", e)
+               Log.e("FavoriteViewModel", "Error updating draft order", e)
             } finally {
                 _isLoading.value = false
             }
@@ -137,8 +224,7 @@ class FavoriteViewModel @Inject constructor(
         viewModelScope.launch {
             val draftOrderId = sharedPreferencesHelper.getFavoriteDraftOrderId()
             val currentProducts = favoriteProducts.value
-            android.util.Log.d("FavoriteViewModel", "Current product variant IDs: ${currentProducts.map { it.variants.firstOrNull()?.id }}")
-            android.util.Log.d("FavoriteViewModel", "Variant ID to remove: $variantIdToRemove")
+
             val updatedItems = currentProducts
                 .filter { it.variants.firstOrNull()?.id != variantIdToRemove }
                 .map { product ->
@@ -147,17 +233,16 @@ class FavoriteViewModel @Inject constructor(
                         quantity = 1
                     )
                 }
+
             if (draftOrderId != null) {
                 if (updatedItems.isEmpty()) {
-                    android.util.Log.d("FavoriteViewModel", "Deleting draft order: $draftOrderId")
                     favoriteProductsUseCases.deleteDraftOrder(draftOrderId)
                     sharedPreferencesHelper.saveFavoriteDraftOrderId("")
-                    refreshFavorites()
                 } else {
-                    android.util.Log.d("FavoriteViewModel", "Updating draft order: $draftOrderId with items: $updatedItems")
                     updateFavoriteDraftOrder(draftOrderId, updatedItems)
                 }
             }
         }
     }
+
 }

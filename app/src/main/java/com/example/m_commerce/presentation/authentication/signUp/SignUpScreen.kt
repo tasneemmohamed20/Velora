@@ -102,7 +102,9 @@ fun SignUpScreen(
 
         Button(
             onClick = {
+                Toast.makeText(context, "Email verification sent to your email", Toast.LENGTH_LONG).show()
                 viewModel.signUp(email, password, confirmPassword, firstName, lastName)
+                onButtonClicked()
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6FB0), contentColor = Color.White),
@@ -132,7 +134,6 @@ fun SignUpScreen(
         LaunchedEffect(successMessage) {
             successMessage?.let {
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                onButtonClicked()
             }
         }
 
