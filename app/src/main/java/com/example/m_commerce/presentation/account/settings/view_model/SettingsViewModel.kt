@@ -30,19 +30,15 @@ class SettingsViewModel @Inject constructor(
                 currencyExchangeUseCase().collect { response ->
                     _currencyExchange.emit(response)
                     saveUsdToEgpValue(response.rates.EGP.toFloat())
-//                    Log.d("SettingsViewModel", "Currency exchange rate: ${response.rates.EGP}")
                 }
             } catch (e: Exception) {
                 _error.emit(e.message ?: "Unknown error occurred")
-
-//                Log.e("SettingsViewModel", "Error fetching currency exchange rate: ${e.message}")
             }
         }
     }
 
     fun setCurrencyPreference(isUSD: Boolean) {
         sharedPreferencesHelper.isUSD(isUSD)
-        Log.d("SettingsViewModel", "Currency preference set to USD: $isUSD")
     }
 
     fun getCurrencyPreference(): Boolean {
@@ -51,5 +47,9 @@ class SettingsViewModel @Inject constructor(
 
     fun saveUsdToEgpValue(value: Float){
         sharedPreferencesHelper.saveUsdToEgpValue(value)
+    }
+
+    fun clearAll(){
+        sharedPreferencesHelper.clearAll()
     }
 }

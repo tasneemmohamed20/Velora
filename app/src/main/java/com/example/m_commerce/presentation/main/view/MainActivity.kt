@@ -58,8 +58,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.json.Json
 
 
-private const val TAG = "MainActivity"
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
@@ -81,10 +79,11 @@ class MainActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainActivity.NavHostSetup(){
+fun MainActivity.NavHostSetup(isLogged: Boolean){
+    Log.i("SharedPreferencesHelper", "NavHostSetup: $isLogged")
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Home,
+        startDestination = if(isLogged) ScreensRoute.Home else ScreensRoute.Start,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -170,6 +169,9 @@ fun MainActivity.NavHostSetup(){
                 },
                 onBackClick = {
                     navHostController.popBackStack()
+                },
+                onLogoutClicked = {
+                    navHostController.navigate(ScreensRoute.Start)
                 }
             )
         }

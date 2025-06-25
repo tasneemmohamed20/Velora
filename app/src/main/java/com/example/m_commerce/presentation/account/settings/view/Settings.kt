@@ -47,7 +47,8 @@ enum class Currency {
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onAddressClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onLogoutClicked: () -> Unit
     ){
 
     var selectedCurrency by remember {
@@ -63,7 +64,6 @@ fun SettingsScreen(
         )
         Column(
             modifier = Modifier
-                //                .padding(padding)
                 .fillMaxSize()
                 .background(Color.White)
         ) {
@@ -112,6 +112,15 @@ fun SettingsScreen(
                 icon = SettingsIcon.ARROW_RIGHT
             )
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
+            SettingsItemRow(
+                label = "Log out",
+                value = "",
+                onClick = {
+                    viewModel.clearAll()
+                    onLogoutClicked()
+                },
+                icon = SettingsIcon.ARROW_RIGHT
+            )
         }
     }
 }
