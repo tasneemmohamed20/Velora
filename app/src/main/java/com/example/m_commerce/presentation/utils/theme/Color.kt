@@ -12,8 +12,8 @@ val Pink40 = Color(0xFF7D5260)
 
 val WhiteSmoke = Color(0xfff9f9f9)
 
-val PrimaryBlue = Color(0xFF3669C9)
-val Secondary = Color(0xFF575e71)
-val Tertiary = Color(0xFF725572)
+val Primary = Color(0xFF4100e0)
+val Secondary = Color(0xFFada3ff)
+val Tertiary = Color(0xFF820087)
 
 //#4100E0

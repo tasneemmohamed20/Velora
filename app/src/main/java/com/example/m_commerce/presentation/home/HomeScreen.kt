@@ -45,17 +45,20 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.m_commerce.R
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Brand
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (String) -> Unit){
     val scrollState = rememberScrollState()
     lateinit var successData: List<Brand>
+    val brandsState by viewModel.brandsList.collectAsStateWithLifecycle()
+
 
     LaunchedEffect(Unit) {
         viewModel.getBrands()
     }
-    val brandsState by viewModel.brandsList.collectAsStateWithLifecycle()
+
 
     Column(
         modifier = Modifier
@@ -84,7 +87,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
                         .fillMaxSize()
                         .padding(top = 80.dp)
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = Primary)
                 }
             }
 
@@ -223,14 +226,14 @@ fun AdsItem(@DrawableRes imageRes: Int, modifier: Modifier = Modifier) {
         modifier = modifier
             .width(280.dp)
             .height(150.dp)
-            .background(color = Color.Blue, shape = RoundedCornerShape(12.dp)),
+            .background(color = Primary, shape = RoundedCornerShape(12.dp)),
         contentAlignment = Alignment.Center,
     ) {
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = "ad",
             modifier = Modifier
-                .padding(4.dp)
+                .padding(3.dp)
                 .fillMaxSize()
                 .clip(shape = RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop

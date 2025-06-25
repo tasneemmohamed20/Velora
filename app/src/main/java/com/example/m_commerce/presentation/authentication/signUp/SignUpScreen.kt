@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.presentation.utils.ResponseState
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 @Composable
 fun SignUpScreen(
@@ -45,7 +46,7 @@ fun SignUpScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Sign Up", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F6FB0))
+        Text("Sign Up", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Primary)
         Spacer(modifier = Modifier.height(40.dp))
         Text("Create your account", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -107,7 +108,7 @@ fun SignUpScreen(
                 onButtonClicked()
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6FB0), contentColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary, contentColor = Color.White),
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Sign Up")
@@ -118,7 +119,7 @@ fun SignUpScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Already have an account?")
             TextButton(onClick = onButtonClicked) {
-                Text("Login", color = Color(0xFF0F6FB0))
+                Text("Login", color = Primary)
             }
         }
 

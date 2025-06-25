@@ -99,3 +99,23 @@ fun copyToClipboard(context: Context, text: String) {
     Toast.makeText(context, "Voucher code copied to clipboard", Toast.LENGTH_SHORT).show()
 }
 
+fun getFriendlyErrorMessage(exception: Throwable): String {
+    val message = exception.message ?: return "Login failed. Please try again."
+
+    Log.i("TAG", "getFriendlyErrorMessage: $message")
+    return when {
+        "The email address is badly formatted" in message ->
+            "Please enter a valid email address."
+        "There is no user record" in message ->
+            "No account found with this email."
+        "The password is invalid" in message ->
+            "Incorrect password. Please try again."
+        "A network error" in message ->
+            "Check your internet connection and try again."
+        "The supplied auth credential is incorrect" in message ->
+            "Invalid email or password. Please try again."
+        "Please enter both email and password" in message ->
+            "Please enter both email and password"
+        else -> "Login failed. Please try again."
+    }
+}

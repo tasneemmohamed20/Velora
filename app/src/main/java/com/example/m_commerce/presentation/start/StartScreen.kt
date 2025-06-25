@@ -18,7 +18,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,8 +29,8 @@ import com.google.android.gms.common.api.ApiException
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.m_commerce.presentation.utils.theme.Primary
 import com.example.m_commerce.start.StartViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import kotlinx.coroutines.launch
@@ -136,7 +135,8 @@ fun StartScreen(
         if (signInState is ResponseState.Loading) {
             CircularProgressIndicator(
                 modifier = Modifier
-                    .align(Alignment.Center)
+                    .align(Alignment.Center),
+                color = Primary
             )
         }
 

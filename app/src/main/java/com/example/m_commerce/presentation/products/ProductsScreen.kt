@@ -50,7 +50,7 @@ import com.example.m_commerce.R
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
-import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
+import com.example.m_commerce.presentation.utils.theme.Primary
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
 
 
@@ -83,7 +83,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = Primary)
                     }
                 }
                 is ResponseState.Success -> {
@@ -188,7 +188,7 @@ fun ProductCard(
                     Text(
                         text = "%.2f $currencySymbol".format(finalPrice),
                         style = MaterialTheme.typography.titleMedium,
-                        color = PrimaryBlue.copy(alpha = 0.7f),
+                        color = Primary.copy(alpha = 0.7f),
                     )
                 }
             }

@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MCommerceTheme {
+            MCommerceTheme(dynamicColor = false) {
                 navHostController = rememberNavController()
                 MainScreen()
             }
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainActivity.NavHostSetup(isLogged: Boolean){
-    Log.i("SharedPreferencesHelper", "NavHostSetup: $isLogged")
+
     NavHost(
         navController = navHostController,
         startDestination = if(isLogged) ScreensRoute.Home else ScreensRoute.Start,
