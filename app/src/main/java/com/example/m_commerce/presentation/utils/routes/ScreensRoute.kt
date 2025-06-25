@@ -8,6 +8,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class ScreensRoute {
 
+    @Serializable
+    data object Splash : ScreensRoute()
+
+    @Serializable
+    data object OnBoarding : ScreensRoute()
 
     @Serializable
     data object Home: ScreensRoute()
@@ -64,7 +69,7 @@ sealed class ScreensRoute {
     @Serializable
     data class Payment(
         val items: ArrayList<OrderItem>,
-        val totalAmountCents: Int
+        val totalAmountCents: Int,
     ) : ScreensRoute()
 
     @Serializable
