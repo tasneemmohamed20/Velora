@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.authentication.login
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,13 +13,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.m_commerce.R
 import com.example.m_commerce.presentation.utils.ResponseState
+import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
 
 @Composable
 fun LoginScreen(
@@ -39,9 +43,17 @@ fun LoginScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Login", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F6FB0))
+
+        Image(
+            painter = painterResource(R.drawable.logo_name),
+            contentDescription = "app logo",
+            modifier = Modifier.padding(bottom = 60.dp).fillMaxWidth(),
+            alignment = Alignment.Center
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text("Login", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue)
         Spacer(modifier = Modifier.height(40.dp))
-        Text("Welcome back to Velora", fontSize = 24.sp)
+        Text("Welcome back!", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -70,7 +82,7 @@ fun LoginScreen(
         Button(
             onClick = { viewModel.login(email, password) },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6FB0), contentColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue, contentColor = Color.White),
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Login")

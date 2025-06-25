@@ -3,6 +3,7 @@ package com.example.m_commerce.presentation.main.view
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.m_commerce.R
 import com.example.m_commerce.presentation.main.viewmodel.MainViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.components.CustomSnackbar
@@ -60,9 +63,11 @@ import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
 
     val showBottomNavBar = remember { mutableStateOf(true) }
+    val showLogo = remember { mutableStateOf(false) }
     val showTopAppBar = remember { mutableStateOf(true) }
     var topAppBarTitleState by remember { mutableStateOf("Velora") }
     var showBackButton by remember { mutableStateOf(false) }
+
     val isConnected by mainViewModel.isConnected.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var previousConnectionState by remember { mutableStateOf<Boolean?>(null) }
@@ -82,7 +87,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
 
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
-            Log.i("TAG", "MainScreen:${destination.route} ")
+
             when {
                 destination.route in listOf(
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
@@ -113,6 +118,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                 ) -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
+                    showLogo.value = false
                     topAppBarTitleState = "Products"
                     showBackButton = true
                 }
@@ -121,6 +127,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                     "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order") -> {
                     showBottomNavBar.value = false
                     showTopAppBar.value = true
+                    showLogo.value = false
                     topAppBarTitleState = "My Orders"
                     showBackButton = true
                 }
@@ -128,6 +135,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                     showBottomNavBar.value = true
                     showTopAppBar.value = true
                     topAppBarTitleState = "Velora"
+                    showLogo.value = true
                     showBackButton = false
                 }
             }
@@ -162,14 +170,24 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                 TopAppBar(
                     modifier = Modifier.shadow(elevation = 6.dp),
                     title = {
-                        Text(
-                            topAppBarTitleState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 60.dp),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
-                        ) },
+                        if(showLogo.value){
+                            Image(
+                                painter = painterResource(R.drawable.logo_name),
+                                contentDescription = "app logo",
+                                modifier = Modifier
+                                    .height(28.dp).padding(start = 60.dp),
+                            )
+                        }else{
+                            Text(
+                                topAppBarTitleState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 60.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
+                            )
+                        }
+                            },
                     colors = TopAppBarColors(
                         containerColor = Color.White,
                         scrolledContainerColor = Color.Black,

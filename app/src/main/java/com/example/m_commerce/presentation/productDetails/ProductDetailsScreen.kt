@@ -39,7 +39,7 @@ fun ProductDetailsScreen(
     productId: String,
     onBack: () -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
-    favoriteViewModel: FavoriteViewModel = hiltViewModel() // Add FavoriteViewModel
+    favoriteViewModel: FavoriteViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -51,7 +51,7 @@ fun ProductDetailsScreen(
 
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
-        favoriteViewModel.loadFavorites() // Load favorites when screen opens
+        favoriteViewModel.loadFavorites()
     }
 
     val productState by viewModel.productState.collectAsState()

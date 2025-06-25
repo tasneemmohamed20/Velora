@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,6 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
+import com.example.m_commerce.presentation.utils.theme.Secondary
 
 data class NavigationItem(
     val title: String,
@@ -66,6 +69,15 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
 
             NavigationBarItem(
                 alwaysShowLabel = true,
+                colors = NavigationBarItemColors(
+                    selectedIndicatorColor = PrimaryBlue.copy(alpha = .2f),
+                    selectedIconColor = PrimaryBlue,
+                    selectedTextColor = Color.White,
+                    unselectedIconColor = Color.Black,
+                    unselectedTextColor = Color.Black,
+                    disabledIconColor = Secondary,
+                    disabledTextColor = Color.White
+                ),
                 selected = selectedNavigationIndex == index,
                 onClick = {
                     selectedNavigationIndex = index

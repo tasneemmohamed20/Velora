@@ -50,6 +50,7 @@ import com.example.m_commerce.R
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.Functions.formatTitleAndBrand
+import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
 
 
@@ -187,7 +188,7 @@ fun ProductCard(
                     Text(
                         text = "%.2f $currencySymbol".format(finalPrice),
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.Red,
+                        color = PrimaryBlue.copy(alpha = 0.7f),
                     )
                 }
             }
