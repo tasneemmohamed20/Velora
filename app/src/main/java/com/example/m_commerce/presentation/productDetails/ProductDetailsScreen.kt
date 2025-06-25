@@ -51,7 +51,7 @@ fun ProductDetailsScreen(
 
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
-        favoriteViewModel.loadFavorites() // Load favorites when screen opens
+        favoriteViewModel.loadFavorites()
     }
 
     val productState by viewModel.productState.collectAsState()
@@ -171,6 +171,7 @@ fun ProductDetailsScreen(
                         FavoriteHeartIcon(
                             isFavorited = isFavorited,
                             onToggle = {
+//                                viewModel.addToCart(product.variants.first().id,1,note.fav)
                                 favoriteViewModel.toggleProductFavorite(product, firstVariantId)
                             },
                             modifier = Modifier

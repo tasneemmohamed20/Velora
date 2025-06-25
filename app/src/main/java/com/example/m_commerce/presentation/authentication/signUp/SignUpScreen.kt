@@ -63,6 +63,7 @@ fun SignUpScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Last Name") }
         )
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -102,9 +103,14 @@ fun SignUpScreen(
 
         Button(
             onClick = {
+                if (firstName.isBlank() || lastName.isBlank() || email.isBlank() ||
+                    password.isBlank() || confirmPassword.isBlank()) {
+                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_LONG).show()
+                    return@Button
+                }
+
                 Toast.makeText(context, "Email verification sent to your email", Toast.LENGTH_LONG).show()
                 viewModel.signUp(email, password, confirmPassword, firstName, lastName)
-                onButtonClicked()
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6FB0), contentColor = Color.White),
@@ -133,7 +139,7 @@ fun SignUpScreen(
 
         LaunchedEffect(successMessage) {
             successMessage?.let {
-                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Sign up successful! Please check your email for verification.", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -144,4 +150,3 @@ fun SignUpScreen(
         }
     }
 }
-
