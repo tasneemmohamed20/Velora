@@ -14,6 +14,8 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
     private val CART_ID_KEY = "cart_id"
     private val FAVORITE_DRAFT_ORDER_ID_KEY = "favorite_draft_order_id"
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val IS_GUEST_MODE_KEY = "is_guest_mode"
+
 
     fun saveCustomerId(customerId: String) {
         prefs.edit().apply {
@@ -119,5 +121,38 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
         prefs.edit().clear().apply()
     }
 
+    fun setGuestMode(isGuest: Boolean) {
+        prefs.edit().apply {
+            putBoolean(IS_GUEST_MODE_KEY, isGuest)
+            apply()
+        }
+        Log.d(TAG, "Guest mode set to: $isGuest")
+    }
+
+    fun isGuestMode(): Boolean {
+        val isGuest = prefs.getBoolean(IS_GUEST_MODE_KEY, false)
+        Log.d(TAG, "Is guest mode: $isGuest")
+        return isGuest
+    }
+
+    fun clearGuestMode() {
+        prefs.edit().apply {
+            remove(IS_GUEST_MODE_KEY)
+            apply()
+        }
+        Log.d(TAG, "Guest mode cleared")
+    }
+
+    fun isUserAuthenticated(): Boolean {
+        return !isGuestMode() && (getCustomerId() != null || getCustomerEmail() != null)
+    }
+
+    fun getCurrentUserMode(): String {
+        return when {
+            isGuestMode() -> "Guest"
+            isUserAuthenticated() -> "Authenticated"
+            else -> "Unknown"
+        }
+    }
 
 }

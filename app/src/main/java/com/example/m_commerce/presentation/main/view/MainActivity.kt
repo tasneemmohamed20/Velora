@@ -201,7 +201,8 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
                 onAddressClick = { address ->
                     viewModel.setupForEditMode(address)
                     navHostController.navigate(ScreensRoute.AddressInfo)
-                }
+                },
+                navController = navHostController,
             )
         }
 
@@ -263,25 +264,12 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
         }
 
         composable<ScreensRoute.Favorites> {
-            val context = LocalContext.current
-            val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
-            val customerEmail = remember(Unit) { sharedPreferencesHelper.getCustomerEmail() }
-
-            if (customerEmail == null) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "Please login to view favorites",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+            FavoriteView(
+                onProductClick = { productId ->
+                    Log.d("ProductClick", "Navigating with productId: $productId")
+                    navHostController.navigate(ScreensRoute.ProductDetails(productId))
                 }
-            } else {
-                FavoriteView(
-                    onProductClick = { productId ->
-                        Log.d("ProductClick", "Navigating with productId: $productId")
-                        navHostController.navigate(ScreensRoute.ProductDetails(productId))
-                    }
-                )
-            }
+            )
         }
 
         composable<ScreensRoute.OrderDetails>{
@@ -298,7 +286,12 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
                     navHostController.navigate(ScreensRoute.Home) {
                         popUpTo(ScreensRoute.Start) { inclusive = true }
                     }
-                }
+                },
+                onGuestSuccess = {
+                    navHostController.navigate(ScreensRoute.Home) {
+                        popUpTo(ScreensRoute.Start) { inclusive = true }
+                    }
+                },
             )
         }
 
@@ -343,7 +336,9 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             val entry = backStackEntry.toRoute<ScreensRoute.ProductDetails>()
             ProductDetailsScreen(
                 productId = entry.productId,
-                onBack = { navHostController.popBackStack() }
+                onBack = { navHostController.popBackStack() },
+                navController = navHostController
+
             )
         }
 

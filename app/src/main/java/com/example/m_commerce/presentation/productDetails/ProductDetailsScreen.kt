@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.productDetails
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,9 +27,15 @@ import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.note
 import com.example.m_commerce.presentation.favorite.FavoriteHeartIcon
 import com.example.m_commerce.presentation.favorite.FavoriteViewModel
+import com.example.m_commerce.presentation.utils.components.PendingAction
+import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import kotlinx.coroutines.launch
 
 
 val TAG = "ProductDetailsScreen"
@@ -39,7 +46,8 @@ fun ProductDetailsScreen(
     productId: String,
     onBack: () -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
-    favoriteViewModel: FavoriteViewModel = hiltViewModel()
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
+    navController: NavController,
 ) {
     val bottomSheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -48,6 +56,14 @@ fun ProductDetailsScreen(
     var selectedSize by remember { mutableStateOf<String?>(null) }
 
     val favoriteVariantIds by favoriteViewModel.favoriteVariantIds.collectAsState()
+
+    val context = LocalContext.current
+    val sharedPrefsHelper = remember { SharedPreferencesHelper(context) }
+    val coroutineScope = rememberCoroutineScope()
+    var showLoginDialog by remember { mutableStateOf(false) }
+    var pendingAction by remember { mutableStateOf(PendingAction.NONE) }
+    var showConfirmRemoveDialog by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
@@ -63,12 +79,17 @@ fun ProductDetailsScreen(
         ) {
             CircularProgressIndicator()
         }
+
         is ResponseState.Failure -> Text("Failed to load product")
         is ResponseState.Success -> {
             val product = (productState as ResponseState.Success).data as Product
             val firstVariantId = product.variants.firstOrNull()?.id ?: ""
             val isFavorited = favoriteVariantIds.contains(firstVariantId)
 
+            Log.d(
+                "ProductDetailsScreen",
+                "Product Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}"
+            )
             if (showBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showBottomSheet = false },
@@ -81,7 +102,10 @@ fun ProductDetailsScreen(
                         onConfirm = { quantity ->
                             selectedVariantId?.let { variantId ->
                                 viewModel.addToCart(variantId, quantity, note.cart)
-                                Log.d(TAG, "Added to cart with variant ID: $variantId, quantity: $quantity")
+                                Log.d(
+                                    TAG,
+                                    "Added to cart with variant ID: $variantId, quantity: $quantity"
+                                )
                             }
                             showBottomSheet = false
                         }
@@ -152,10 +176,12 @@ fun ProductDetailsScreen(
                 Spacer(modifier = Modifier.height(100.dp))
             }
 
+
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomCenter
-            ) {
+                contentAlignment = Alignment.BottomCenter,
+
+                ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 8.dp,
@@ -171,8 +197,16 @@ fun ProductDetailsScreen(
                         FavoriteHeartIcon(
                             isFavorited = isFavorited,
                             onToggle = {
-//                                viewModel.addToCart(product.variants.first().id,1,note.fav)
-                                favoriteViewModel.toggleProductFavorite(product, firstVariantId)
+                                if (sharedPrefsHelper.isGuestMode()) {
+                                    pendingAction = PendingAction.ADD_TO_FAVORITES
+                                    showLoginDialog = true
+                                } else {
+                                    if (isFavorited) {
+                                        showConfirmRemoveDialog = true
+                                    } else {
+                                        favoriteViewModel.toggleProductFavorite(product, firstVariantId)
+                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()                                    }
+                                }
                             },
                             modifier = Modifier
                                 .size(70.dp)
@@ -183,11 +217,17 @@ fun ProductDetailsScreen(
                             size = 42.dp
                         )
 
+
                         Button(
                             onClick = {
                                 Log.d(TAG, "Selected Variant ID: $selectedVariantId")
-                                if (selectedVariantId != null) {
-                                    showBottomSheet = true
+                                if (sharedPrefsHelper.isGuestMode()) {
+                                    pendingAction = PendingAction.ADD_TO_CART
+                                    showLoginDialog = true
+                                } else {
+                                    if (selectedVariantId != null) {
+                                        showBottomSheet = true
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -209,6 +249,63 @@ fun ProductDetailsScreen(
                             )
                         }
                     }
+                    if (showLoginDialog) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                showLoginDialog = false
+                                pendingAction = PendingAction.NONE
+                            },
+                            title = {
+                                Text("Sign in Required")
+                            },
+                            text = {
+                                Text("Please sign in to ${if (pendingAction == PendingAction.ADD_TO_CART) "add products to your cart" else "add products to your favorites"}.")
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showLoginDialog = false
+                                        navController.navigate(ScreensRoute.SignUp)
+                                    }
+                                ) {
+                                    Text("Sign In")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = {
+                                        showLoginDialog = false
+                                        pendingAction = PendingAction.NONE
+                                    }
+                                ) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
+
+
+                    if (showConfirmRemoveDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showConfirmRemoveDialog = false },
+                            title = { Text("Remove from Favorites?") },
+                            text = { Text("Are you sure you want to remove this product from your favorites?") },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    favoriteViewModel.toggleProductFavorite(product, firstVariantId)
+                                    showConfirmRemoveDialog = false
+                                }) {
+                                    Text("Remove")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showConfirmRemoveDialog = false }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
+
                 }
             }
         }

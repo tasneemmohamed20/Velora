@@ -35,7 +35,9 @@ class LoginViewModel @Inject constructor(
             _loginState.value = result.fold(
                 onSuccess = {
                     sharedPreferencesHelper.saveCustomerEmail(email)
+                    sharedPreferencesHelper.setGuestMode(false)
                     val customerEmail = sharedPreferencesHelper.getCustomerEmail()
+
                     if (customerEmail != null) {
                         try {
                             var hasExistingOrder = false

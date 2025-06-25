@@ -16,12 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.Product
 
 @Composable
@@ -31,45 +33,137 @@ fun FavoriteView(
 ) {
     val favoriteProducts by viewModel.favoriteProducts.collectAsState()
     val favoriteVariantIds by viewModel.favoriteVariantIds.collectAsState()
+    val context = LocalContext.current
+    val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
+
+    val isGuest = remember { sharedPreferencesHelper.getCustomerEmail() == null }
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var productToRemove by remember { mutableStateOf<Pair<Product, String>?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadFavorites()
+        if (!isGuest) viewModel.loadFavorites()
     }
 
-    if (favoriteProducts.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("No favorite products found")
+    when {
+        !isGuest && isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
         }
-    } else {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(favoriteProducts.size) { index ->
-                val product = favoriteProducts[index]
-                val variantId = product.variants.firstOrNull()?.id ?: ""
-                val isFavorited = favoriteVariantIds.contains(variantId)
 
-                FavoriteProductCard(
-                    product = product,
-                    isFavorited = isFavorited,
-                    onProductClick = { onProductClick(product.id) },
-                    onFavoriteToggle = {
-                        viewModel.toggleProductFavorite(product, variantId)
+        isGuest -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = "Favorites",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Please login to view your favorites",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        favoriteProducts.isEmpty() -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = "Favorites",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "No favorite products added yet!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        else -> {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(favoriteProducts.size) { index ->
+                    val product = favoriteProducts[index]
+                    val variantId = product.variants.firstOrNull()?.id ?: ""
+                    val isFavorited = favoriteVariantIds.contains(variantId)
+
+                    FavoriteProductCard(
+                        product = product,
+                        isFavorited = isFavorited,
+                        onProductClick = { onProductClick(product.id) },
+                        onFavoriteToggle = {
+                            productToRemove = product to variantId
+                            showDeleteDialog = true
+                        }
+                    )
+                }
+            }
+
+            if (showDeleteDialog && productToRemove != null) {
+                val (product, variantId) = productToRemove!!
+                AlertDialog(
+                    onDismissRequest = {
+                        showDeleteDialog = false
+                        productToRemove = null
+                    },
+                    title = { Text("Remove from Favorites") },
+                    text = { Text("Are you sure you want to remove this product from your favorites?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.toggleProductFavorite(product, variantId)
+                                showDeleteDialog = false
+                                productToRemove = null
+                            }
+                        ) {
+                            Text("Remove")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showDeleteDialog = false
+                                productToRemove = null
+                            }
+                        ) {
+                            Text("Cancel")
+                        }
                     }
                 )
             }
         }
     }
 }
+
+
 
 @Composable
 private fun FavoriteProductCard(
@@ -114,17 +208,10 @@ private fun FavoriteProductCard(
                 modifier = Modifier.padding(8.dp)
             ) {
                 Text(
-                    text = product.title ?: "",
+                    text = product.title,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

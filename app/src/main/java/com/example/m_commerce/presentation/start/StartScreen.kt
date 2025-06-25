@@ -39,10 +39,12 @@ import kotlinx.coroutines.launch
 fun StartScreen(
     onEmailClicked: () -> Unit,
     onGoogleSuccess: () -> Unit,
+    onGuestSuccess: () -> Unit,
     viewModel: StartViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val signInState by viewModel.googleSignInState.collectAsStateWithLifecycle()
+    val guestModeState by viewModel.guestModeState.collectAsStateWithLifecycle()
     val webClientId = stringResource(id = R.string.web_client_id)
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -90,6 +92,30 @@ fun StartScreen(
         }
     }
 
+    LaunchedEffect(guestModeState) {
+        when (guestModeState) {
+            is ResponseState.Success -> {
+                viewModel.clearGuestModeState()
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Welcome, Guest!",
+                        withDismissAction = true
+                    )
+                }
+                onGuestSuccess()
+            }
+            is ResponseState.Failure -> {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Failed to enter guest mode. Please try again.",
+                        withDismissAction = true
+                    )
+                }
+            }
+            else -> Unit
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -124,7 +150,9 @@ fun StartScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CustomButton("Continue as Guest", R.drawable.ic_person) {}
+                CustomButton("Continue as Guest", R.drawable.ic_person) {
+                    viewModel.handleGuestMode()
+                }
                 CustomButton("Continue with Email", R.drawable.ic_gmail, onClick = onEmailClicked)
                 CustomButton("Continue with Google", R.drawable.ic_google) {
                     launcher.launch(googleSignInClient.signInIntent)
@@ -132,7 +160,7 @@ fun StartScreen(
             }
         }
 
-        if (signInState is ResponseState.Loading) {
+        if (signInState is ResponseState.Loading || guestModeState is ResponseState.Loading) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.Center),
@@ -146,7 +174,6 @@ fun StartScreen(
         )
     }
 }
-
 
 @Composable
 fun CustomButton(text: String, icon: Int, onClick: () -> Unit) {
