@@ -54,7 +54,6 @@ import com.example.m_commerce.presentation.start.StartScreen
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.vouchers.VouchersScreen
-import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.json.Json
 
@@ -157,6 +156,9 @@ fun MainActivity.NavHostSetup(){
                 itemsCount = itemsCount,
                 onOrderCompleted = {
                     navHostController.navigate(ScreensRoute.Home)
+                },
+                onNavigateToAddresses = {
+                    navHostController.navigate(ScreensRoute.Addresses)
                 }
             )
         }
@@ -240,9 +242,8 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.Products>{  backStackEntry->
             val entry = backStackEntry.toRoute<ScreensRoute.Products>()
-            val type = entry.type
             ProductsScreen(
-                type = type,
+                type = entry.type,
                 onProductClick = { productId ->
                     navHostController.navigate(ScreensRoute.ProductDetails(productId))
                 }
@@ -367,7 +368,7 @@ fun MainActivity.NavHostSetup(){
 
         composable<ScreensRoute.VouchersScreen> {
             VouchersScreen(
-                onBackClick = {navHostController.popBackStack()},
+                onBackClick = { navHostController.popBackStack() },
             )
         }
 

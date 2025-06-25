@@ -6,11 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Money
@@ -25,7 +28,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.m_commerce.domain.entities.CustomerAddresses
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.presentation.checkout.CheckoutViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
@@ -45,18 +50,27 @@ enum class PaymentMethod {
     PAYMOB
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     onBack: () -> Unit,
-    totalPrice : Double,
+    totalPrice: Double,
     subtotal: Double,
     estimatedFee: Double,
     itemsCount: Int,
     items: List<OrderItem>,
     onConfirmOrder: (PaymentMethod, List<OrderItem>, Int) -> Unit,
     checkoutViewModel: CheckoutViewModel = hiltViewModel(),
-    onOrderCompleted: () -> Unit
+    onOrderCompleted: () -> Unit,
+    onNavigateToAddresses: () -> Unit = {}
 ) {
+    val addresses by checkoutViewModel.addresses.collectAsState()
+
+    // Refresh customer data when screen becomes active or addresses change
+    LaunchedEffect(addresses.size) {
+        checkoutViewModel.refreshCustomerData()
+    }
+
     // Check if total price exceeds cash on delivery limit
     val exceedsCashLimit = totalPrice > 5000.0
 
@@ -68,13 +82,15 @@ fun CheckoutScreen(
     }
     val location by checkoutViewModel.selectedLocation.collectAsState()
     val selectedAddress by checkoutViewModel.selectedAddress.collectAsState()
-
     val voucherText by checkoutViewModel.voucherText.collectAsState()
     val voucherError by checkoutViewModel.voucherError.collectAsState()
     val appliedDiscount by checkoutViewModel.appliedDiscount.collectAsState()
     val isApplyingVoucher by checkoutViewModel.isApplyingVoucher.collectAsState()
     val totalPriceAfterDiscount = totalPrice - appliedDiscount
     Log.d("CheckoutScreen", "CheckoutScreen: $location")
+    var showAddressBottomSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState()
+
     Scaffold(
         topBar = {
             CustomTopAppBar(
@@ -90,7 +106,7 @@ fun CheckoutScreen(
                             checkoutViewModel.completeDraftOrder()
                     }
                 },
-                isEnabled = !showPriceExceedsError
+                isEnabled = !showPriceExceedsError && addresses.isNotEmpty()
             )
         }
     ) { paddingValues ->
@@ -101,10 +117,16 @@ fun CheckoutScreen(
                 .verticalScroll(rememberScrollState())
                 .background(Color.White)
         ) {
-            val location2 = LatLng(location?.latitude ?: 0.0, location?.longitude ?: 0.0)
-            MapAndAddressSection(location2,
-                address = selectedAddress.toString()
-            )
+            if (addresses.isEmpty()) {
+                NoAddressSection(onNavigateToAddresses = onNavigateToAddresses)
+            } else {
+                val location2 = LatLng(location?.latitude ?: 0.0, location?.longitude ?: 0.0)
+                MapAndAddressSection(
+                    location = location2,
+                    address = selectedAddress.toString(),
+                    onChangeAddress = { showAddressBottomSheet = true }
+                )
+            }
             Spacer(Modifier.height(16.dp))
 
             VoucherSection(
@@ -192,10 +214,58 @@ fun CheckoutScreen(
             }
         }
     }
+
+    if (showAddressBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAddressBottomSheet = false },
+            sheetState = bottomSheetState
+        ) {
+            AddressSelectionBottomSheet(
+                addresses = addresses,
+                onAddressSelected = { address ->
+                    checkoutViewModel.selectAddress(address)
+                    showAddressBottomSheet = false
+                },
+                onDismiss = { showAddressBottomSheet = false }
+            )
+        }
+    }
 }
 
 @Composable
-private fun MapAndAddressSection(location: LatLng, address: String) {
+private fun NoAddressSection(onNavigateToAddresses: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .height(120.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFF2F2F2), RoundedCornerShape(20.dp))
+            .clickable { onNavigateToAddresses() },
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Address", tint = Color.Blue)
+            Text(
+                text = "Add Address",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MapAndAddressSection(
+    location: LatLng,
+    address: String,
+    onChangeAddress: () -> Unit
+) {
     if (location.latitude != 0.0 || location.longitude != 0.0) {
         Box(
             modifier = Modifier
@@ -249,6 +319,7 @@ private fun MapAndAddressSection(location: LatLng, address: String) {
             .background(Color.White, RoundedCornerShape(16.dp))
             .border(1.dp, Color(0xFFF2F2F2), RoundedCornerShape(16.dp))
             .padding(8.dp)
+            .clickable { onChangeAddress() }
     ) {
         Icon(Icons.Default.Place, contentDescription = "Area", tint = Color.Blue)
         Column(
@@ -261,6 +332,13 @@ private fun MapAndAddressSection(location: LatLng, address: String) {
                 text = address,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Black
+            )
+        }
+        TextButton(onClick = onChangeAddress) {
+            Text(
+                text = "Change",
+                color = Color.Blue,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -565,6 +643,89 @@ private fun ConfirmOrderBottomBar(
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddressSelectionBottomSheet(
+    addresses: List<CustomerAddresses>,
+    onAddressSelected: (CustomerAddresses) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Select Address",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        LazyColumn {
+            items(addresses) { address ->
+                val area = address.address1?.split("|")?.find { it.startsWith("area:") }
+                    ?.removePrefix("area:") ?: "Unknown Area"
+                AddressItem(
+                    address = address,
+                    displayName = area,
+                    onClick = { onAddressSelected(address) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun AddressItem(
+    address: CustomerAddresses,
+    displayName: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Place,
+                contentDescription = "Location",
+                tint = Color.Blue,
+                modifier = Modifier.size(24.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp)
+            ) {
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+                address.city?.let { city ->
+                    Text(
+                        text = city,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
