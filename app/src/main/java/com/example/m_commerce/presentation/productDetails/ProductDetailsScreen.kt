@@ -30,16 +30,11 @@ import com.example.m_commerce.domain.entities.note
 import com.example.m_commerce.presentation.favorite.FavoriteHeartIcon
 import com.example.m_commerce.presentation.favorite.FavoriteViewModel
 import com.example.m_commerce.presentation.utils.theme.Primary
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-import com.example.m_commerce.domain.entities.note
-import com.example.m_commerce.presentation.favorite.FavoriteHeartIcon
-import com.example.m_commerce.presentation.favorite.FavoriteViewModel
 import com.example.m_commerce.presentation.utils.components.PendingAction
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
-import kotlinx.coroutines.launch
 
 
 val TAG = "ProductDetailsScreen"

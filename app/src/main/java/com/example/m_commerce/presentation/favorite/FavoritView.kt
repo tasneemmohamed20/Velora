@@ -15,9 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,7 +26,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.Product
+import com.example.m_commerce.presentation.utils.theme.Primary
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FavoriteView(
     viewModel: FavoriteViewModel = hiltViewModel(),
@@ -48,12 +51,13 @@ fun FavoriteView(
 
     when {
         !isGuest && isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            CircularWavyProgressIndicator(
+                stroke = Stroke(width = 4.0f, cap = StrokeCap.Round),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center),
+                color = Primary.copy(alpha = 0.7f)
+            )
         }
 
         isGuest -> {

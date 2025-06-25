@@ -133,7 +133,6 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
         prefs.edit().clear().apply()
     }
 
-<<<<<<< guest
     fun setGuestMode(isGuest: Boolean) {
         prefs.edit().apply {
             putBoolean(IS_GUEST_MODE_KEY, isGuest)
@@ -169,6 +168,3 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
     }
 
 }
-=======
-}
->>>>>>> dev
