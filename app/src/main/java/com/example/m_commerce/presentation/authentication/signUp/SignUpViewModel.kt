@@ -47,6 +47,7 @@ class SignUpViewModel @Inject constructor(
             result.fold(
                 onSuccess = {
                     sharedPreferencesHelper.saveCustomerEmail(email)
+                    sharedPreferencesHelper.setGuestMode(false)
                     _signUpState.value = ResponseState.Success("Account created successfully")
                 },
                 onFailure = { error ->

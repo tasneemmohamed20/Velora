@@ -61,10 +61,16 @@ fun AddressesScreen(
     viewModel: AddressMapViewModel,
     onBack: () -> Unit,
     onAddClicked: () -> Unit,
-    onAddressClick: (Address) -> Unit
-) {
+    onAddressClick: (Address) -> Unit,
+    navController: NavController,
+
+    ) {
     val addresses by viewModel.addresses.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val context = LocalContext.current
+    val sharedPrefsHelper = remember { SharedPreferencesHelper(context) }
+    var showGuestDialog by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -82,11 +88,42 @@ fun AddressesScreen(
                     fontSize = 18.sp,
                     modifier = Modifier
                         .clickable {
-                            onAddClicked()
-                            viewModel.resetForAddMode()
+                            if (sharedPrefsHelper.isGuestMode()) {
+                                showGuestDialog = true
+                            } else {
+                                onAddClicked()
+                                viewModel.resetForAddMode()
+                            }
                         }
                         .padding(horizontal = 8.dp)
                 )
+                if (showGuestDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showGuestDialog = false },
+                        title = {
+                            Text(text = "Sign in Required")
+                        },
+                        text = {
+                            Text("Guests cannot add addresses. Please sign in or create an account to continue.")
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showGuestDialog = false
+                                navController.navigate(ScreensRoute.SignUp)
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                showGuestDialog = false
+                            }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+
             }
         )
 

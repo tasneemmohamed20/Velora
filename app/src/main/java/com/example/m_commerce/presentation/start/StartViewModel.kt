@@ -32,6 +32,9 @@ class StartViewModel @Inject constructor(
     private val shopDomain = "and2-ism-mad45.myshopify.com"
     private val accessToken = "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"
 
+    private val _guestModeState = MutableStateFlow<ResponseState?>(null)
+    val guestModeState: StateFlow<ResponseState?> = _guestModeState
+
     fun handleGoogleSignIn(idToken: String) {
         _googleSignInState.value = ResponseState.Loading
         val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -40,7 +43,10 @@ class StartViewModel @Inject constructor(
                 val user = result.user
                 val name = user?.displayName ?: "Google User"
                 val email = user?.email ?: ""
+
+                sharedPreferencesHelper.clearGuestMode()
                 sharedPreferencesHelper.saveCustomerEmail(email)
+
                 Log.d("GoogleSignIn", "Signed in as: $name <$email>")
 
                 createShopifyCustomer(name, email)
@@ -101,5 +107,37 @@ class StartViewModel @Inject constructor(
 
     fun clearGoogleSignInState() {
         _googleSignInState.value = null
+    }
+
+    fun handleGuestMode() {
+        _guestModeState.value = ResponseState.Loading
+
+        viewModelScope.launch {
+            try {
+                sharedPreferencesHelper.clearCustomerId()
+                sharedPreferencesHelper.removeKey("customer_email")
+
+                sharedPreferencesHelper.setGuestMode(true)
+
+                Log.d("GuestMode", "Guest mode activated")
+                _guestModeState.value = ResponseState.Success("Guest mode activated")
+            } catch (e: Exception) {
+                Log.e("GuestMode", "Failed to activate guest mode", e)
+                _guestModeState.value = ResponseState.Failure(e)
+            }
+        }
+    }
+
+    fun clearGuestModeState() {
+        _guestModeState.value = null
+    }
+
+    fun getCurrentUserMode(): String {
+        return sharedPreferencesHelper.getCurrentUserMode()
+    }
+
+    fun switchToAuthenticatedMode() {
+        sharedPreferencesHelper.clearGuestMode()
+        Log.d("UserMode", "Switched from guest to authenticated mode")
     }
 }

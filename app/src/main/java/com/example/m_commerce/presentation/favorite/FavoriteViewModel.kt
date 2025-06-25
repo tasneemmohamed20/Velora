@@ -30,8 +30,9 @@ class FavoriteViewModel @Inject constructor(
     private val _favoriteProducts = MutableStateFlow<List<Product>>(emptyList())
     val favoriteProducts: StateFlow<List<Product>> = _favoriteProducts
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
 
     private val _favoriteVariantIds = MutableStateFlow<Set<String>>(emptySet())
     val favoriteVariantIds: StateFlow<Set<String>> = _favoriteVariantIds
@@ -67,6 +68,14 @@ class FavoriteViewModel @Inject constructor(
 
                     _favoriteProducts.value = uniqueProducts
                     _favoriteVariantIds.value = variantIds
+
+                    uniqueProducts.forEach { product ->
+                        Log.d(
+                            "FavoriteViewModel",
+                            "Favorite Product: ${product.title}, Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}"
+                        )
+                    }
+
 
                     if (matchingDraftOrders.isNotEmpty()) {
                         sharedPreferencesHelper.saveFavoriteDraftOrderId(
@@ -145,6 +154,7 @@ class FavoriteViewModel @Inject constructor(
             val existingDraftOrderId = sharedPreferencesHelper.getFavoriteDraftOrderId()
 
             if (existingDraftOrderId.isNullOrEmpty()) {
+                val price = product.price.minVariantPrice.amount
                 val newDraftOrder = favoriteProductsUseCases.addToFavorites(email, variantId, 1)
                 sharedPreferencesHelper.saveFavoriteDraftOrderId(newDraftOrder.id.toString())
             } else {
