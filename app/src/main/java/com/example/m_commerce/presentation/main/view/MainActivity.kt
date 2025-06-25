@@ -12,9 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
-
-
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +29,6 @@ import androidx.navigation.toRoute
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.domain.entities.OrderEntity
-import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
-import com.example.m_commerce.presentation.home.HomeScreen
-import com.example.m_commerce.presentation.authentication.login.LoginScreen
-import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.order.orders_list.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressInfo
@@ -42,25 +37,25 @@ import com.example.m_commerce.presentation.account.settings.view.AddressesScreen
 import com.example.m_commerce.presentation.account.settings.view.MapSearch
 import com.example.m_commerce.presentation.account.settings.view.SettingsScreen
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.authentication.login.LoginScreen
+import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.cart.CartScreen
 import com.example.m_commerce.presentation.favorite.FavoriteView
+import com.example.m_commerce.presentation.home.HomeScreen
 import com.example.m_commerce.presentation.main.view.MainScreen
 import com.example.m_commerce.presentation.order.order_details.OrderDetails
 import com.example.m_commerce.presentation.payment.checkout.CheckoutScreen
 import com.example.m_commerce.presentation.payment.checkout.PaymentMethod
 import com.example.m_commerce.presentation.payment.payment.PaymentScreen
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
-
 import com.example.m_commerce.presentation.products.ProductsScreen
 import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.start.StartScreen
-
-
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.vouchers.VouchersScreen
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
-
 import kotlinx.serialization.json.Json
 
 
@@ -90,7 +85,7 @@ class MainActivity : ComponentActivity() {
 fun MainActivity.NavHostSetup(){
     NavHost(
         navController = navHostController,
-        startDestination = ScreensRoute.Start,
+        startDestination = ScreensRoute.Home,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
@@ -196,14 +191,11 @@ fun MainActivity.NavHostSetup(){
                     navHostController.popBackStack()
                 },
                 onAddClicked = {
+                    viewModel.resetForAddMode()
                     navHostController.navigate(ScreensRoute.AddressMap)
-                    Log.d(TAG, "NavHostSetup: $it")
                 },
                 onAddressClick = { address ->
-                    viewModel.setEditingAddress(address)
-                    viewModel.updateCurrentLocation(
-                        LatLng(address.latitude, address.longitude)
-                    )
+                    viewModel.setupForEditMode(address)
                     navHostController.navigate(ScreensRoute.AddressInfo)
                 }
             )
@@ -222,16 +214,15 @@ fun MainActivity.NavHostSetup(){
                 },
                 viewModel = viewModel,
                 goToMap = {
-                    navHostController.navigate(ScreensRoute.AddressMap) {
-                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
+                    viewModel.editingAddress.value?.let { address ->
+                        viewModel.setupForEditMode(address)
                     }
-
+                    navHostController.navigate(ScreensRoute.AddressMap)
                 }
             )
         }
 
         composable<ScreensRoute.AddressMap> {
-
             AddressMap(
                 onSearchClicked = {
                     navHostController.navigate(ScreensRoute.MapSearch)
@@ -239,12 +230,11 @@ fun MainActivity.NavHostSetup(){
                 onBackClick = {
                     navHostController.popBackStack()
                 },
-                onConfirmLocation = {
+                onConfirmLocation = { address ->
                     navHostController.navigate(ScreensRoute.AddressInfo)
                 },
                 viewModel = viewModel,
-                isFromEdit = navHostController.previousBackStackEntry?.destination?.route == ScreensRoute.AddressInfo.toString()
-
+                isFromEdit = !viewModel.isAddMode.collectAsState().value
             )
         }
 
@@ -269,6 +259,27 @@ fun MainActivity.NavHostSetup(){
                 })
         }
 
+        composable<ScreensRoute.Favorites> {
+            val context = LocalContext.current
+            val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
+            val customerEmail = remember(Unit) { sharedPreferencesHelper.getCustomerEmail() }
+
+            if (customerEmail == null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = "Please login to view favorites",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                FavoriteView(
+                    onProductClick = { productId ->
+                        Log.d("ProductClick", "Navigating with productId: $productId")
+                        navHostController.navigate(ScreensRoute.ProductDetails(productId))
+                    }
+                )
+            }
+        }
 
         composable<ScreensRoute.OrderDetails>{
             val order = navHostController.previousBackStackEntry?.savedStateHandle?.get<OrderEntity>("order")
@@ -325,25 +336,6 @@ fun MainActivity.NavHostSetup(){
             )
         }
 
-        composable<ScreensRoute.AddressInfo> {
-            AddressInfo(
-                onBack = { navHostController.popBackStack() },
-                onSave = { address ->
-                    viewModel.saveAddressToCustomer(address)
-                    navHostController.popBackStack(
-                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
-                        inclusive = false
-                    )
-                },
-                viewModel = viewModel,
-                goToMap = {
-                    navHostController.navigate(ScreensRoute.AddressMap) {
-                        popUpTo(ScreensRoute.AddressInfo) { inclusive = true }
-                    }
-                }
-            )
-        }
-
         composable<ScreensRoute.ProductDetails> { backStackEntry ->
             val entry = backStackEntry.toRoute<ScreensRoute.ProductDetails>()
             ProductDetailsScreen(
@@ -351,29 +343,6 @@ fun MainActivity.NavHostSetup(){
                 onBack = { navHostController.popBackStack() }
             )
         }
-
-        composable<ScreensRoute.Favorites> {
-            val context = LocalContext.current
-            val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
-            val customerEmail = remember(Unit) { sharedPreferencesHelper.getCustomerEmail() }
-
-            if (customerEmail == null) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "Please login to view favorites",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            } else {
-                FavoriteView(
-                    onProductClick = { productId ->
-                        Log.d("ProductClick", "Navigating with productId: $productId")
-                        navHostController.navigate(ScreensRoute.ProductDetails(productId))
-                    }
-                )
-            }
-        }
-
 
         composable(
             route = "payment/{items}/{totalAmountCents}",
@@ -391,7 +360,7 @@ fun MainActivity.NavHostSetup(){
                 totalAmountCents = totalAmountCents,
                 onPaymentComplete = {
                     navHostController.navigate(ScreensRoute.Home)
-                                    },
+                },
                 onPaymentError = { Log.i("PaymentScreen", "onPaymentError: ") }
             )
         }

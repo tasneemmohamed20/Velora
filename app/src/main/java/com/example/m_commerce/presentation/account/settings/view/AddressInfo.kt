@@ -1,5 +1,10 @@
 package com.example.m_commerce.presentation.account.settings.view
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +29,7 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.House
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,17 +53,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Address
 import com.example.m_commerce.domain.entities.AddressType
-import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
@@ -73,39 +82,117 @@ fun AddressInfo(
     viewModel: AddressMapViewModel,
     goToMap: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val locationState by viewModel.locationState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when (val state = locationState) {
-            is ResponseState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasLocationPermission = isGranted
+        if (!isGranted) {
+            showPermissionDialog = true
+        } else {
+            // Initialize based on mode immediately after permission is granted
+            val isAddMode = viewModel.isAddMode.value
+            val editingAddress = viewModel.editingAddress.value
+
+            if (!isAddMode && editingAddress != null) {
+                // Edit mode - set up with existing address data
+                viewModel.updateCurrentLocation(
+                    LatLng(
+                        editingAddress.latitude,
+                        editingAddress.longitude
+                    )
+                )
+            } else {
+                // Add mode - get fresh location
+                viewModel.refreshLocation()
+            }
+        }
+    }
+
+    // Show permission dialog
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Location Permission Required") },
+            text = {
+                Text("Velora needs to access your location to help you set up your delivery address accurately. This ensures your orders are delivered to the right place.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showPermissionDialog = false
+                        permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    }
                 ) {
-                    CircularProgressIndicator()
+                    Text("OK", color = Color.Blue)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showPermissionDialog = false
+                        onBack()
+                    }
+                ) {
+                    Text("Cancel", color = Color.Gray)
                 }
             }
-            is ResponseState.Failure -> {
-                LaunchedEffect(state.err) {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = state.err.message ?: "Failed to get location"
-                        )
+        )
+    }
+
+    // Only show content if permission is granted
+    if (hasLocationPermission) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (val state = locationState) {
+                is ResponseState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
-                SnackbarHost(hostState = snackbarHostState)
-            }
-            is ResponseState.Success -> {
-                val editingAddress by viewModel.editingAddress.collectAsState()
-                AddressInfoContent(
-                    onBack = onBack,
-                    onSave = onSave,
-                    viewModel = viewModel,
-                    initialAddress = editingAddress,
-                    goToMap = goToMap
-                )
+
+                is ResponseState.Failure -> {
+                    LaunchedEffect(state.err) {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = state.err.message ?: "Failed to get location"
+                            )
+                        }
+                    }
+                    SnackbarHost(hostState = snackbarHostState)
+                }
+
+                is ResponseState.Success -> {
+                    val editingAddress by viewModel.editingAddress.collectAsState()
+                    val selectedLocation by viewModel.selectedLocation.collectAsState()
+                    val address by viewModel.address.collectAsState()
+                    val phoneNumber by viewModel.phoneNumber.collectAsState()
+                    val isPhoneValid by viewModel.isPhoneValid.collectAsState()
+
+                    AddressInfoContent(
+                        onBack = onBack,
+                        onSave = onSave,
+                        viewModel = viewModel,
+                        initialAddress = editingAddress,
+                        goToMap = goToMap
+                    )
+                }
             }
         }
     }
@@ -144,13 +231,32 @@ private fun AddressInfoContent(
     }
     LaunchedEffect(initialAddress, isAddMode) {
         if (!isAddMode && initialAddress != null) {
-            addressType = initialAddress.type
-            buildingName = initialAddress.building
-            aptNumber = initialAddress.apartment
-            floor = initialAddress.floor ?: ""
-            street = initialAddress.street
-            additionalDirections = initialAddress.additionalDirections ?: ""
-            addressLabel = initialAddress.addressLabel ?: ""
+            // Check if we have stored form state (coming back from map)
+            val formState = viewModel.getFormState()
+            if (formState != null) {
+                // Restore form state
+                addressType = formState.addressType
+                buildingName = formState.buildingName
+                aptNumber = formState.aptNumber
+                floor = formState.floor
+                street = formState.street
+                additionalDirections = formState.additionalDirections
+                addressLabel = formState.addressLabel
+                formattedAddress = formState.formattedAddress
+                selectedCountry = formState.selectedCountry
+                viewModel.clearFormState()
+            } else {
+                // Initial load from existing address
+                addressType = initialAddress.type
+                buildingName = initialAddress.building
+                aptNumber = initialAddress.apartment
+                floor = initialAddress.floor ?: ""
+                street = initialAddress.street
+                additionalDirections = initialAddress.additionalDirections ?: ""
+                addressLabel = initialAddress.addressLabel ?: ""
+                formattedAddress = initialAddress.area
+                selectedCountry = "EG"
+            }
         } else {
             // Add mode - reset fields
             addressType = AddressType.HOME
@@ -160,21 +266,30 @@ private fun AddressInfoContent(
             street = ""
             additionalDirections = ""
             addressLabel = ""
-
+            formattedAddress = ""
+            selectedCountry = "EG"
         }
     }
 
-    formattedAddress = remember(address) {
-        address.split(",")
-            .filterNot { it.trim().isEmpty() }
-            .take(2)
-            .joinToString(", ")
-            .trim()
+    // Update formatted address when address from API changes
+    LaunchedEffect(address) {
+        if (formattedAddress.isEmpty() || isAddMode) {
+            formattedAddress = address.split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .let { parts ->
+                    listOfNotNull(
+                        parts.getOrNull(1),
+                        parts.getOrNull(2)
+                    ).joinToString(", ")
+                }
+        }
     }
 
     val hasAddressChanged = remember(
         addressType, buildingName, aptNumber, floor, street,
-        phoneNumber, additionalDirections, addressLabel, formattedAddress
+        additionalDirections, addressLabel, formattedAddress,
+        initialAddress
     ) {
         initialAddress?.let { existing ->
             existing.type != addressType ||
@@ -245,10 +360,9 @@ private fun AddressInfoContent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .background(Color.White, RoundedCornerShape(16.dp))
                     .border(1.dp, Color(0xFFF2F2F2), RoundedCornerShape(16.dp))
-//                    .padding(8.dp)
             ) {
                 Icon(Icons.Default.Place, contentDescription = "Area", tint = Color.Blue)
                 Column(
@@ -257,18 +371,6 @@ private fun AddressInfoContent(
                         .padding(start = 8.dp)
                 ) {
                     Text("Area", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-
-                     formattedAddress = remember(address) {
-                        address.split(",")
-                            .map { it.trim() }
-                            .filter { it.isNotEmpty() }
-                            .let { parts ->
-                                listOfNotNull(
-                                    parts.getOrNull(1),
-                                    parts.getOrNull(2)
-                                ).joinToString(", ")
-                            }
-                    }
 
                     Text(
                         text = if (formattedAddress.isNotEmpty()) formattedAddress else "Loading address...",
@@ -288,17 +390,15 @@ private fun AddressInfoContent(
                                 floor = floor,
                                 street = street,
                                 additionalDirections = additionalDirections,
-                                addressLabel = addressLabel
+                                addressLabel = addressLabel,
+                                formattedAddress = formattedAddress,
+                                selectedCountry = selectedCountry
                             )
-
+                            goToMap()
                         }
                     }
                 ) {
-                    if (isAddMode) {
                     Text("Change", color = Color.Blue)
-                    }else{
-                        Text("", color = Color.Blue)
-                    }
                 }
             }
 
@@ -322,7 +422,6 @@ private fun AddressInfoContent(
                         ),
                         shape = RoundedCornerShape(32.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp),
-                        //                    modifier = Modifier.weight(1f)
                     ) {
                         Icon(
                             imageVector = when (type) {
@@ -362,7 +461,6 @@ private fun AddressInfoContent(
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                         textStyle = TextStyle(color = Color.Black)
-
                     )
                     OutlinedTextField(
                         value = floor, onValueChange = { floor = it },
@@ -370,7 +468,6 @@ private fun AddressInfoContent(
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                         textStyle = TextStyle(color = Color.Black)
-
                     )
                 }
                 Spacer(Modifier.height(8.dp))
@@ -380,7 +477,6 @@ private fun AddressInfoContent(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = TextStyle(color = Color.Black)
-
                 )
                 Spacer(Modifier.height(8.dp))
 
@@ -421,7 +517,6 @@ private fun AddressInfoContent(
                     singleLine = false,
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = TextStyle(color = Color.Black)
-
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
@@ -431,7 +526,6 @@ private fun AddressInfoContent(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = TextStyle(color = Color.Black)
-
                 )
                 Spacer(Modifier.height(24.dp))
 
@@ -457,10 +551,8 @@ private fun AddressInfoContent(
                     },
                     enabled = isSaveEnabled,
                     modifier = Modifier
-//                        .padding(horizontal = 8.dp)
                         .fillMaxWidth()
                         .height(56.dp),
-
                     colors =  ButtonDefaults.buttonColors(
                         containerColor = Color.Blue,
                         contentColor = Color.White,
@@ -469,11 +561,10 @@ private fun AddressInfoContent(
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-
                     Text(
                         if(initialAddress !=null) {
-                        "Update address"
-                    } else {
+                            "Update address"
+                        } else {
                             "Save address"
                         })
                 }
@@ -482,4 +573,3 @@ private fun AddressInfoContent(
         }
     }
 }
-

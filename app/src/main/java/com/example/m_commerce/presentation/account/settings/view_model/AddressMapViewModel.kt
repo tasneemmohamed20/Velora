@@ -45,7 +45,6 @@ class AddressMapViewModel @Inject constructor (
     private val workManager: WorkManager
 ) : ViewModel() {
     private val TAG = "AddressMapViewModel"
-//    private val workManager = WorkManager.getInstance(context)
 
     private val _locationState = MutableStateFlow<ResponseState>(ResponseState.Loading)
     val locationState: StateFlow<ResponseState> = _locationState
@@ -80,14 +79,14 @@ class AddressMapViewModel @Inject constructor (
     private val _editingAddress = MutableStateFlow<Address?>(null)
     val editingAddress: StateFlow<Address?> = _editingAddress
 
-    private val customerId = sharedPreferencesHelper.getCustomerId()
-
     private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
 
     private val _isAddMode = MutableStateFlow(true)
     val isAddMode: StateFlow<Boolean> = _isAddMode
 
     private val _formState = MutableStateFlow<AddressFormState?>(null)
+
+    val customerId = sharedPreferencesHelper.getCustomerId()
 
     init {
         startLocationUpdates()
@@ -107,10 +106,12 @@ class AddressMapViewModel @Inject constructor (
         _editingAddress.value = address
         _phoneNumber.value = address.phoneNumber
         updateCurrentLocation(LatLng(address.latitude, address.longitude))
+        restoreFormState(address)
     }
 
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
+        _selectedLocation.value = latLng
         fetchAddress("${latLng.latitude},${latLng.longitude}")
     }
 
@@ -240,7 +241,9 @@ class AddressMapViewModel @Inject constructor (
         floor: String,
         street: String,
         additionalDirections: String,
-        addressLabel: String
+        addressLabel: String,
+        formattedAddress: String,
+        selectedCountry: String
     ) {
         _formState.value = AddressFormState(
             addressType,
@@ -249,8 +252,16 @@ class AddressMapViewModel @Inject constructor (
             floor,
             street,
             additionalDirections,
-            addressLabel
+            addressLabel,
+            formattedAddress,
+            selectedCountry
         )
+    }
+
+    fun getFormState(): AddressFormState? = _formState.value
+
+    fun clearFormState() {
+        _formState.value = null
     }
 
     fun validateAndUpdatePhone(newValue: String) {
@@ -272,6 +283,10 @@ class AddressMapViewModel @Inject constructor (
         fetchAddress("${latLng.latitude},${latLng.longitude}")
     }
 
+    fun refreshLocation() {
+        // Force fresh location update by restarting location work
+        startLocationUpdates()
+    }
 
     fun saveAddressToCustomer(newAddress: Address) {
         viewModelScope.launch {
@@ -376,6 +391,20 @@ class AddressMapViewModel @Inject constructor (
         }
     }
 
+    private fun restoreFormState(address: Address) {
+        _formState.value = AddressFormState(
+            addressType = address.type,
+            buildingName = address.building,
+            aptNumber = address.apartment,
+            floor = address.floor ?: "",
+            street = address.street,
+            additionalDirections = address.additionalDirections ?: "",
+            addressLabel = address.addressLabel ?: "",
+            formattedAddress = "",
+            selectedCountry = ""
+        )
+    }
+
 }
 
 data class AddressFormState(
@@ -385,5 +414,7 @@ data class AddressFormState(
     val floor: String,
     val street: String,
     val additionalDirections: String,
-    val addressLabel: String
+    val addressLabel: String,
+    val formattedAddress: String,
+    val selectedCountry: String
 )
