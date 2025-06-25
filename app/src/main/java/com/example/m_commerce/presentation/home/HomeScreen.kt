@@ -25,7 +25,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import com.example.m_commerce.domain.entities.Brand
 import com.example.m_commerce.presentation.utils.theme.Primary
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (String) -> Unit){
     val scrollState = rememberScrollState()
@@ -82,12 +84,10 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onItemClicked: (Strin
             }
             is ResponseState.Loading -> {
                 Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 80.dp)
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Primary)
+                    CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
                 }
             }
 
@@ -178,6 +178,7 @@ fun Brands(brands: List<Brand>, onItemClicked: (String) -> Unit){
 }
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BrandItem(brand: Brand, onItemClicked: (String) -> Unit, modifier: Modifier = Modifier){
     Column(
@@ -201,7 +202,7 @@ fun BrandItem(brand: Brand, onItemClicked: (String) -> Unit, modifier: Modifier 
             SubcomposeAsyncImage(
                 model = brand.imageUrl,
                 loading = {
-                    CircularProgressIndicator(modifier = Modifier.size(50.dp))
+                    CircularWavyProgressIndicator(modifier = Modifier.size(50.dp))
                 },
                 error = {
                 },

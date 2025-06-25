@@ -1,6 +1,7 @@
 package com.example.m_commerce.presentation.account.settings.view
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
@@ -42,14 +42,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.m_commerce.R
 import com.example.m_commerce.domain.entities.Address
 import com.example.m_commerce.domain.entities.AddressType
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -74,7 +77,7 @@ fun AddressesScreen(
             actions = {
                 Text(
                     text = "Add",
-                    color = Color.Blue,
+                    color = Primary.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
                     modifier = Modifier
@@ -93,7 +96,7 @@ fun AddressesScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularWavyProgressIndicator(color = Color.Blue)
+                    CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
                 }
             }
 
@@ -106,18 +109,21 @@ fun AddressesScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = "No addresses added yet",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
+                        Image(
+                            painter = painterResource(id = R.drawable.address_placeholder),
+                            contentDescription = "No Address",
+                            modifier = Modifier
+                                .size(300.dp)
+                                .padding(bottom = 16.dp)
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
                             text = "Tap 'Add' to create your first address",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
+                            color = Color.Black,
+                            textAlign = TextAlign.Center,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -168,7 +174,7 @@ fun AddressItem(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(2.dp, Color.Blue),
+        border = BorderStroke(2.dp, Primary.copy(alpha = 0.7f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = onClick
     ) {
@@ -185,7 +191,7 @@ fun AddressItem(
                     AddressType.OFFICE -> Icons.Filled.Business
                 },
                 contentDescription = address.type.name,
-                tint = Color.Blue,
+                tint = Primary.copy(alpha = 0.7f),
                 modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -193,7 +199,7 @@ fun AddressItem(
                 Text(
                     text = address.type.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.Blue
+                    color = Color.Black
                 )
                 Text(
                     text = address.area,

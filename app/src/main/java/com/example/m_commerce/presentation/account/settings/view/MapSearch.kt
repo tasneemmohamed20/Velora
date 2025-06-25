@@ -36,6 +36,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.utils.theme.Primary
+import com.example.m_commerce.presentation.utils.theme.PurpleGrey40
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
@@ -72,7 +74,7 @@ fun MapSearch(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.Blue
+                    tint = Primary.copy(alpha = 0.7f)
                 )
             }
 
@@ -91,7 +93,7 @@ fun MapSearch(
                     .padding(vertical = 8.dp)
                     .border(
                         width = 1.dp,
-                        color = Color.Blue,
+                        color = Primary.copy(alpha = 0.7f),
                         shape = RoundedCornerShape(16.dp)
                     ),
                 trailingIcon = {
@@ -100,7 +102,7 @@ fun MapSearch(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear",
-                                tint = Color.Blue
+                                tint = Primary.copy(alpha = 0.7f)
                             )
                         }
                     }
@@ -108,7 +110,7 @@ fun MapSearch(
                         Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = Color.Blue
+                        tint = Primary.copy(alpha = 0.7f)
                     )
                     }
                 },
@@ -171,7 +173,7 @@ fun SearchResultRow(
         Icon(
             imageVector = Icons.Default.LocationOn,
             contentDescription = "Location",
-            tint = Color.Blue,
+            tint = Primary.copy(alpha = 0.7f),
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -186,8 +188,7 @@ fun SearchResultRow(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    color = PurpleGrey40                )
             }
         }
     }

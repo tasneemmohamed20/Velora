@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +60,8 @@ import androidx.core.content.ContextCompat
 import com.example.m_commerce.R
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
+import com.example.m_commerce.presentation.utils.theme.Primary
+import com.example.m_commerce.presentation.utils.theme.Purple40
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -85,7 +88,7 @@ fun AddressMapToolbar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.Blue
+                    tint = Primary.copy(alpha = 0.7f)
                 )
             }
         },
@@ -94,7 +97,7 @@ fun AddressMapToolbar(
                 Icon(
                     imageVector = Icons.Rounded.Search,
                     contentDescription = "Search",
-                    tint = Color.Blue
+                    tint = Primary.copy(alpha = 0.7f)
                 )
             }
         },
@@ -196,7 +199,7 @@ fun AddressMap(
                         permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }
                 ) {
-                    Text("OK", color = Color.Blue)
+                    Text("OK", color = Primary)
                 }
             },
             dismissButton = {
@@ -399,14 +402,14 @@ private fun MapContent(
                         .alpha(1f),
                     painter = painterResource(id = R.drawable.map_marker),
                     contentDescription = "Location marker",
-                    tint = Color.Blue
+                    tint = Primary.copy(alpha = 0.7f)
                 )
             }
         }
     }
 
     if (isLoading) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Primary.copy(alpha = 0.7f), trackColor = Purple40, strokeCap = StrokeCap.Round, gapSize = 8.dp)
     }
 }
 
@@ -435,7 +438,7 @@ fun BottomBar(
                     .height(56.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Blue,
+                    containerColor = Primary.copy(alpha = 0.7f),
                     contentColor = Color.White,
                     disabledContainerColor = Color.Gray,
                     disabledContentColor = Color.White

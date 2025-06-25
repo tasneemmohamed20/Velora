@@ -24,7 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -54,6 +55,7 @@ import com.example.m_commerce.presentation.utils.theme.Primary
 import com.example.m_commerce.presentation.utils.theme.WhiteSmoke
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,onProductClick: (String) -> Unit){
 
@@ -83,7 +85,7 @@ fun ProductsScreen(viewModel: ProductsViewModel = hiltViewModel(), type: String,
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        CircularProgressIndicator(color = Primary)
+                        CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
                     }
                 }
                 is ResponseState.Success -> {
@@ -120,6 +122,7 @@ fun ProductsList(productsState: List<Product>, currencyPref: Pair<Boolean, Float
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProductCard(
     productDetails: Product,
@@ -156,7 +159,7 @@ fun ProductCard(
                 SubcomposeAsyncImage(
                     model = productDetails.images.firstOrNull(),
                     loading = {
-                        CircularProgressIndicator()
+                        CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
                     },
                     error = {},
                     contentDescription = "Product image",

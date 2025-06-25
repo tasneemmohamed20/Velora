@@ -1,6 +1,6 @@
 package com.example.m_commerce.presentation.cart
 
-import android.R
+import com.example.m_commerce.R
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -123,7 +123,7 @@ fun CartScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .wrapContentSize(Alignment.Center),
-                color = Color.Blue,
+                color = Primary.copy(alpha = 0.7f)
             )
         }
         is ResponseState.Failure -> {
@@ -143,17 +143,20 @@ fun CartScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Image(
-                            imageVector = Icons.Default.ShoppingCart,
+                            painter =  painterResource(id = R.drawable.empty_cart),
                             contentDescription = "Empty Cart",
                             modifier = Modifier
-                                .size(100.dp)
+                                .size(300.dp)
                                 .padding(8.dp),
-                            colorFilter = ColorFilter.tint(Primary)
+//                            colorFilter = ColorFilter.tint(Primary)
                         )
                         Text(
-                            text = "Your cart is empty",
+                            text = "Looks like your cart is empty!",
                             textAlign = TextAlign.Center,
-                            color = Primary
+                            color = Color.Black,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
                         )
                     }
                 }
@@ -342,7 +345,7 @@ fun BottomButtons(onCheckout: () -> Unit, isEnabled: Boolean = true) {
                     .height(56.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Blue,
+                    containerColor = Primary.copy(alpha = 0.7f),
                     contentColor = Color.White,
                     disabledContainerColor = Color.Gray,
                     disabledContentColor = Color.White
@@ -376,15 +379,6 @@ fun SummaryRow(label: String, value: String, info: Boolean = false) {
                 fontSize = 16.sp,
                 color = Color.Black
             )
-            if (info) {
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_menu_info_details),
-                    contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(15.dp)
-                )
-            }
         }
         Text(
             value,
@@ -440,7 +434,7 @@ fun CartItemRow(
                         .clip(RoundedCornerShape(10.dp))
                         .border(
                             width = 1.dp,
-                            color = Color.Blue,
+                            color = Primary.copy(alpha = 0.7f),
                             shape = RoundedCornerShape(8.dp)
                         )
                 )
@@ -494,7 +488,7 @@ fun CartItemRow(
                     ) {
                         Text(
                             text = "-",
-                            color = Color.Blue,
+                            color = Primary.copy(alpha = 0.7f),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 24.sp,
                             textAlign = TextAlign.Center
@@ -515,7 +509,7 @@ fun CartItemRow(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Increase",
-                            tint = Color.Blue
+                            tint = Primary.copy(alpha = 0.7f)
                         )
                     }
                 }

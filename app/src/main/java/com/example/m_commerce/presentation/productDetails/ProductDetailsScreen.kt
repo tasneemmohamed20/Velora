@@ -25,15 +25,15 @@ import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.ProductVariant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.ui.graphics.Color
 import com.example.m_commerce.domain.entities.note
 import com.example.m_commerce.presentation.favorite.FavoriteHeartIcon
 import com.example.m_commerce.presentation.favorite.FavoriteViewModel
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 
 val TAG = "ProductDetailsScreen"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProductDetailsScreen(
     productId: String,
@@ -58,10 +58,10 @@ fun ProductDetailsScreen(
 
     when (productState) {
         is ResponseState.Loading -> Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
         }
         is ResponseState.Failure -> Text("Failed to load product")
         is ResponseState.Success -> {

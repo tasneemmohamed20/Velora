@@ -30,9 +30,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.Color
 import com.example.m_commerce.presentation.products.NoProductsFound
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
@@ -141,7 +142,12 @@ fun SearchScreen(
                 }
             ) { productsState ->
                 when (productsState) {
-                    is ResponseState.Loading -> CircularProgressIndicator()
+                    is ResponseState.Loading -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
+                    }
                     is ResponseState.Success -> {
                         val products = productsState.data as List<Product>
                         if (products.isEmpty()) {
