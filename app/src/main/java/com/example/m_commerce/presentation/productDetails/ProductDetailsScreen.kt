@@ -171,6 +171,7 @@ fun ProductDetailsScreen(
                         FavoriteHeartIcon(
                             isFavorited = isFavorited,
                             onToggle = {
+//                                viewModel.addToCart(product.variants.first().id,1,note.fav)
                                 favoriteViewModel.toggleProductFavorite(product, firstVariantId)
                             },
                             modifier = Modifier
