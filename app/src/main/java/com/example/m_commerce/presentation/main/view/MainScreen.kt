@@ -34,8 +34,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +75,8 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
     val snackbarHostState = remember { SnackbarHostState() }
     var previousConnectionState by remember { mutableStateOf<Boolean?>(null) }
     val isLogged by mainViewModel.isLogged.collectAsState()
+    var selectedIndex by rememberSaveable { mutableStateOf(0) }
+
 
     LaunchedEffect(isConnected) {
         if (previousConnectionState != null && previousConnectionState != isConnected) {
@@ -162,9 +166,13 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
         },
         bottomBar = {
             if(showBottomNavBar.value){
-                BottomNavigationBar {
-                    navHostController.navigate(it.route)
-                }
+                BottomNavigationBar(
+                    selectedIndex = selectedIndex,
+                    onItemSelected = { index, item ->
+                        selectedIndex = index
+                        navHostController.navigate(item.route)
+                    }
+                )
             }
         },
         topBar = {

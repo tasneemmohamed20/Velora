@@ -53,16 +53,17 @@ val navigationItems = listOf(
 
 
 @Composable
-fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
+fun BottomNavigationBar(
+    selectedIndex: Int,
+    onItemSelected: (index: Int, item: NavigationItem) -> Unit
+){
 
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 30.dp,
         modifier = Modifier.shadow(elevation = 8.dp),
+
     ){
-        var selectedNavigationIndex by rememberSaveable {
-            mutableIntStateOf(0)
-        }
 
         navigationItems.forEachIndexed { index, navigationItem ->
 
@@ -77,10 +78,9 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
                     disabledIconColor = Secondary,
                     disabledTextColor = Color.White
                 ),
-                selected = selectedNavigationIndex == index,
+                selected = selectedIndex  == index,
                 onClick = {
-                    selectedNavigationIndex = index
-                    onItemSelected(navigationItem)
+                    onItemSelected(index, navigationItem)
                 },
                 icon = {
                     Icon(
@@ -92,7 +92,7 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
                     Text(
                         text = navigationItem.title,
                         style = MaterialTheme.typography.labelSmall,
-                        color = if(selectedNavigationIndex == index) Primary else  Color.Black
+                        color = if (selectedIndex  == index) Primary else  Color.Black
                     )
                 },
 
