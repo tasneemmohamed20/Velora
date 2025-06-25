@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,15 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.m_commerce.R
-import com.example.m_commerce.presentation.start.ModernButton
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.start.StartViewModel
@@ -147,17 +143,17 @@ fun StartScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                ModernButton(
+                CustomButton(
                     text = "Continue with Google",
                     icon = R.drawable.ic_google,
                     onClick = { launcher.launch(googleSignInClient.signInIntent) }
                 )
-                ModernButton(
+                CustomButton(
                     text = "Continue with Email",
                     icon = R.drawable.ic_gmail,
                     onClick = onEmailClicked
                 )
-                ModernButton(
+                CustomButton(
                     text = "Continue as Guest",
                     icon = R.drawable.ic_person,
                     onClick = {}
@@ -180,7 +176,7 @@ fun StartScreen(
 }
 
 @Composable
-fun ModernButton(text: String, icon: Int, onClick: () -> Unit) {
+fun CustomButton(text: String, icon: Int, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
