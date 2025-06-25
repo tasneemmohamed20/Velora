@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MCommerceTheme(dynamicColor = false) {
                 navHostController = rememberNavController()
-                NavHostSetup()
+                MainScreen()
             }
         }
     }
@@ -97,9 +97,15 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
         composable<ScreensRoute.Splash> {
             SplashScreen(
                 onNavigateToStart = {
-                  
-                    navHostController.navigate(ScreensRoute.Start) {
-                        popUpTo(ScreensRoute.Splash) { inclusive = true }
+                    if(isLogged) {
+                        navHostController.navigate(ScreensRoute.Home) {
+                            popUpTo(ScreensRoute.Splash) { inclusive = true }
+                        }
+                    }else
+                    {
+                        navHostController.navigate(ScreensRoute.Start) {
+                            popUpTo(ScreensRoute.Splash) { inclusive = true }
+                        }
                     }
                 },
                 onNavigateToOnBoarding = {

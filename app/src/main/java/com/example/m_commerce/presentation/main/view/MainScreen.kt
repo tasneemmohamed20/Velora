@@ -36,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,10 @@ import com.example.m_commerce.presentation.main.viewmodel.MainViewModel
 import com.example.m_commerce.presentation.utils.components.BottomNavigationBar
 import com.example.m_commerce.presentation.utils.components.CustomSnackbar
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -63,9 +68,9 @@ import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 @Composable
 fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
 
-    val showBottomNavBar = remember { mutableStateOf(true) }
+    val showBottomNavBar = remember { mutableStateOf(false) }
     val showLogo = remember { mutableStateOf(false) }
-    val showTopAppBar = remember { mutableStateOf(true) }
+    val showTopAppBar = remember { mutableStateOf(false) }
     var topAppBarTitleState by remember { mutableStateOf("Velora") }
     var showBackButton by remember { mutableStateOf(false) }
 
@@ -87,62 +92,70 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
         previousConnectionState = isConnected
     }
 
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(navHostController) {
         navHostController.addOnDestinationChangedListener { _, destination, _ ->
+            coroutineScope.launch {
+                delay(300L)
 
-            when {
-                destination.route in listOf(
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Cart"
-                ) || destination.route?.startsWith("checkout") == true -> {
-                    showBottomNavBar.value = false
-                    showTopAppBar.value = false
-                    showBackButton = false
-                }
-                destination.route in listOf(
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.VouchersScreen"
-                ) -> {
-                    showBottomNavBar.value = true
-                    showTopAppBar.value = false
-                }
-                destination.route in listOf(
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.ProductDetails/{productId}"
-                ) -> {
-                    showBottomNavBar.value = false
-                    showTopAppBar.value = true
-                    showLogo.value = false
-                    topAppBarTitleState = "Products"
-                    showBackButton = true
-                }
-                destination.route in listOf(
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.OrderDetails",
-                    "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order") -> {
-                    showBottomNavBar.value = false
-                    showTopAppBar.value = true
-                    showLogo.value = false
-                    topAppBarTitleState = "My Orders"
-                    showBackButton = true
-                }
-                else ->{
-                    showBottomNavBar.value = true
-                    showTopAppBar.value = true
-                    topAppBarTitleState = "Velora"
-                    showLogo.value = true
-                    showBackButton = false
+                when {
+                    destination.route in listOf(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Start",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Login",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.SignUp",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressMap",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.MapSearch",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.AddressInfo",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Cart",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Splash",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.OnBoarding",
+                    ) || destination.route?.startsWith("checkout") == true -> {
+                        showBottomNavBar.value = false
+                        showTopAppBar.value = false
+                        showBackButton = false
+                    }
+                    destination.route in listOf(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Settings",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Account",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Addresses",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.VouchersScreen"
+                    ) -> {
+                        showBottomNavBar.value = true
+                        showTopAppBar.value = false
+                    }
+                    destination.route in listOf(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Products/{type}",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Search",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.ProductDetails/{productId}"
+                    ) -> {
+                        showBottomNavBar.value = false
+                        showTopAppBar.value = true
+                        showLogo.value = false
+                        topAppBarTitleState = "Products"
+                        showBackButton = true
+                    }
+                    destination.route in listOf(
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.OrderDetails",
+                        "com.example.m_commerce.presentation.utils.routes.ScreensRoute.Order") -> {
+                        showBottomNavBar.value = false
+                        showTopAppBar.value = true
+                        showLogo.value = false
+                        topAppBarTitleState = "My Orders"
+                        showBackButton = true
+                    }
+                    else ->{
+                        showBottomNavBar.value = true
+                        showTopAppBar.value = true
+                        topAppBarTitleState = "Velora"
+                        showLogo.value = true
+                        showBackButton = false
+                    }
                 }
             }
         }
     }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(
