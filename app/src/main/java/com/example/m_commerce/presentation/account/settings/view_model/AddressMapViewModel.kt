@@ -109,6 +109,36 @@ class AddressMapViewModel @Inject constructor (
         restoreFormState(address)
     }
 
+    fun deleteAddress(addressToDelete: Address) {
+        viewModelScope.launch {
+            _updateAddressState.value = ResponseState.Loading
+            try {
+                val customer = customerUseCase(customerId.toString()).first()
+                val currentApiAddresses = customer.addresses?.toMutableList() ?: mutableListOf()
+
+                // Find and remove the address by ID
+                val addressIndex = currentApiAddresses.indexOfFirst { it.id == addressToDelete.id }
+                if (addressIndex != -1) {
+                    currentApiAddresses.removeAt(addressIndex)
+                    Log.d(TAG, "Deleting address with ID: ${addressToDelete.id}")
+
+                    // Update customer with the modified addresses list
+                    customerUseCase(id = customerId.toString(), addresses = currentApiAddresses)
+                        .collect { updatedCustomer ->
+                            _updateAddressState.value = ResponseState.Success(updatedCustomer)
+                            getCustomerAddresses() // Refresh the addresses list
+                            Log.d(TAG, "Address deleted successfully")
+                        }
+                } else {
+                    throw Exception("Address with id ${addressToDelete.id} not found for deletion.")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete address: ${e.message}", e)
+                _updateAddressState.value = ResponseState.Failure(e)
+            }
+        }
+    }
+
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
         _selectedLocation.value = latLng
@@ -339,6 +369,7 @@ class AddressMapViewModel @Inject constructor (
 
     fun getCustomerAddresses() {
         viewModelScope.launch {
+            _isLoading.value = true
             _addresses.value = emptyList()
             try {
                 customerUseCase(customerId.toString()).collect { customer ->
@@ -383,6 +414,7 @@ class AddressMapViewModel @Inject constructor (
                     } ?: emptyList()
 
                     _addresses.value = uiAddresses
+                    _isLoading.value = false
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get customer addresses", e)
