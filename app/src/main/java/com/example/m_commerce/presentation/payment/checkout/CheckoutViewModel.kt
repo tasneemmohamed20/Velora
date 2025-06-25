@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.BillingAddress
 import com.example.m_commerce.domain.entities.Customer
+import com.example.m_commerce.domain.entities.CustomerAddresses
 import com.example.m_commerce.domain.entities.DiscountCodes
 import com.example.m_commerce.domain.usecases.CompleteDraftOrder
 import com.example.m_commerce.domain.usecases.CustomerUseCase
@@ -36,6 +37,8 @@ class CheckoutViewModel @Inject constructor(
     val selectedLocation: StateFlow<LatLng?> = _selectedLocation
     private val _selectedAddress = MutableStateFlow<String?>(null)
     val selectedAddress: StateFlow<String?> = _selectedAddress
+    private val _addresses = MutableStateFlow<List<CustomerAddresses>>(emptyList())
+    val addresses: StateFlow<List<CustomerAddresses>> = _addresses.asStateFlow()
     private val _discountCodes = MutableStateFlow<List<DiscountCodes>>(emptyList())
     val discountCodes: StateFlow<List<DiscountCodes>> = _discountCodes.asStateFlow()
 
@@ -60,11 +63,17 @@ class CheckoutViewModel @Inject constructor(
         fetchDiscountCodes()
     }
 
+    fun refreshCustomerData() {
+        fetchCustomerAndSetLocation()
+    }
+
     fun fetchCustomerAndSetLocation() {
         viewModelScope.launch {
             val customerId = sharedPreferencesHelper.getCustomerId().toString()
             val customer: Flow<Customer> = customerUseCase(customerId)
             val addresses = customer?.firstOrNull()?.addresses.orEmpty()
+
+            _addresses.value = addresses
 
             val homeAddress = addresses.find { it.address1?.contains("type:HOME", ignoreCase = true) == true }
             val selectedAddress = homeAddress ?: addresses.firstOrNull()
@@ -92,7 +101,21 @@ class CheckoutViewModel @Inject constructor(
         _selectedAddress.value = area
         return Pair(lat, lon)
     }
-    
+
+    fun selectAddress(address: CustomerAddresses) {
+        val (lat, lon) = extractLatLng(address.address1)
+        if (lat != null && lon != null) {
+            _selectedLocation.value = LatLng(lat, lon)
+        }
+        val billingAddress = BillingAddress(
+            address1 = address.address1,
+            address2 = address.address2,
+            city = address.city,
+            phone = address.phone
+        )
+        updateDraftOrderBillingAddress(billingAddress)
+    }
+
     private fun updateDraftOrderBillingAddress(address: BillingAddress) {
         viewModelScope.launch {
             val draftOrderId = sharedPreferencesHelper.getCartDraftOrderId().toString()
@@ -188,14 +211,9 @@ class CheckoutViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-//        _selectedLocation.value = null
-//        _selectedAddress.value = null
-//        _discountCodes.value = emptyList()
         _voucherText.value = ""
         _voucherError.value = null
         _appliedDiscount.value = 0.0
         _isApplyingVoucher.value = false
-//        showSuccessDialog.value = false
-//        showErrorDialog.value = false
     }
 }

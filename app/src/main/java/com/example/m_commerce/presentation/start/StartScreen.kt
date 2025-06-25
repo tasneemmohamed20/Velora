@@ -6,7 +6,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +30,7 @@ import com.google.android.gms.common.api.ApiException
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.start.StartViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -45,6 +48,7 @@ fun StartScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -94,11 +98,16 @@ fun StartScreen(
     ) {
         Column(
             verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.verticalScroll(state = scrollState)
         ) {
             Spacer(modifier = Modifier.height(120.dp))
 
-            Text("Velora", color = Color(0xFF0F6FB0), fontSize = 56.sp, fontWeight = FontWeight.Bold)
+            Image(
+                painter = painterResource(R.drawable.logo_name),
+                contentDescription = "app logo"
+            )
+            Spacer(modifier = Modifier.height(10.dp))
             Text("Your Best Shop", fontSize = 14.sp, color = Color.Gray)
 
             Spacer(modifier = Modifier.height(12.dp))

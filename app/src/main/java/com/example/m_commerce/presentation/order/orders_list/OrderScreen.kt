@@ -48,7 +48,7 @@ import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.Functions.formatShopifyDate
 import com.example.m_commerce.presentation.utils.Functions.getOrderStatusColors
 import com.example.m_commerce.presentation.utils.Functions.mapOrderStatusSimple
-import com.example.m_commerce.presentation.utils.theme.primaryBlue
+import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -146,7 +146,7 @@ fun OrderCard(order: OrderEntity, onOrderClicked: (OrderEntity) -> Unit, modifie
                    )
                    Text(
                        text = order.name,
-                       color = primaryBlue,
+                       color = PrimaryBlue,
                        style = MaterialTheme.typography.titleMedium
                    )
                }
@@ -225,7 +225,7 @@ fun NoOrderFound(onExploreProductsClicked: () -> Unit){
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = primaryBlue,
+                containerColor = PrimaryBlue,
                 contentColor = Color.White
             )
         ){

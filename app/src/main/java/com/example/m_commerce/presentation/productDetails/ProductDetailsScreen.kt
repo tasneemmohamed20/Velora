@@ -39,7 +39,7 @@ fun ProductDetailsScreen(
     productId: String,
     onBack: () -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
-    favoriteViewModel: FavoriteViewModel = hiltViewModel() // Add FavoriteViewModel
+    favoriteViewModel: FavoriteViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }

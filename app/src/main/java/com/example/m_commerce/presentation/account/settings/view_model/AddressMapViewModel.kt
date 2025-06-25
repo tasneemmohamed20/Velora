@@ -45,7 +45,6 @@ class AddressMapViewModel @Inject constructor (
     private val workManager: WorkManager
 ) : ViewModel() {
     private val TAG = "AddressMapViewModel"
-//    private val workManager = WorkManager.getInstance(context)
 
     private val _locationState = MutableStateFlow<ResponseState>(ResponseState.Loading)
     val locationState: StateFlow<ResponseState> = _locationState
@@ -80,14 +79,14 @@ class AddressMapViewModel @Inject constructor (
     private val _editingAddress = MutableStateFlow<Address?>(null)
     val editingAddress: StateFlow<Address?> = _editingAddress
 
-    private val customerId = sharedPreferencesHelper.getCustomerId()
-
     private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
 
     private val _isAddMode = MutableStateFlow(true)
     val isAddMode: StateFlow<Boolean> = _isAddMode
 
     private val _formState = MutableStateFlow<AddressFormState?>(null)
+
+    val customerId = sharedPreferencesHelper.getCustomerId()
 
     init {
         startLocationUpdates()
@@ -107,10 +106,42 @@ class AddressMapViewModel @Inject constructor (
         _editingAddress.value = address
         _phoneNumber.value = address.phoneNumber
         updateCurrentLocation(LatLng(address.latitude, address.longitude))
+        restoreFormState(address)
+    }
+
+    fun deleteAddress(addressToDelete: Address) {
+        viewModelScope.launch {
+            _updateAddressState.value = ResponseState.Loading
+            try {
+                val customer = customerUseCase(customerId.toString()).first()
+                val currentApiAddresses = customer.addresses?.toMutableList() ?: mutableListOf()
+
+                // Find and remove the address by ID
+                val addressIndex = currentApiAddresses.indexOfFirst { it.id == addressToDelete.id }
+                if (addressIndex != -1) {
+                    currentApiAddresses.removeAt(addressIndex)
+                    Log.d(TAG, "Deleting address with ID: ${addressToDelete.id}")
+
+                    // Update customer with the modified addresses list
+                    customerUseCase(id = customerId.toString(), addresses = currentApiAddresses)
+                        .collect { updatedCustomer ->
+                            _updateAddressState.value = ResponseState.Success(updatedCustomer)
+                            getCustomerAddresses() // Refresh the addresses list
+                            Log.d(TAG, "Address deleted successfully")
+                        }
+                } else {
+                    throw Exception("Address with id ${addressToDelete.id} not found for deletion.")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete address: ${e.message}", e)
+                _updateAddressState.value = ResponseState.Failure(e)
+            }
+        }
     }
 
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
+        _selectedLocation.value = latLng
         fetchAddress("${latLng.latitude},${latLng.longitude}")
     }
 
@@ -240,7 +271,9 @@ class AddressMapViewModel @Inject constructor (
         floor: String,
         street: String,
         additionalDirections: String,
-        addressLabel: String
+        addressLabel: String,
+        formattedAddress: String,
+        selectedCountry: String
     ) {
         _formState.value = AddressFormState(
             addressType,
@@ -249,8 +282,16 @@ class AddressMapViewModel @Inject constructor (
             floor,
             street,
             additionalDirections,
-            addressLabel
+            addressLabel,
+            formattedAddress,
+            selectedCountry
         )
+    }
+
+    fun getFormState(): AddressFormState? = _formState.value
+
+    fun clearFormState() {
+        _formState.value = null
     }
 
     fun validateAndUpdatePhone(newValue: String) {
@@ -272,6 +313,10 @@ class AddressMapViewModel @Inject constructor (
         fetchAddress("${latLng.latitude},${latLng.longitude}")
     }
 
+    fun refreshLocation() {
+        // Force fresh location update by restarting location work
+        startLocationUpdates()
+    }
 
     fun saveAddressToCustomer(newAddress: Address) {
         viewModelScope.launch {
@@ -324,6 +369,7 @@ class AddressMapViewModel @Inject constructor (
 
     fun getCustomerAddresses() {
         viewModelScope.launch {
+            _isLoading.value = true
             _addresses.value = emptyList()
             try {
                 customerUseCase(customerId.toString()).collect { customer ->
@@ -368,12 +414,27 @@ class AddressMapViewModel @Inject constructor (
                     } ?: emptyList()
 
                     _addresses.value = uiAddresses
+                    _isLoading.value = false
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get customer addresses", e)
                 _addresses.value = emptyList()
             }
         }
+    }
+
+    private fun restoreFormState(address: Address) {
+        _formState.value = AddressFormState(
+            addressType = address.type,
+            buildingName = address.building,
+            aptNumber = address.apartment,
+            floor = address.floor ?: "",
+            street = address.street,
+            additionalDirections = address.additionalDirections ?: "",
+            addressLabel = address.addressLabel ?: "",
+            formattedAddress = "",
+            selectedCountry = ""
+        )
     }
 
 }
@@ -385,5 +446,7 @@ data class AddressFormState(
     val floor: String,
     val street: String,
     val additionalDirections: String,
-    val addressLabel: String
+    val addressLabel: String,
+    val formattedAddress: String,
+    val selectedCountry: String
 )

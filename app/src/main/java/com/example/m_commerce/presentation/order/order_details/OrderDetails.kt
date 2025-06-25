@@ -35,7 +35,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.ui.text.font.FontWeight
 import com.example.m_commerce.domain.entities.OrderEntity
-import com.example.m_commerce.presentation.utils.theme.primaryBlue
+import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
 
 
 @Composable
@@ -57,7 +57,7 @@ fun OrderDetails(order: OrderEntity){
             )
             Text(
                 text = order.name,
-                color = primaryBlue,
+                color = PrimaryBlue,
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -72,7 +72,7 @@ fun OrderDetails(order: OrderEntity){
             )
             Text(
                 text = "${order.lineItems?.fold(0) { acc, product -> acc + product.quantity }} Items",
-                color = primaryBlue
+                color = PrimaryBlue
             )
         }
         Spacer(Modifier.height(12.dp))
