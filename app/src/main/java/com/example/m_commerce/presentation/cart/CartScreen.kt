@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
@@ -78,6 +80,9 @@ fun CartScreen(
     var estimatedFee: Double? = null
     var itemsCount: Int? = null
     var totalPrice: Double? = null
+    val context = LocalContext.current
+    val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
+    val isAuthenticated = remember { sharedPreferencesHelper.isUserAuthenticated() }
 
     val removeItemRequest = viewModel.removeItemRequest
     var itemToRemove by remember {
@@ -151,10 +156,11 @@ fun CartScreen(
                             colorFilter = ColorFilter.tint(Primary)
                         )
                         Text(
-                            text = "Your cart is empty",
+                            text = if (isAuthenticated) "Your cart is empty" else "Please log in to view your cart",
                             textAlign = TextAlign.Center,
                             color = Primary
                         )
+
                     }
                 }
             }
