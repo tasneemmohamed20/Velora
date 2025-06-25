@@ -2,7 +2,6 @@ package com.example.m_commerce.presentation.utils.components
 
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -23,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
-import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
+import com.example.m_commerce.presentation.utils.theme.Primary
 import com.example.m_commerce.presentation.utils.theme.Secondary
 
 data class NavigationItem(
@@ -70,8 +69,8 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
             NavigationBarItem(
                 alwaysShowLabel = true,
                 colors = NavigationBarItemColors(
-                    selectedIndicatorColor = PrimaryBlue.copy(alpha = .2f),
-                    selectedIconColor = PrimaryBlue,
+                    selectedIndicatorColor = Primary.copy(alpha = .1f),
+                    selectedIconColor = Primary,
                     selectedTextColor = Color.White,
                     unselectedIconColor = Color.Black,
                     unselectedTextColor = Color.Black,
@@ -93,7 +92,7 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
                     Text(
                         text = navigationItem.title,
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Black
+                        color = if(selectedNavigationIndex == index) Primary else  Color.Black
                     )
                 },
 

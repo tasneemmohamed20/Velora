@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,6 +72,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
     val isConnected by mainViewModel.isConnected.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var previousConnectionState by remember { mutableStateOf<Boolean?>(null) }
+    val isLogged by mainViewModel.isLogged.collectAsState()
 
     LaunchedEffect(isConnected) {
         if (previousConnectionState != null && previousConnectionState != isConnected) {
@@ -182,7 +184,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                                 topAppBarTitleState,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = 60.dp),
+                                    .padding(start = 50.dp),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
                             )
@@ -219,7 +221,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            NavHostSetup()
+            NavHostSetup(isLogged)
         }
     }
 

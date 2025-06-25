@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val authUseCase: AuthUseCase,
@@ -48,7 +47,7 @@ class SignUpViewModel @Inject constructor(
             result.fold(
                 onSuccess = {
                     sharedPreferencesHelper.saveCustomerEmail(email)
-                    _signUpState.value = ResponseState.Success(Unit)
+                    _signUpState.value = ResponseState.Success("Account created successfully")
                 },
                 onFailure = { error ->
                     _signUpState.value = ResponseState.Failure(error)

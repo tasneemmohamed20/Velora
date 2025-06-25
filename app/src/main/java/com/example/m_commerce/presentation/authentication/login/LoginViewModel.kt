@@ -43,7 +43,6 @@ class LoginViewModel @Inject constructor(
                                 draftOrders.find { it.note2 == "cart" }?.let { draftOrder ->
                                     hasExistingOrder = true
                                     sharedPreferencesHelper.saveCartDraftOrderId(draftOrder.id.toString())
-                                    Log.d("LoginViewModel", "Found existing draft order with note: ${draftOrder.note2}")
                                 }
                             }
                             if (hasExistingOrder) {

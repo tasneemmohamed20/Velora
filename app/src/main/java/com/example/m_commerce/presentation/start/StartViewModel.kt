@@ -3,9 +3,11 @@ package com.example.m_commerce.start
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +20,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 
-class StartViewModel @Inject constructor() : ViewModel() {
+@HiltViewModel
+class StartViewModel @Inject constructor(
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
+) : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val _googleSignInState = MutableStateFlow<ResponseState?>(null)
@@ -35,7 +40,7 @@ class StartViewModel @Inject constructor() : ViewModel() {
                 val user = result.user
                 val name = user?.displayName ?: "Google User"
                 val email = user?.email ?: ""
-
+                sharedPreferencesHelper.saveCustomerEmail(email)
                 Log.d("GoogleSignIn", "Signed in as: $name <$email>")
 
                 createShopifyCustomer(name, email)

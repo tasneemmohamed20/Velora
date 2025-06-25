@@ -65,8 +65,6 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 
 
-private const val TAG = "MainActivity"
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
@@ -75,9 +73,8 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
         setContent {
-            MCommerceTheme {
+            MCommerceTheme(dynamicColor = false) {
                 navHostController = rememberNavController()
                 NavHostSetup()
             }
@@ -87,7 +84,8 @@ class MainActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainActivity.NavHostSetup(){
+fun MainActivity.NavHostSetup(isLogged: Boolean){
+
     NavHost(
         navController = navHostController,
         startDestination = ScreensRoute.Splash,
@@ -99,6 +97,7 @@ fun MainActivity.NavHostSetup(){
         composable<ScreensRoute.Splash> {
             SplashScreen(
                 onNavigateToStart = {
+                  
                     navHostController.navigate(ScreensRoute.Start) {
                         popUpTo(ScreensRoute.Splash) { inclusive = true }
                     }
@@ -193,6 +192,9 @@ fun MainActivity.NavHostSetup(){
                 },
                 onBackClick = {
                     navHostController.popBackStack()
+                },
+                onLogoutClicked = {
+                    navHostController.navigate(ScreensRoute.Start)
                 }
             )
         }

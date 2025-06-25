@@ -21,8 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.R
+import com.example.m_commerce.presentation.utils.Functions.getFriendlyErrorMessage
 import com.example.m_commerce.presentation.utils.ResponseState
-import com.example.m_commerce.presentation.utils.theme.PrimaryBlue
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 @Composable
 fun LoginScreen(
@@ -36,6 +37,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val loginState by viewModel.loginState.collectAsState()
+    var isLoginClicked by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -51,7 +53,7 @@ fun LoginScreen(
             alignment = Alignment.Center
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Text("Login", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue)
+        Text("Login", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Primary)
         Spacer(modifier = Modifier.height(40.dp))
         Text("Welcome back!", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -80,18 +82,29 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.login(email, password) },
+            onClick = {
+                viewModel.login(email, password)
+                isLoginClicked = true
+               },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue, contentColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary, contentColor = Color.White),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Login")
+            if (loginState is ResponseState.Loading && isLoginClicked) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(20.dp)
+                )
+            } else {
+                Text("Login")
+            }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Don't have an account?")
             TextButton(onClick = onButtonClicked) {
-                Text("Sign Up", color = Color(0xFF0F6FB0))
+                Text("Sign Up", color = Primary)
             }
         }
 
@@ -106,7 +119,7 @@ fun LoginScreen(
             }
             is ResponseState.Failure -> {
                 LaunchedEffect(Unit) {
-                    Toast.makeText(context, (loginState as ResponseState.Failure).err.message ?: "Unknown error", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getFriendlyErrorMessage((loginState as ResponseState.Failure).err) , Toast.LENGTH_SHORT).show()
                 }
             }
             else -> Unit

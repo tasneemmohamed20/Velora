@@ -26,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,7 +49,8 @@ enum class Currency {
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onAddressClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onLogoutClicked: () -> Unit
     ){
 
     var selectedCurrency by remember {
@@ -63,7 +66,6 @@ fun SettingsScreen(
         )
         Column(
             modifier = Modifier
-                //                .padding(padding)
                 .fillMaxSize()
                 .background(Color.White)
         ) {
@@ -85,7 +87,8 @@ fun SettingsScreen(
                 )
                 DropdownMenu(
                     expanded = showDropdown,
-                    onDismissRequest = { showDropdown = false }
+                    onDismissRequest = { showDropdown = false },
+                    offset = DpOffset(LocalConfiguration.current.screenWidthDp.dp, 0.dp)
                 ) {
                     Currency.entries.forEach { currency ->
                         DropdownMenuItem(
@@ -112,6 +115,15 @@ fun SettingsScreen(
                 icon = SettingsIcon.ARROW_RIGHT
             )
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
+            SettingsItemRow(
+                label = "Log out",
+                value = "",
+                onClick = {
+                    viewModel.clearAll()
+                    onLogoutClicked()
+                },
+                icon = SettingsIcon.ARROW_RIGHT
+            )
         }
     }
 }

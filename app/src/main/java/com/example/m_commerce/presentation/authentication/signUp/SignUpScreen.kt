@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.presentation.utils.ResponseState
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 @Composable
 fun SignUpScreen(
@@ -45,7 +46,7 @@ fun SignUpScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Sign Up", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F6FB0))
+        Text("Sign Up", fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Primary)
         Spacer(modifier = Modifier.height(40.dp))
         Text("Create your account", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -63,6 +64,7 @@ fun SignUpScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Last Name") }
         )
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -102,12 +104,17 @@ fun SignUpScreen(
 
         Button(
             onClick = {
+                if (firstName.isBlank() || lastName.isBlank() || email.isBlank() ||
+                    password.isBlank() || confirmPassword.isBlank()) {
+                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_LONG).show()
+                    return@Button
+                }
+
                 Toast.makeText(context, "Email verification sent to your email", Toast.LENGTH_LONG).show()
                 viewModel.signUp(email, password, confirmPassword, firstName, lastName)
-                onButtonClicked()
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6FB0), contentColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary, contentColor = Color.White),
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Sign Up")
@@ -118,7 +125,7 @@ fun SignUpScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Already have an account?")
             TextButton(onClick = onButtonClicked) {
-                Text("Login", color = Color(0xFF0F6FB0))
+                Text("Login", color = Primary)
             }
         }
 
@@ -133,7 +140,7 @@ fun SignUpScreen(
 
         LaunchedEffect(successMessage) {
             successMessage?.let {
-                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Sign up successful! Please check your email for verification.", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -144,4 +151,3 @@ fun SignUpScreen(
         }
     }
 }
-

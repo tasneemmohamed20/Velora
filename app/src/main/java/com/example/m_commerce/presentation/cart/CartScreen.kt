@@ -61,6 +61,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -147,12 +148,12 @@ fun CartScreen(
                             modifier = Modifier
                                 .size(100.dp)
                                 .padding(8.dp),
-                            colorFilter = ColorFilter.tint(Color.Blue)
+                            colorFilter = ColorFilter.tint(Primary)
                         )
                         Text(
                             text = "Your cart is empty",
                             textAlign = TextAlign.Center,
-                            color = Color.Blue
+                            color = Primary
                         )
                     }
                 }

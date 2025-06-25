@@ -91,7 +91,17 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
         Log.d(TAG, "Saved customer email: $email")
     }
 
+    fun removeKey(key: String) {
+        prefs.edit().apply {
+            remove(key)
+            apply()
+        }
+
+    }
+
+
     fun getCustomerEmail(): String? {
+        Log.d(TAG, "getCustomerEmail: ${prefs.getString("customer_email", null)}")
         return prefs.getString("customer_email", null)
     }
 
@@ -116,4 +126,9 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
             apply()
         }
     }
+    
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
 }
