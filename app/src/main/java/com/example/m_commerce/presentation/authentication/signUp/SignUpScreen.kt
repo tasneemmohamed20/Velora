@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.presentation.utils.theme.Primary
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SignUpScreen(
     onButtonClicked: () -> Unit,
@@ -133,7 +134,7 @@ fun SignUpScreen(
 
         when (signUpState) {
             is ResponseState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
             else -> Unit
         }

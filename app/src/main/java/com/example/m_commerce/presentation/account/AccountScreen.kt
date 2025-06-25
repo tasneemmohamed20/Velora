@@ -1,18 +1,15 @@
 package com.example.m_commerce.presentation.account
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,12 +17,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.R
+import com.example.m_commerce.presentation.utils.theme.Primary
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     onSettingsClick: () -> Unit = {},
@@ -41,6 +41,9 @@ fun AccountScreen(
     val customer by viewModel.customerState.collectAsState()
     val customerName = customer?.displayName ?: "Guest"
     val avatarLetter = customer?.firstName?.firstOrNull()?.toString()?.uppercase() ?: "G"
+
+    val bottomSheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -60,7 +63,7 @@ fun AccountScreen(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF3669C9).copy(alpha = 0.2f)),
+                    .background(Primary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -76,13 +79,13 @@ fun AccountScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                     Icon(
-                        painter = painterResource(id = R.drawable.adidas),
+                        painter = painterResource(id = R.drawable.egypt),
                         contentDescription = "UAE Flag",
                         modifier = Modifier.size(16.dp),
                         tint = Color.Unspecified
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text("UAE", fontSize = 12.sp, color = Color.Gray)
+                    Text("EGYPT", fontSize = 12.sp, color = Color.Gray)
                 }
             }
             IconButton(onClick = onSettingsClick) {
@@ -111,20 +114,113 @@ fun AccountScreen(
             )
             AccountMenuItem(
                 icon = Icons.Outlined.LocalOffer,
-                label = "Velora Vouchera",
+                label = "Velora Vouchers",
                 onClick = onVeloraVouchersClick
-            )
-            AccountMenuItem(
-                icon = Icons.Outlined.Email,
-                label = "Contact us",
-                onClick = onHelpClick
             )
             AccountMenuItem(
                 icon = Icons.Outlined.Info,
                 label = "About app",
-                onClick = onAboutClick
+                onClick = { showBottomSheet = true }
             )
         }
+    }
+
+    // About App Bottom Sheet
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        ) {
+            AboutAppBottomSheetContent()
+        }
+    }
+}
+
+@Composable
+fun AboutAppBottomSheetContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = "App Logo",
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Velora",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+
+        Text(
+            text = "Version 1.0.0",
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Your trusted e-commerce companion for seamless shopping experiences. Discover, shop, and enjoy with Velora.",
+            fontSize = 16.sp,
+            color = Color.DarkGray,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Info Items
+        InfoItem(label = "Developer", value = "Velora Team")
+        InfoItem(label = "Release Date", value = "2024")
+        InfoItem(label = "Category", value = "Shopping & E-commerce")
+        InfoItem(label = "Contact", value = "support@velora.com")
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "© 2024 Velora. All rights reserved.",
+            fontSize = 12.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun InfoItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            color = Color.Gray,
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            color = Color.Black
+        )
     }
 }
 
@@ -135,7 +231,7 @@ fun AccountMenuItem(
     onClick: () -> Unit
 ) {
     AccountMenuItemImpl(label = label, onClick = onClick) {
-        Icon(icon, contentDescription = label, tint = Color(0xFF3669C9), modifier = Modifier.size(22.dp))
+        Icon(icon, contentDescription = label, tint = Primary.copy( alpha = 0.7f), modifier = Modifier.size(22.dp))
     }
 }
 

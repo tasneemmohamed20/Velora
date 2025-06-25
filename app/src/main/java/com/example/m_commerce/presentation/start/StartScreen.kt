@@ -36,6 +36,7 @@ import com.example.m_commerce.start.StartViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StartScreen(
     onEmailClicked: () -> Unit,
@@ -187,8 +188,9 @@ fun StartScreen(
             }
         }
 
-        if (signInState is ResponseState.Loading || guestModeState is ResponseState.Loading) {
-            CircularProgressIndicator(
+        if (signInState is ResponseState.Loading) {
+            CircularWavyProgressIndicator(
+
                 modifier = Modifier
                     .align(Alignment.Center),
                 color = Primary

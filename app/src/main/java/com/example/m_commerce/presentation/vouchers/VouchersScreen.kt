@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.domain.entities.CodeDiscountNode
 import com.example.m_commerce.presentation.utils.Functions.copyToClipboard
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -144,7 +145,7 @@ fun VoucherItem(
                 Text(
                     text = "Tap to copy",
                     fontSize = 12.sp,
-                    color = Color.Blue,
+                    color = Primary.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Medium
                 )
             }

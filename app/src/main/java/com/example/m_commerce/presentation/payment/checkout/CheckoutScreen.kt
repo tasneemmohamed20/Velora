@@ -35,6 +35,7 @@ import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.presentation.checkout.CheckoutViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
 import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
+import com.example.m_commerce.presentation.utils.theme.Primary
 //import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -249,11 +250,11 @@ private fun NoAddressSection(onNavigateToAddresses: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Address", tint = Color.Blue)
+            Icon(Icons.Default.Add, contentDescription = "Add Address", tint = Primary.copy(alpha = 0.7f))
             Text(
                 text = "Add Address",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue,
+                color = Primary.copy(alpha = 0.7f),
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
@@ -321,7 +322,7 @@ private fun MapAndAddressSection(
             .padding(8.dp)
             .clickable { onChangeAddress() }
     ) {
-        Icon(Icons.Default.Place, contentDescription = "Area", tint = Color.Blue)
+        Icon(Icons.Default.Place, contentDescription = "Area", tint = Primary.copy(alpha = 0.7f))
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -337,7 +338,7 @@ private fun MapAndAddressSection(
         TextButton(onClick = onChangeAddress) {
             Text(
                 text = "Change",
-                color = Color.Blue,
+                color = Primary.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -418,7 +419,7 @@ private fun VoucherSection(
                 ) {
                     Text(
                         text = "Submit",
-                        color = Color.Blue,
+                        color = Primary.copy(alpha = 0.7f),
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -512,7 +513,7 @@ private fun PaymentOptionCard(
             .border(
                 BorderStroke(
                     width = if (isSelected) 2.dp else 1.dp,
-                    color = if (isSelected) Color.Blue else if (isEnabled) Color.LightGray else Color.Gray
+                    color = if (isSelected) Primary.copy(alpha = 0.7f) else if (isEnabled) Color.LightGray else Color.Gray
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -523,7 +524,7 @@ private fun PaymentOptionCard(
         Icon(
             imageVector = icon,
             contentDescription = title,
-            tint = if (isEnabled) Color.Blue else Color.Gray
+            tint = if (isEnabled) Primary.copy(alpha = 0.7f) else Color.Gray
         )
         Spacer(Modifier.width(12.dp))
         Text(
@@ -537,7 +538,7 @@ private fun PaymentOptionCard(
             onClick = onClick,
             enabled = isEnabled,
             colors = RadioButtonDefaults.colors(
-                selectedColor = if (isEnabled) Color.Blue else Color.Gray,
+                selectedColor = if (isEnabled) Primary.copy(alpha = 0.7f) else Color.Gray,
                 unselectedColor = if (isEnabled) Color.Gray else Color.LightGray
             )
         )
@@ -623,7 +624,7 @@ private fun ConfirmOrderBottomBar(
                 .height(56.dp),
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Blue,
+                containerColor = Primary.copy(alpha = 0.7f),
                 contentColor = Color.White,
                 disabledContainerColor = Color.Gray,
                 disabledContentColor = Color.White
@@ -705,7 +706,7 @@ private fun AddressItem(
             Icon(
                 Icons.Default.Place,
                 contentDescription = "Location",
-                tint = Color.Blue,
+                tint = Primary.copy(alpha = 0.7f),
                 modifier = Modifier.size(24.dp)
             )
             Column(

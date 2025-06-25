@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -190,22 +192,23 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
         },
         topBar = {
             if(showTopAppBar.value){
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     modifier = Modifier.shadow(elevation = 6.dp),
                     title = {
                         if(showLogo.value){
                             Image(
-                                painter = painterResource(R.drawable.logo_name),
+                                painter = painterResource(R.drawable.velora_title),
                                 contentDescription = "app logo",
                                 modifier = Modifier
-                                    .height(28.dp).padding(start = 60.dp),
+                                    .height(28.dp)
+                                    .width(120.dp),
                             )
                         }else{
                             Text(
                                 topAppBarTitleState,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 50.dp),
+                                    .fillMaxWidth(),
+//                                    .padding(start = 50.dp),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
                             )

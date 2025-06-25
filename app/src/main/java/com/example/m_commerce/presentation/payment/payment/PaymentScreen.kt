@@ -30,7 +30,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.m_commerce.domain.entities.payment.OrderItem
-//import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
+import com.example.m_commerce.presentation.utils.components.ErrorAlertDialog
 
 
 @Composable
@@ -127,7 +127,7 @@ fun PaymentScreen(
         }
 
         if(viewModel.showErrorDialog.value){
-//            ErrorAlertDialog(message = "Failed to complete order. Please try again.", onDismiss = {viewModel.toggleErrorAlert()})
+            ErrorAlertDialog(message = "Failed to complete order. Please try again.", onDismiss = {viewModel.toggleErrorAlert()})
         }
         if (viewModel.showSuccessDialog.value) {
             AlertDialog(

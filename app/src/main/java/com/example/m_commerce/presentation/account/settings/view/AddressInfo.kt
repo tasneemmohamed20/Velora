@@ -32,7 +32,8 @@ import androidx.compose.material.icons.outlined.House
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -64,6 +65,7 @@ import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.Address
 import com.example.m_commerce.domain.entities.AddressType
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.theme.Primary
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -75,6 +77,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AddressInfo(
     onBack: () -> Unit,
@@ -138,7 +141,7 @@ fun AddressInfo(
                         permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }
                 ) {
-                    Text("OK", color = Color.Blue)
+                    Text("OK", color = Primary.copy(alpha = 0.7f))
                 }
             },
             dismissButton = {
@@ -163,7 +166,7 @@ fun AddressInfo(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
                     }
                 }
 
@@ -364,7 +367,7 @@ private fun AddressInfoContent(
                     .background(Color.White, RoundedCornerShape(16.dp))
                     .border(1.dp, Color(0xFFF2F2F2), RoundedCornerShape(16.dp))
             ) {
-                Icon(Icons.Default.Place, contentDescription = "Area", tint = Color.Blue)
+                Icon(Icons.Default.Place, contentDescription = "Area", tint = Primary.copy(alpha = 0.7f))
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -398,7 +401,7 @@ private fun AddressInfoContent(
                         }
                     }
                 ) {
-                    Text("Change", color = Color.Blue)
+                    Text("Change", color = Color.Black)
                 }
             }
 
@@ -414,10 +417,10 @@ private fun AddressInfoContent(
                         onClick = { addressType = type },
                         border = BorderStroke(
                             width = if (addressType == type) 2.dp else 1.dp,
-                            color = if (addressType == type) Color.Blue else Color(0xFFF2F2F2)
+                            color = if (addressType == type) Primary.copy(alpha = 0.7f) else Color(0xFFF2F2F2)
                         ),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = if (addressType == type) Color.Blue else Color.White,
+                            containerColor = if (addressType == type) Primary.copy(alpha = 0.7f) else Color.White,
                             contentColor = if (addressType == type) Color.White else Color.Black
                         ),
                         shape = RoundedCornerShape(32.dp),
@@ -554,7 +557,7 @@ private fun AddressInfoContent(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors =  ButtonDefaults.buttonColors(
-                        containerColor = Color.Blue,
+                        containerColor = Primary.copy(alpha = 0.7f),
                         contentColor = Color.White,
                         disabledContainerColor = Color.Gray,
                         disabledContentColor = Color.White
@@ -566,7 +569,8 @@ private fun AddressInfoContent(
                             "Update address"
                         } else {
                             "Save address"
-                        })
+                        }
+                    )
                 }
                 Spacer(Modifier.height(32.dp))
             }

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.presentation.account.settings.view_model.SettingsViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.theme.Primary
 
 
 enum class SettingsIcon {
@@ -163,7 +164,7 @@ fun SettingsItemRow(
                     SettingsIcon.ARROW_RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
                 },
                 contentDescription = null,
-                tint = Color.Blue
+                tint = Primary.copy(alpha = 0.7f)
             )
         }
     }
