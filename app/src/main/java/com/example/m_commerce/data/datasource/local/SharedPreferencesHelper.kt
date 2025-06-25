@@ -13,6 +13,7 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
     private val CURRENCY_KEY = "currency_is_egp"
     private val CART_ID_KEY = "cart_id"
     private val FAVORITE_DRAFT_ORDER_ID_KEY = "favorite_draft_order_id"
+    private val FIRST_TIME_USER_KEY = "first_time_user"
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val IS_GUEST_MODE_KEY = "is_guest_mode"
 
@@ -117,10 +118,22 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
         return prefs.getString(FAVORITE_DRAFT_ORDER_ID_KEY, null)
     }
 
+    fun isFirstTimeUser(): Boolean {
+        return prefs.getBoolean(FIRST_TIME_USER_KEY, true)
+    }
+
+    fun markUserAsNotFirstTime() {
+        prefs.edit().apply {
+            putBoolean(FIRST_TIME_USER_KEY, false)
+            apply()
+        }
+    }
+    
     fun clearAll() {
         prefs.edit().clear().apply()
     }
 
+<<<<<<< guest
     fun setGuestMode(isGuest: Boolean) {
         prefs.edit().apply {
             putBoolean(IS_GUEST_MODE_KEY, isGuest)
@@ -156,3 +169,6 @@ class SharedPreferencesHelper @Inject constructor(context: Context) {
     }
 
 }
+=======
+}
+>>>>>>> dev

@@ -29,6 +29,8 @@ import androidx.navigation.toRoute
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.payment.OrderItem
 import com.example.m_commerce.domain.entities.OrderEntity
+import com.example.m_commerce.presentation.on_boarding.OnBoardingViewModel
+import com.example.m_commerce.presentation.on_boarding.OnBoardingScreens
 import com.example.m_commerce.presentation.order.orders_list.OrderScreen
 import com.example.m_commerce.presentation.account.AccountScreen
 import com.example.m_commerce.presentation.account.settings.view.AddressInfo
@@ -49,22 +51,25 @@ import com.example.m_commerce.presentation.payment.checkout.PaymentMethod
 import com.example.m_commerce.presentation.payment.payment.PaymentScreen
 import com.example.m_commerce.presentation.productDetails.ProductDetailsScreen
 import com.example.m_commerce.presentation.products.ProductsScreen
+import com.example.m_commerce.presentation.splash.SplashScreen
 import com.example.m_commerce.presentation.search.SearchScreen
 import com.example.m_commerce.presentation.start.StartScreen
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.vouchers.VouchersScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
+    private var isReady = false
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             MCommerceTheme(dynamicColor = false) {
                 navHostController = rememberNavController()
@@ -72,10 +77,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
-
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -83,12 +85,35 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
 
     NavHost(
         navController = navHostController,
-        startDestination = if(isLogged) ScreensRoute.Home else ScreensRoute.Start,
+        startDestination = ScreensRoute.Splash,
         modifier = Modifier.background(color = Color.White)
     ){
         val viewModel : AddressMapViewModel by viewModels()
+        val onBoardingViewModel: OnBoardingViewModel by viewModels()
 
-        composable<ScreensRoute.Home>{
+        composable<ScreensRoute.Splash> {
+            SplashScreen(
+                onNavigateToStart = {
+                    if(isLogged) {
+                        navHostController.navigate(ScreensRoute.Home) {
+                            popUpTo(ScreensRoute.Splash) { inclusive = true }
+                        }
+                    }else
+                    {
+                        navHostController.navigate(ScreensRoute.Start) {
+                            popUpTo(ScreensRoute.Splash) { inclusive = true }
+                        }
+                    }
+                },
+                onNavigateToOnBoarding = {
+                    navHostController.navigate(ScreensRoute.OnBoarding) {
+                        popUpTo(ScreensRoute.Splash) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<ScreensRoute.Home> {
             HomeScreen(
             ) {
                 type -> navHostController.navigate(ScreensRoute.Products(type))
@@ -98,7 +123,7 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
         composable<ScreensRoute.Cart> {
             CartScreen(
                 onBack = { navHostController.popBackStack() },
-                onCheckout = { order, totalAmountCents, subtotal, estimatedFee, itemsCount->
+                onCheckout = { order, totalAmountCents, subtotal, estimatedFee, itemsCount ->
                     val orderItems = order.lineItems?.nodes?.map { node ->
                         OrderItem(
                             name = node.title ?: node.name ?: "Unknown Item",
@@ -124,7 +149,9 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
                 navArgument("estimatedFee") { type = NavType.StringType },
                 navArgument("itemsCount") { type = NavType.IntType }
             )
-        ) { backStackEntry ->
+        ) {
+
+                backStackEntry ->
 
             val itemsJson = backStackEntry.arguments?.getString("items") ?: "[]"
             val totalAmountCents = backStackEntry.arguments?.getInt("totalAmountCents") ?: 0
@@ -133,7 +160,6 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             val estimatedFee =
                 backStackEntry.arguments?.getString("estimatedFee")?.toDoubleOrNull() ?: 0.0
             val itemsCount = backStackEntry.arguments?.getInt("itemsCount") ?: 0
-
             CheckoutScreen(
                 onBack = { navHostController.popBackStack() },
                 totalPrice = totalAmountCents / 100.0,
@@ -162,7 +188,7 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             )
         }
 
-        composable<ScreensRoute.Settings>{
+        composable<ScreensRoute.Settings> {
             SettingsScreen(
                 onAddressClick = {
                     navHostController.navigate(ScreensRoute.Addresses)
@@ -176,7 +202,7 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             )
         }
 
-        composable<ScreensRoute.Account>{
+        composable<ScreensRoute.Account> {
             AccountScreen(
                 onSettingsClick = {
                     navHostController.navigate(ScreensRoute.Settings)
@@ -253,7 +279,7 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             )
         }
 
-        composable<ScreensRoute.Order>{
+        composable<ScreensRoute.Order> {
             OrderScreen(onOrderClicked = { order ->
                 navHostController.currentBackStackEntry?.savedStateHandle?.set("order", order)
                 navHostController.navigate(ScreensRoute.OrderDetails)
@@ -369,5 +395,15 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             )
         }
 
+        composable<ScreensRoute.OnBoarding> {
+            OnBoardingScreens(
+                onFinish = {
+                    onBoardingViewModel.completeOnboarding()
+                    navHostController.navigate(ScreensRoute.Start) {
+                        popUpTo(ScreensRoute.OnBoarding) { inclusive = true }
+                    }
+                }
+            )
+        }
     }
 }

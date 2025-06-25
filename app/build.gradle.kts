@@ -169,4 +169,7 @@ dependencies {
 
     implementation (libs.lottie.compose)
     testImplementation(kotlin("test"))
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
 }
