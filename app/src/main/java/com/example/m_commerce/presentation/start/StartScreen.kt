@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.m_commerce.R
+import com.example.m_commerce.presentation.start.ModernButton
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -31,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.start.StartViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -104,32 +107,61 @@ fun StartScreen(
             Spacer(modifier = Modifier.height(120.dp))
 
             Image(
-                painter = painterResource(R.drawable.logo_name),
-                contentDescription = "app logo"
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(200.dp)
             )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text("Your Best Shop", fontSize = 14.sp, color = Color.Gray)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
             Image(
-                painter = painterResource(id = R.drawable.start_img),
-                contentDescription = "start image",
-                modifier = Modifier.size(300.dp),
-                contentScale = ContentScale.Fit
+                painter = painterResource(id = R.drawable.velora_title),
+                contentDescription = "App Logo",
+                modifier = Modifier.width(200.dp)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(80.dp))
+
+            // Title and subtitle texts
+            Text(
+                text = "Log in or create an account",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Receive rewards and save your details for a faster checkout experience.",
+                fontSize = 12.sp,
+                color = Color.Gray,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 24.dp),
+                lineHeight = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CustomButton("Continue as Guest", R.drawable.ic_person) {}
-                CustomButton("Continue with Email", R.drawable.ic_gmail, onClick = onEmailClicked)
-                CustomButton("Continue with Google", R.drawable.ic_google) {
-                    launcher.launch(googleSignInClient.signInIntent)
-                }
+                ModernButton(
+                    text = "Continue with Google",
+                    icon = R.drawable.ic_google,
+                    onClick = { launcher.launch(googleSignInClient.signInIntent) }
+                )
+                ModernButton(
+                    text = "Continue with Email",
+                    icon = R.drawable.ic_gmail,
+                    onClick = onEmailClicked
+                )
+                ModernButton(
+                    text = "Continue as Guest",
+                    icon = R.drawable.ic_person,
+                    onClick = {}
+                )
             }
         }
 
@@ -147,25 +179,42 @@ fun StartScreen(
     }
 }
 
-
 @Composable
-fun CustomButton(text: String, icon: Int, onClick: () -> Unit) {
-    OutlinedButton(
+fun ModernButton(text: String, icon: Int, onClick: () -> Unit) {
+    Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp),
-        shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(1.dp, Color.Black)
-    ) {
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = Color.Unspecified
+            .height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Color.Black
+        ),
+        border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.2f)),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 2.dp
         )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(text, fontSize = 14.sp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = Color.Unspecified
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = text,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+        }
     }
 }
