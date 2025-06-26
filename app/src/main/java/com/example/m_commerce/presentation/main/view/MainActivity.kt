@@ -214,7 +214,9 @@ fun MainActivity.NavHostSetup(mainViewModel: MainViewModel, isLogged: Boolean){
                 onOrderClick = {
                     navHostController.navigate(ScreensRoute.Order)
                 },
-                onVeloraVouchersClick = {navHostController.navigate(ScreensRoute.VouchersScreen)}
+                onVeloraVouchersClick = { navHostController.navigate(ScreensRoute.VouchersScreen) },
+                onCartClicked = { navHostController.navigate(ScreensRoute.Cart) },
+                onFavoritesClick = { navHostController.navigate(ScreensRoute.Favorites) },
             )
         }
 

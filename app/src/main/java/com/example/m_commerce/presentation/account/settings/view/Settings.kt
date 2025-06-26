@@ -74,6 +74,8 @@ fun SettingsScreen(
     val bottomSheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
 
+    val isGuestMode = viewModel.getCurrentUserMode() == "Guest"
+
     Column {
         CustomTopAppBar(
             title = "Settings",
@@ -130,7 +132,7 @@ fun SettingsScreen(
             )
             HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
             SettingsItemRow(
-                label = "Log out",
+                label = if (isGuestMode) "Log in" else "Log out",
                 value = "",
                 onClick = {
                     onLogoutClicked()

@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,11 +31,9 @@ import com.example.m_commerce.presentation.utils.theme.Primary
 fun AccountScreen(
     onSettingsClick: () -> Unit = {},
     onOrderClick: () -> Unit = {},
-    onOffersClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {},
+    onCartClicked: () -> Unit = {},
+    onFavoritesClick: () -> Unit = {},
     onVeloraVouchersClick: () -> Unit = {},
-    onHelpClick: () -> Unit = {},
-    onAboutClick: () -> Unit = {},
     viewModel: AccountViewModel = hiltViewModel()
 ) {
 
@@ -221,12 +218,12 @@ fun AccountScreen(
             AccountMenuItem(
                 icon = Icons.Outlined.ShoppingCart,
                 label = "Cart",
-                onClick = onOffersClick
+                onClick = onCartClicked
             )
             AccountMenuItem(
                 icon = Icons.Outlined.FavoriteBorder,
-                label = "Wish list",
-                onClick = onNotificationsClick
+                label = "Favorites",
+                onClick = onFavoritesClick
             )
             AccountMenuItem(
                 icon = Icons.Outlined.LocalOffer,
@@ -373,18 +370,4 @@ private fun AccountMenuItemImpl(
         Spacer(modifier = Modifier.width(18.dp))
         Text(label, color = Color.Black, fontSize = 15.sp)
     }
-}
-
-@Preview
-@Composable
-fun AccountScreenPreview() {
-    AccountScreen(
-        onSettingsClick = {},
-        onOrderClick = {},
-        onOffersClick = {},
-        onNotificationsClick = {},
-        onVeloraVouchersClick = {},
-        onHelpClick = {},
-        onAboutClick = {}
-    )
 }

@@ -23,7 +23,11 @@ class AccountViewModel @Inject constructor(
 
     init {
         val customerId : String = sharedPreferencesHelper.getCustomerId().toString()
-        getCustomerData(customerId)
+        if (sharedPreferencesHelper.getCurrentUserMode() == "Guest"){
+            _customerState.value = ResponseState.Success(Any())
+        }else{
+            getCustomerData(customerId)
+        }
     }
 
     fun getCustomerData(id: String) {

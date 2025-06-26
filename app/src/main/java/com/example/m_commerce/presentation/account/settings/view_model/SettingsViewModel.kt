@@ -20,10 +20,10 @@ class SettingsViewModel @Inject constructor(
 
     private val _currencyExchange = MutableSharedFlow<CurrencyExchangeResponse>()
     val currencyExchange: SharedFlow<CurrencyExchangeResponse> = _currencyExchange
-
+    
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
-
+    
     fun getCurrencyExchange() {
         viewModelScope.launch {
             try {
@@ -51,5 +51,9 @@ class SettingsViewModel @Inject constructor(
 
     fun clearAll(){
         sharedPreferencesHelper.clearAll()
+    }
+
+    fun getCurrentUserMode(): String {
+        return sharedPreferencesHelper.getCurrentUserMode()
     }
 }
