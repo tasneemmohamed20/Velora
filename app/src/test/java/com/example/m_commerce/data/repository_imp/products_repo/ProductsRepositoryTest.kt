@@ -9,9 +9,13 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+
 
 class ProductsRepositoryTest {
 
@@ -92,5 +96,56 @@ class ProductsRepositoryTest {
         // Assert
         assert(result.isEmpty())
     }
+
+    private val fakeProducts = listOf(
+        Product(
+            id = "1",
+            title = "Vans Old Skool",
+            productType = "Shoes",
+            description = "Classic skate shoe.",
+            price = PriceDetails(Price("79.99", "USD")),
+            images = listOf("https://example.com/image1.jpg")
+        ),
+        Product(
+            id = "2",
+            title = "Vans Sk8-Hi",
+            productType = "Shoes",
+            description = "High-top skate shoe.",
+            price = PriceDetails(Price("89.99", "USD")),
+            images = listOf("https://example.com/image2.jpg")
+        )
+    )
+
+    @Test
+    fun `getAllProducts should return list of products`() = runTest {
+        // Given
+        every { stubRemoteDataSource.getAllProducts() } returns flow { emit(fakeProducts) }
+
+        // When
+        val result: List<Product> = repo.getAllProducts().toList().flatten()
+
+        // Then
+        assertEquals(2, result.size)
+        assertEquals("Vans Old Skool", result[0].title)
+        assertEquals("Vans Sk8-Hi", result[1].title)
+    }
+
+    @Test
+    fun `getProductById should return correct product`() = runTest {
+        // Given
+        val productId = "1"
+        val product = fakeProducts[0]
+        coEvery { stubRemoteDataSource.getProductById(productId) } returns product
+
+        // When
+        val result = repo.getProductById(productId)
+
+        // Then
+        assertEquals("Vans Old Skool", result.title)
+        assertEquals("79.99", result.price.minVariantPrice.amount)
+    }
+
+
+
 
 }
