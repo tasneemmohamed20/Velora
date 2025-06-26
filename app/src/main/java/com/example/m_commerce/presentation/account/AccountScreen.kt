@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.m_commerce.R
+import com.example.m_commerce.domain.entities.Customer
+import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.presentation.utils.theme.Primary
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,9 +40,7 @@ fun AccountScreen(
     viewModel: AccountViewModel = hiltViewModel()
 ) {
 
-    val customer by viewModel.customerState.collectAsState()
-    val customerName = if(customer?.displayName?.isNotEmpty() == true) customer?.displayName else "Guest"
-    val avatarLetter = customer?.firstName?.firstOrNull()?.toString()?.uppercase() ?: "G"
+    val customerState by viewModel.customerState.collectAsState()
 
     val bottomSheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -50,53 +50,169 @@ fun AccountScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-
-        // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Primary.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = avatarLetter,
-                    color = Color.DarkGray,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(2f)) {
-                Text("Hi $customerName", fontWeight = FontWeight.Medium, fontSize = 16.sp, color = Color.Black)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-
-                    Icon(
-                        painter = painterResource(id = R.drawable.egypt),
-                        contentDescription = "UAE Flag",
-                        modifier = Modifier.size(16.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text("EGYPT", fontSize = 12.sp, color = Color.Gray)
+        // Header with ResponseState
+        when (customerState) {
+            is ResponseState.Loading -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Primary.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Primary,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(2f)) {
+                        Text(
+                            "Loading...",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.egypt),
+                                contentDescription = "UAE Flag",
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text("EGYPT", fontSize = 12.sp, color = Color.Gray)
+                        }
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.Black
+                        )
+                    }
                 }
             }
-            IconButton(onClick = onSettingsClick) {
-                Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.Black)
+
+            is ResponseState.Failure -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.Red.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "!",
+                            color = Color.Red,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(2f)) {
+                        Text(
+                            "Error loading account",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = Color.Red
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.egypt),
+                                contentDescription = "UAE Flag",
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text("EGYPT", fontSize = 12.sp, color = Color.Gray)
+                        }
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.Black
+                        )
+                    }
+                }
+            }
+
+            is ResponseState.Success -> {
+                val successState = customerState as ResponseState.Success
+                val customer = successState.data as? Customer
+                val customerName = customer?.displayName ?: "Guest"
+                val avatarLetter =
+                    customer?.firstName?.firstOrNull()?.toString()?.uppercase() ?: "G"
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Primary.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = avatarLetter,
+                            color = Color.DarkGray,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(2f)) {
+                        Text(
+                            "Hi $customerName",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.egypt),
+                                contentDescription = "UAE Flag",
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text("EGYPT", fontSize = 12.sp, color = Color.Gray)
+                        }
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            Icons.Outlined.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.Black
+                        )
+                    }
+                }
             }
         }
+
         HorizontalDivider(thickness = 8.dp, color = Color(0xFFF2F2F2))
         Spacer(Modifier.height(16.dp))
 
         // Menu Items
-        Column (verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             AccountMenuItem(
                 icon = Icons.Outlined.DateRange,
                 label = "Your orders",
@@ -231,7 +347,12 @@ fun AccountMenuItem(
     onClick: () -> Unit
 ) {
     AccountMenuItemImpl(label = label, onClick = onClick) {
-        Icon(icon, contentDescription = label, tint = Primary.copy( alpha = 0.7f), modifier = Modifier.size(22.dp))
+        Icon(
+            icon,
+            contentDescription = label,
+            tint = Primary.copy(alpha = 0.7f),
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 
