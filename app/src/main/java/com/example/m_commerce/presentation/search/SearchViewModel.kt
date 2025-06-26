@@ -47,7 +47,7 @@ class SearchViewModel @Inject constructor(
         fetchProductsAndInitPrices()
     }
 
-    private fun fetchProductsAndInitPrices() {
+    fun fetchProductsAndInitPrices() {
         viewModelScope.launch {
             _productsList.value = ResponseState.Loading
             getAllProductsUseCase().collect { products ->
@@ -73,7 +73,7 @@ class SearchViewModel @Inject constructor(
         searchProducts()
     }
 
-    private fun searchProducts() {
+    fun searchProducts() {
         viewModelScope.launch {
             _productsList.value = ResponseState.Loading
             getAllProductsUseCase().collect { products ->
@@ -89,7 +89,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun getCurrencyCode(): String {
+    fun getCurrencyCode(): String {
         return if (sharedPreferencesHelper.getCurrencyPreference()) "USD" else "EGP"
     }
 
