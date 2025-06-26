@@ -154,7 +154,7 @@ fun AccountScreen(
             is ResponseState.Success -> {
                 val successState = customerState as ResponseState.Success
                 val customer = successState.data as? Customer
-                val customerName = customer?.displayName ?: "Guest"
+                val customerName = if(customer?.displayName?.isNotEmpty() == true) customer.displayName else  "Guest"
                 val avatarLetter =
                     customer?.firstName?.firstOrNull()?.toString()?.uppercase() ?: "G"
 
