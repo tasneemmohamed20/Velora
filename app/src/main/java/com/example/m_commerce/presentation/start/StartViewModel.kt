@@ -50,12 +50,12 @@ class StartViewModel @Inject constructor(
                 sharedPreferencesHelper.clearGuestMode()
                 sharedPreferencesHelper.saveCustomerEmail(email)
 
-                Log.d("GoogleSignIn", "Signed in as: $name <$email>")
+//                Log.d("GoogleSignIn", "Signed in as: $name <$email>")
 
                 createShopifyCustomer(name, email)
             }
             .addOnFailureListener {
-                Log.e("GoogleSignIn", "Sign in failed", it)
+//                Log.e("GoogleSignIn", "Sign in failed", it)
                 _googleSignInState.value = ResponseState.Failure(it)
 
             }
@@ -89,8 +89,8 @@ class StartViewModel @Inject constructor(
                     val response = client.newCall(request).execute()
                     val responseBody = response.body?.string()
 
-                    Log.d("ShopifyAPI", "Response Code: ${response.code}")
-                    Log.d("ShopifyAPI", "Response Body: $responseBody")
+//                    Log.d("ShopifyAPI", "Response Code: ${response.code}")
+//                    Log.d("ShopifyAPI", "Response Body: $responseBody")
 
                     if (response.isSuccessful && responseBody != null) {
                         ResponseState.Success(responseBody)
@@ -126,10 +126,10 @@ class StartViewModel @Inject constructor(
 
                 sharedPreferencesHelper.setGuestMode(true)
 
-                Log.d("GuestMode", "Guest mode activated")
+//                Log.d("GuestMode", "Guest mode activated")
                 _guestModeState.value = ResponseState.Success("Guest mode activated")
             } catch (e: Exception) {
-                Log.e("GuestMode", "Failed to activate guest mode", e)
+//                Log.e("GuestMode", "Failed to activate guest mode", e)
                 _guestModeState.value = ResponseState.Failure(e)
             }
         }
@@ -145,6 +145,6 @@ class StartViewModel @Inject constructor(
 
     fun switchToAuthenticatedMode() {
         sharedPreferencesHelper.clearGuestMode()
-        Log.d("UserMode", "Switched from guest to authenticated mode")
+//        Log.d("UserMode", "Switched from guest to authenticated mode")
     }
 }
