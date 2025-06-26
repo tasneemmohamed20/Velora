@@ -42,7 +42,7 @@ class ProductDetailsViewModel @Inject constructor(
             try {
                 val product = getProductByIdUseCase(productId)
                 _productState.value = ResponseState.Success(product)
-                Log.d("ProductDetailsViewModel", "Product loaded: $product")
+//                Log.d("ProductDetailsViewModel", "Product loaded: $product")
             } catch (e: Exception) {
                 _productState.value = ResponseState.Failure(e)
             }
