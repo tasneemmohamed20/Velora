@@ -133,7 +133,7 @@ fun StartScreen(
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "App Logo",
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier.size(190.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Image(
@@ -142,7 +142,7 @@ fun StartScreen(
                 modifier = Modifier.width(200.dp)
             )
 
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(75.dp))
 
             // Title and subtitle texts
             Text(

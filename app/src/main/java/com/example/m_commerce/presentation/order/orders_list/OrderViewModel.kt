@@ -1,5 +1,6 @@
 package com.example.m_commerce.presentation.order.orders_list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.presentation.utils.ResponseState
@@ -27,10 +28,10 @@ class OrderViewModel @Inject constructor(
     fun getOrdersByCustomer(){
 
         val customerId = sharedPreferencesHelper.getCustomerId()?.split("/")?.last() ?: ""
-
+        Log.i("getOrdersByCustomer", "getOrdersByCustomer: $customerId")
         viewModelScope.launch {
            val result = orderRepository.getOrdersByCustomerId(customerId)
-
+            Log.i("getOrdersByCustomer", "getOrdersByCustomer: $result")
             result.catch {
                 _mutableOrdersList.value = ResponseState.Failure(it)
             }.collect{

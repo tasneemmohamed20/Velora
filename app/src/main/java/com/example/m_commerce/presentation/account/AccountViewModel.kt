@@ -30,6 +30,7 @@ class AccountViewModel @Inject constructor(
 
     init {
         val customerId : String = sharedPreferencesHelper.getCustomerId().toString()
+
         getCustomerData(customerId)
     }
 
@@ -38,12 +39,12 @@ class AccountViewModel @Inject constructor(
             _isLoading.value = true
             customerUseCase(id)
                 .catch { e ->
-//                    Log.e("AccountViewModel", "getCustomerData: ${e.message}")
+                   Log.e("AccountViewModel", "getCustomerData: ${e.message}")
                     _error.value = e.message
                     _isLoading.value = false
                 }
                 .collect { customer ->
-//                    Log.i("AccountViewModel", "getCustomerData: $customer")
+                   Log.i("AccountViewModel", "getCustomerData: $customer")
                     _customerState.value = customer
                     _isLoading.value = false
                 }

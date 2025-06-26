@@ -1,11 +1,13 @@
 package com.example.m_commerce.data.datasource.remote.graphql.customer
 
+import android.util.Log
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.example.m_commerce.di.AdminApollo
 import com.example.m_commerce.domain.entities.Customer
 import com.example.m_commerce.domain.entities.CustomerAddresses
 import com.example.m_commerce.service1.CustomerUpdateMutation
+import com.example.m_commerce.service1.GetCustomerByEmailQuery
 import com.example.m_commerce.service1.GetCustomerDataQuery
 import com.example.m_commerce.service1.type.CustomerInput
 import com.example.m_commerce.service1.type.MailingAddressInput
@@ -83,6 +85,28 @@ class CustomerRemoteDataSourceImp @Inject constructor(@AdminApollo private val s
             )
         } ?: Customer("", "", "", "", "", null)
 
+        emit(customer)
+    }
+
+
+    override fun getCustomerByEmail(email: String): Flow<Customer> = flow {
+
+        Log.i("customer", "getCustomerIdByEmail: REMOTE $email")
+        val response = shopifyService.query(GetCustomerByEmailQuery(email)).execute()
+        val customerNode = response.data?.customers?.edges?.firstOrNull()?.node
+
+        val customer = customerNode?.let {
+            Customer(
+                displayName = it.firstName + " " + it.lastName,
+                email = it.email ?: "",
+                firstName = it.firstName ?: "",
+                id = it.id,
+                lastName = it.lastName ?: "",
+                addresses = emptyList() // Not fetched in query, fill if needed later
+            )
+        } ?: Customer("", "", "", "", "", null)
+
+        Log.i("customer", "getCustomerIdByEmail: $customer")
         emit(customer)
     }
 }

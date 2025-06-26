@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
+import com.example.m_commerce.data.repository_imp.customer_repo.CustomerRepositoryImp
+import com.example.m_commerce.domain.repository.ICustomerRepository
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -23,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class StartViewModel @Inject constructor(
     private val sharedPreferencesHelper: SharedPreferencesHelper,
+    private val customerRepo : ICustomerRepository
 ) : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -92,6 +95,10 @@ class StartViewModel @Inject constructor(
                     if (response.isSuccessful && responseBody != null) {
                         ResponseState.Success(responseBody)
                     } else if (response.code == 422 && responseBody?.contains("email") == true) {
+                        customerRepo.getCustomerIdByEmail(email).collect {
+                            customer ->
+                                sharedPreferencesHelper.saveCustomerId(customer.id)
+                        }
                         ResponseState.Success("Email already taken user can proceed")
                     } else {
                         ResponseState.Failure(Throwable("Shopify API Error: ${response.code} ${responseBody}"))

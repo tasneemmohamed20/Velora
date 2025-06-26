@@ -10,4 +10,6 @@ interface ICustomerRepository {
         id: String?,
         addresses: List<CustomerAddresses>
     ): Flow<Customer>
+
+    fun getCustomerIdByEmail(email: String): Flow<Customer>
 }

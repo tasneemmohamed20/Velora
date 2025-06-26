@@ -84,7 +84,11 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
     val isLogged by mainViewModel.isLogged.collectAsState()
     var selectedIndex by rememberSaveable { mutableStateOf(0) }
 
-
+    LaunchedEffect(isLogged) {
+        if (!isLogged) {
+            selectedIndex = 0
+        }
+    }
     LaunchedEffect(isConnected) {
         if (previousConnectionState != null && previousConnectionState != isConnected) {
             snackbarHostState.showSnackbar(
@@ -208,7 +212,6 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                                 topAppBarTitleState,
                                 modifier = Modifier
                                     .fillMaxWidth(),
-//                                    .padding(start = 50.dp),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
                             )
@@ -245,7 +248,7 @@ fun MainActivity.MainScreen(mainViewModel: MainViewModel = hiltViewModel()){
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            NavHostSetup(isLogged)
+            NavHostSetup(mainViewModel, isLogged)
         }
     }
 

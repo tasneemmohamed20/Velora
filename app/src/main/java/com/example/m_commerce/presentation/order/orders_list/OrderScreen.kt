@@ -128,7 +128,8 @@ fun OrderCard(order: OrderEntity, onOrderClicked: (OrderEntity) -> Unit, modifie
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         onClick = {
-            onOrderClicked(order) }
+            onOrderClicked(order)
+        }
     ){
         Column(modifier = Modifier.padding(12.dp)) {
            Row(

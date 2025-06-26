@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -44,7 +45,7 @@ import com.example.m_commerce.presentation.authentication.signUp.SignUpScreen
 import com.example.m_commerce.presentation.cart.CartScreen
 import com.example.m_commerce.presentation.favorite.FavoriteView
 import com.example.m_commerce.presentation.home.HomeScreen
-import com.example.m_commerce.presentation.main.view.MainScreen
+import com.example.m_commerce.presentation.main.viewmodel.MainViewModel
 import com.example.m_commerce.presentation.order.order_details.OrderDetails
 import com.example.m_commerce.presentation.payment.checkout.CheckoutScreen
 import com.example.m_commerce.presentation.payment.checkout.PaymentMethod
@@ -58,14 +59,14 @@ import com.example.m_commerce.presentation.utils.routes.ScreensRoute
 import com.example.m_commerce.presentation.utils.theme.MCommerceTheme
 import com.example.m_commerce.presentation.vouchers.VouchersScreen
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
+
 import kotlinx.serialization.json.Json
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     lateinit var navHostController: NavHostController
-    private var isReady = false
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +82,7 @@ class MainActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainActivity.NavHostSetup(isLogged: Boolean){
+fun MainActivity.NavHostSetup(mainViewModel: MainViewModel, isLogged: Boolean){
 
     NavHost(
         navController = navHostController,
@@ -152,7 +153,6 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
         ) {
 
                 backStackEntry ->
-
             val itemsJson = backStackEntry.arguments?.getString("items") ?: "[]"
             val totalAmountCents = backStackEntry.arguments?.getInt("totalAmountCents") ?: 0
             val items = Json.decodeFromString<List<OrderItem>>(Uri.decode(itemsJson))
@@ -189,6 +189,7 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
         }
 
         composable<ScreensRoute.Settings> {
+
             SettingsScreen(
                 onAddressClick = {
                     navHostController.navigate(ScreensRoute.Addresses)
@@ -197,7 +198,10 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
                     navHostController.popBackStack()
                 },
                 onLogoutClicked = {
-                    navHostController.navigate(ScreensRoute.Start)
+                    mainViewModel.logout()
+                    navHostController.navigate(ScreensRoute.Start) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
@@ -309,13 +313,15 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             StartScreen(
                 onEmailClicked = { navHostController.navigate(ScreensRoute.Login) },
                 onGoogleSuccess = {
+                    mainViewModel.setLogged()
                     navHostController.navigate(ScreensRoute.Home) {
                         popUpTo(ScreensRoute.Start) { inclusive = true }
                     }
                 },
                 onGuestSuccess = {
+                    mainViewModel.setLogged()
                     navHostController.navigate(ScreensRoute.Home) {
-                        popUpTo(ScreensRoute.Start) { inclusive = true }
+                        popUpTo(ScreensRoute.Start) { inclusive = false }
                     }
                 },
             )
@@ -325,6 +331,7 @@ fun MainActivity.NavHostSetup(isLogged: Boolean){
             LoginScreen(
                 onButtonClicked = { navHostController.navigate(ScreensRoute.SignUp)},
                 onLoginSuccess = {
+                    mainViewModel.setLogged()
                     navHostController.navigate(ScreensRoute.Home) {
                         popUpTo(ScreensRoute.Start) { inclusive = true }
                     }

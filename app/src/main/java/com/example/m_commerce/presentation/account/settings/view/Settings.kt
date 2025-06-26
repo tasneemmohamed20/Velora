@@ -133,7 +133,6 @@ fun SettingsScreen(
                 label = "Log out",
                 value = "",
                 onClick = {
-                    viewModel.clearAll()
                     onLogoutClicked()
                 },
                 icon = SettingsIcon.ARROW_RIGHT

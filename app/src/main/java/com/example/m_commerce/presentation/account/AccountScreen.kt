@@ -39,7 +39,7 @@ fun AccountScreen(
 ) {
 
     val customer by viewModel.customerState.collectAsState()
-    val customerName = customer?.displayName ?: "Guest"
+    val customerName = if(customer?.displayName?.isNotEmpty() == true) customer?.displayName else "Guest"
     val avatarLetter = customer?.firstName?.firstOrNull()?.toString()?.uppercase() ?: "G"
 
     val bottomSheetState = rememberModalBottomSheetState()

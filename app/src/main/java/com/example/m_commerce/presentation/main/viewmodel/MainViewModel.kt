@@ -16,12 +16,20 @@ class MainViewModel @Inject constructor(
     val isConnected: StateFlow<Boolean> = connectivityHelper.isConnected
 
     private val _isLogged = MutableStateFlow(false)
-    val isLogged: StateFlow<Boolean> = _isLogged
+    var isLogged: StateFlow<Boolean> = _isLogged
 
     init {
         _isLogged.value = getCustomerEmail() != null
     }
 
+    fun setLogged() {
+        _isLogged.value = true
+    }
+
+    fun logout() {
+        sharedPreferencesHelper.clearAll()
+        _isLogged.value = false
+    }
     fun getCustomerEmail(): String?{
         return sharedPreferencesHelper.getCustomerEmail()
     }
