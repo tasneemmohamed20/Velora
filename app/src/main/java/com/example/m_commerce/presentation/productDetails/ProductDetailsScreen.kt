@@ -63,6 +63,28 @@ fun ProductDetailsScreen(
     var pendingAction by remember { mutableStateOf(PendingAction.NONE) }
     var showConfirmRemoveDialog by remember { mutableStateOf(false) }
 
+    val currencyPreference = sharedPrefsHelper.getCurrencyPreference()
+    val usdToEgpRate = sharedPrefsHelper.getUsdToEgpValue()
+
+    fun convertPrice(originalPrice: Double, originalCurrency: String): Pair<Double, String> {
+        return if (!currencyPreference) {
+            if (originalCurrency.equals("USD", ignoreCase = true)) {
+                Pair(originalPrice * usdToEgpRate, "EGP")
+            } else {
+                Pair(originalPrice, "EGP")
+            }
+        } else {
+            if (originalCurrency.equals("EGP", ignoreCase = true)) {
+                Pair(originalPrice / usdToEgpRate, "USD")
+            } else {
+                Pair(originalPrice, "USD")
+            }
+        }
+    }
+
+    fun formatPrice(price: Double): String {
+        return String.format("%.2f", price)
+    }
 
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
@@ -85,10 +107,11 @@ fun ProductDetailsScreen(
             val firstVariantId = product.variants.firstOrNull()?.id ?: ""
             val isFavorited = favoriteVariantIds.contains(firstVariantId)
 
-            Log.d(
-                "ProductDetailsScreen",
-                "Product Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}"
-            )
+            val originalPrice = product.price.minVariantPrice.amount.toDoubleOrNull() ?: 0.0
+            val originalCurrency = product.price.minVariantPrice.currencyCode
+            val (convertedPrice, displayCurrency) = convertPrice(originalPrice, originalCurrency)
+
+
             if (showBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showBottomSheet = false },
@@ -141,12 +164,13 @@ fun ProductDetailsScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Price: ${product.price.minVariantPrice.amount} ${product.price.minVariantPrice.currencyCode}",
-                            style = MaterialTheme.typography.bodyLarge
+                            text = "Price: ${formatPrice(convertedPrice)} $displayCurrency",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         )
                     }
-
-
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -175,12 +199,10 @@ fun ProductDetailsScreen(
                 Spacer(modifier = Modifier.height(100.dp))
             }
 
-
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter,
-
-                ) {
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shadowElevation = 8.dp,
@@ -204,7 +226,8 @@ fun ProductDetailsScreen(
                                         showConfirmRemoveDialog = true
                                     } else {
                                         favoriteViewModel.toggleProductFavorite(product, firstVariantId)
-                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()                                    }
+                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -215,7 +238,6 @@ fun ProductDetailsScreen(
                                 ),
                             size = 42.dp
                         )
-
 
                         Button(
                             onClick = {
@@ -248,6 +270,7 @@ fun ProductDetailsScreen(
                             )
                         }
                     }
+
                     if (showLoginDialog) {
                         AlertDialog(
                             onDismissRequest = {
@@ -283,7 +306,6 @@ fun ProductDetailsScreen(
                         )
                     }
 
-
                     if (showConfirmRemoveDialog) {
                         AlertDialog(
                             onDismissRequest = { showConfirmRemoveDialog = false },
@@ -304,7 +326,6 @@ fun ProductDetailsScreen(
                             }
                         )
                     }
-
                 }
             }
         }
