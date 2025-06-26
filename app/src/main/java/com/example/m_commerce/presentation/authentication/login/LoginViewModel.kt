@@ -48,12 +48,12 @@ class LoginViewModel @Inject constructor(
                                 }
                             }
                             if (hasExistingOrder) {
-                                Log.d("LoginViewModel", "Draft order already exists for customer: $customerEmail")
+//                                Log.d("LoginViewModel", "Draft order already exists for customer: $customerEmail")
                             } else {
-                                Log.d("LoginViewModel", "No existing draft order found for customer: $customerEmail")
+//                                Log.d("LoginViewModel", "No existing draft order found for customer: $customerEmail")
                             }
                         } catch (e: Exception) {
-                            Log.e("LoginViewModel", "Error checking draft order", e)
+//                            Log.e("LoginViewModel", "Error checking draft order", e)
                         }
                     }
                     ResponseState.Success("Welcome back! You have successfully logged in") },
