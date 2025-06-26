@@ -143,7 +143,7 @@ class FavoriteViewModel @Inject constructor(
         }
     }
 
-    private suspend fun addProductToFavorites(product: Product, variantId: String) {
+    suspend fun addProductToFavorites(product: Product, variantId: String) {
         val email = sharedPreferencesHelper.getCustomerEmail()
         if (email == null) {
             Log.e("FavoriteViewModel", "No customer email found")
@@ -190,7 +190,7 @@ class FavoriteViewModel @Inject constructor(
         }
     }
 
-    private fun lineItemToProduct(lineItem: LineItem): Product {
+    fun lineItemToProduct(lineItem: LineItem): Product {
         val isUsd = sharedPreferencesHelper.getCurrencyPreference()
         val usdToEgp = sharedPreferencesHelper.getUsdToEgpValue()
         val originalPrice = lineItem.originalUnitPrice ?: 0.0
