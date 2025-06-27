@@ -26,6 +26,7 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
         quantity: Int
     ): DraftOrder = withContext(Dispatchers.IO) {
         try {
+
             val response = apolloClient.mutation(
                 DraftOrderCreateMutation(
                     email = email,
@@ -36,12 +37,14 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
             ).execute()
 
             val draft = response.data?.draftOrderCreate?.draftOrder
-                ?: throw Exception("Failed to create favorite draft order")
+                ?: throw Exception("Failed to create favorite draft order - no data returned")
+
 
             DraftOrder(
                 id = draft.id,
                 email = draft.email,
                 name = draft.name,
+                note2 = draft.note2,
                 status = draft.status?.toString(),
                 totalPrice = draft.totalPrice?.toString()?.toDoubleOrNull(),
                 updatedAt = draft.updatedAt?.toString(),
@@ -62,13 +65,21 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFavoriteDraftOrders(query: String): Flow<List<DraftOrder>> = flow {
+    override suspend fun getFavoriteDraftOrders(email: String): Flow<List<DraftOrder>> = flow {
         try {
+            val query = "email:'$email"
+
+
             val response = apolloClient.query(
                 GetDraftOrdersQuery(Optional.present(query))
             ).execute()
 
             var draftOrders = response.data?.draftOrders?.nodes?.mapNotNull { draft ->
+                if (draft.email != email) {
+                    return@mapNotNull null
+                }
+
+
                 DraftOrder(
                     id = draft.id,
                     email = draft.email,
@@ -79,7 +90,10 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
                         DraftOrderLineItemConnection(
                             nodes = lineItems.nodes?.mapNotNull { node ->
                                 val productNode = node.product
-                                if (productNode == null) return@mapNotNull null
+                                if (productNode == null) {
+                                    return@mapNotNull null
+                                }
+
                                 LineItem(
                                     id = node.id,
                                     name = node.name,
@@ -125,13 +139,16 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
                         )
                     }
                 )
+            }?.filter { draftOrder ->
+                draftOrder.email == email && draftOrder.note2 == note.fav.name
             } ?: emptyList()
+
+
             emit(draftOrders)
         } catch (e: Exception) {
             throw Exception("Failed to fetch favorite draft orders: ${e.message}")
         }
     }
-
     private fun sanitizeVariantId(variantId: String?): String {
         if (variantId == null) return ""
         return when {
@@ -155,7 +172,6 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
     ): DraftOrder {
         val draftOrderLineItems = lineItems.map { item ->
             val sanitizedVariantId = sanitizeVariantId(item.variantID)
-            android.util.Log.d("FavoriteRemoteDataSourceImpl", "LineItem: variantId=$sanitizedVariantId, quantity=${item.quantity}")
 
             DraftOrderLineItemInput(
                 variantId = Optional.present(sanitizedVariantId),
@@ -172,9 +188,6 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
             ).execute()
         }
 
-        android.util.Log.d("FavoriteDraftOrderUpdate", "Request ID: $draftOrderId")
-        android.util.Log.d("FavoriteDraftOrderUpdate", "LineItems: $draftOrderLineItems")
-        android.util.Log.d("FavoriteDraftOrderUpdate", "Response: ${response.data?.draftOrderUpdate?.userErrors}")
 
         response.data?.draftOrderUpdate?.userErrors?.firstOrNull()?.let { error ->
             android.util.Log.e("FavoriteDraftOrderUpdate", "Error: ${error.message}")
@@ -215,7 +228,6 @@ class FavoriteRemoteDataSourceImpl @Inject constructor(
             val success = response.data?.draftOrderDelete?.userErrors?.isEmpty() ?: false
             if (!success) {
                 response.data?.draftOrderDelete?.userErrors?.forEach { error ->
-                    android.util.Log.e("DraftOrderDelete", "Error: ${error.message}, Field: ${error.field}")
                 }
                 throw Exception("Failed to delete draft order")
             }

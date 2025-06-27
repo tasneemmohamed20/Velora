@@ -8,7 +8,7 @@ interface IFavoriteRepository {
 
     suspend fun addProductToFavorites(email: String, variantId: String, quantity: Int): DraftOrder
 
-    suspend fun getFavoriteDraftOrders(query: String): Flow<List<DraftOrder>>
+    suspend fun getFavoriteDraftOrders(email: String): Flow<List<DraftOrder>>
 
     suspend fun updateDraftOrder(draftOrderId: String, lineItems: List<Item>): DraftOrder
 

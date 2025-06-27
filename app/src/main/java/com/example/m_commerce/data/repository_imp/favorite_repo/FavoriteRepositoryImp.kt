@@ -14,8 +14,8 @@ class FavoriteRepositoryImp @Inject constructor(
     override suspend fun addProductToFavorites(email: String, variantId: String, quantity: Int): DraftOrder =
         favoriteRemoteDataSource.addProductToFavorites(email, variantId, quantity)
 
-    override suspend fun getFavoriteDraftOrders(query: String): Flow<List<DraftOrder>> =
-        favoriteRemoteDataSource.getFavoriteDraftOrders(query)
+    override suspend fun getFavoriteDraftOrders(email: String): Flow<List<DraftOrder>> =
+        favoriteRemoteDataSource.getFavoriteDraftOrders(email)
 
     override suspend fun updateDraftOrder(draftOrderId: String, lineItems: List<Item>): DraftOrder =
         favoriteRemoteDataSource.updateDraftOrder(draftOrderId, lineItems)

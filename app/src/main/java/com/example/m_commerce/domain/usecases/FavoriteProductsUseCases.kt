@@ -16,8 +16,8 @@ class FavoriteProductsUseCases @Inject constructor(
     ): DraftOrder = repository.addProductToFavorites(email, variantId, quantity)
 
 
-    suspend fun getFavoriteDraftOrders(query: String): Flow<List<DraftOrder>> =
-        repository.getFavoriteDraftOrders(query)
+    suspend fun getFavoriteDraftOrders(email: String): Flow<List<DraftOrder>> =
+        repository.getFavoriteDraftOrders(email)
 
 
     suspend fun updateDraftOrder(
