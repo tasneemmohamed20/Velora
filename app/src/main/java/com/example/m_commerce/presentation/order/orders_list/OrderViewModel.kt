@@ -37,4 +37,8 @@ class OrderViewModel @Inject constructor(
             }
         }
     }
+
+    fun getCurrentUserMode(): String {
+        return sharedPreferencesHelper.getCurrentUserMode()
+    }
 }

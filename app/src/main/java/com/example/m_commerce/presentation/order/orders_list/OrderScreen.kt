@@ -64,41 +64,50 @@ fun OrderScreen(
     onLoginClicked: () -> Unit,
     ){
 
+    val isGuestMode = viewModel.getCurrentUserMode() == "Guest"
+
     LaunchedEffect(Unit){
-        viewModel.getOrdersByCustomer()
+        if(!isGuestMode){
+            viewModel.getOrdersByCustomer()
+        }
     }
 
     val ordersState by viewModel.ordersList.collectAsStateWithLifecycle()
 
-    AnimatedContent(targetState = ordersState) { ordersState ->
-        when(ordersState){
-            is ResponseState.Failure ->{
-                DefaultGuestScreen(
-                    onLoginClicked,
-                    "Log in or sign up for a more personalized ordering experience"
-                    ,)
-            }
-            is ResponseState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
-                }
-            }
-            is ResponseState.Success -> {
-                val ordersData = ordersState.data as List<OrderEntity>
-                Log.i("OrderScreen", "OrderScreen: ")
-                if(ordersData.isNotEmpty()){
-                    OrderList(ordersData, onOrderClicked)
-                }else{
-                    NoOrdersFound(onExploreProductsClicked)
+    if (isGuestMode){
+        DefaultGuestScreen(
+            onLoginClicked,
+            "Log in or sign up for a more personalized ordering experience"
+            ,)
+    }else {
+        AnimatedContent(targetState = ordersState) { ordersState ->
+            when (ordersState) {
+                is ResponseState.Failure -> {
+
                 }
 
+                is ResponseState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularWavyProgressIndicator(color = Primary.copy(alpha = 0.7f))
+                    }
+                }
+
+                is ResponseState.Success -> {
+                    val ordersData = ordersState.data as List<OrderEntity>
+                    Log.i("OrderScreen", "OrderScreen: ")
+                    if (ordersData.isNotEmpty()) {
+                        OrderList(ordersData, onOrderClicked)
+                    } else {
+                        NoOrdersFound(onExploreProductsClicked)
+                    }
+
+                }
             }
         }
     }
-
 
 }
 
