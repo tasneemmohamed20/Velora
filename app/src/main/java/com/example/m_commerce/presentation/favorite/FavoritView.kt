@@ -27,26 +27,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.m_commerce.R
-import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.theme.Primary
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.ui.text.font.FontWeight
+import com.example.m_commerce.presentation.utils.components.DefaultGuestScreen
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FavoriteView(
     viewModel: FavoriteViewModel = hiltViewModel(),
-    onProductClick: (String) -> Unit
+    onProductClick: (String) -> Unit,
+    onLoginClicked: () -> Unit
 ) {
     val favoriteProducts by viewModel.favoriteProducts.collectAsState()
     val favoriteVariantIds by viewModel.favoriteVariantIds.collectAsState()
-    val context = LocalContext.current
-    val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
 
-    val isGuest = remember { sharedPreferencesHelper.getCustomerEmail() == null }
+    val isGuest = remember { viewModel.getCurrentUserMode() == "Guest" }
     val isLoading by viewModel.isLoading.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -68,26 +67,10 @@ fun FavoriteView(
         }
 
         isGuest -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.notfav),
-                    contentDescription = "Not Favorited",
-                    modifier = Modifier.size(200.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Please login to view your favorites",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    color = Color.Black
-                )
-            }
+            DefaultGuestScreen(
+                onLoginClicked = { onLoginClicked},
+                description = "💝 Unlock Your Personal Collection 💝\n\nSign in to discover and save your favorite products for easy shopping later"
+            )
         }
 
         favoriteProducts.isEmpty() -> {

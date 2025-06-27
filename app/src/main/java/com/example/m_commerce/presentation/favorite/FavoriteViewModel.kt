@@ -251,4 +251,8 @@ class FavoriteViewModel @Inject constructor(
             }
         }
     }
+
+    fun getCurrentUserMode() : String{
+        return sharedPreferencesHelper.getCurrentUserMode()
+    }
 }

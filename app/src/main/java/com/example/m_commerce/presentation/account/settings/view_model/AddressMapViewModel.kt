@@ -40,7 +40,7 @@ class AddressMapViewModel @Inject constructor (
     @ApplicationContext context: Context,
     private val geoCodingRepository: IGeoCodingRepository,
     private val placesClient: PlacesClient,
-    sharedPreferencesHelper: SharedPreferencesHelper,
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
     private val customerUseCase: CustomerUseCase,
     private val workManager: WorkManager
 ) : ViewModel() {
@@ -435,6 +435,10 @@ class AddressMapViewModel @Inject constructor (
             formattedAddress = "",
             selectedCountry = ""
         )
+    }
+
+    fun getCurrentCustomerMode()  : String{
+        return sharedPreferencesHelper.getCurrentUserMode()
     }
 
 }

@@ -50,6 +50,7 @@ import com.example.m_commerce.domain.entities.OrderEntity
 import com.example.m_commerce.presentation.utils.Functions.formatShopifyDate
 import com.example.m_commerce.presentation.utils.Functions.getOrderStatusColors
 import com.example.m_commerce.presentation.utils.Functions.mapOrderStatusSimple
+import com.example.m_commerce.presentation.utils.components.DefaultGuestScreen
 import com.example.m_commerce.presentation.utils.theme.Primary
 
 
@@ -245,47 +246,4 @@ fun NoOrdersFound(onExploreProductsClicked: () -> Unit){
     }
 }
 
-@Composable
-fun DefaultGuestScreen(
-    onLoginClicked: () -> Unit,
-    description: String
-){
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(painter = painterResource(id = R.drawable.velora_logo), contentDescription = "No Orders Guest")
-        Spacer(Modifier.height(18.dp))
-        Text(
-            text = "Hey There!",
-            style = MaterialTheme.typography.titleLarge,
-            color = Color.Black,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = description,
-            style = MaterialTheme.typography.titleSmall,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            maxLines = 3
-        )
-        Spacer(Modifier.height(20.dp))
-        Button(
-            onClick = onLoginClicked,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Primary,
-                contentColor = Color.White
-            )
-        ){
-            Text(
-                text = "Log in",
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
-    }
-}
+

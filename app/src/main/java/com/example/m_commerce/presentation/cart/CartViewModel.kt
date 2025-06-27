@@ -165,4 +165,8 @@ class CartViewModel @Inject constructor(
             _cartState.value = ResponseState.Failure(Exception("Cart not found"))
         }
     }
+
+    fun getCurrentUserMode() : String {
+        return sharedPreferencesHelper.getCurrentUserMode()
+    }
 }

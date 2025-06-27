@@ -137,7 +137,8 @@ fun MainActivity.NavHostSetup(mainViewModel: MainViewModel, isLogged: Boolean){
 
                     val itemsJson = Uri.encode(Json.encodeToString(ArrayList(orderItems)))
                     navHostController.navigate("checkout/$itemsJson/$totalAmountCents/$subtotal/$estimatedFee/$itemsCount")
-                }
+                },
+                onLoginClicked = { navHostController.navigate(ScreensRoute.Start) }
             )
         }
 
@@ -234,7 +235,7 @@ fun MainActivity.NavHostSetup(mainViewModel: MainViewModel, isLogged: Boolean){
                     viewModel.setupForEditMode(address)
                     navHostController.navigate(ScreensRoute.AddressInfo)
                 },
-                navController = navHostController,
+                onGuestMode = { navHostController.navigate(ScreensRoute.Start)},
             )
         }
 
@@ -303,7 +304,8 @@ fun MainActivity.NavHostSetup(mainViewModel: MainViewModel, isLogged: Boolean){
                 onProductClick = { productId ->
                     Log.d("ProductClick", "Navigating with productId: $productId")
                     navHostController.navigate(ScreensRoute.ProductDetails(productId))
-                }
+                },
+                onLoginClicked = {navHostController.navigate(ScreensRoute.Start)}
             )
         }
 

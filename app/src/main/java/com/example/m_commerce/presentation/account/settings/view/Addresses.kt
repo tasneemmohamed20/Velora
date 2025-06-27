@@ -25,37 +25,34 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.m_commerce.R
-import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.Address
 import com.example.m_commerce.domain.entities.AddressType
 import com.example.m_commerce.presentation.account.settings.view_model.AddressMapViewModel
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
-import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.components.DefaultGuestScreen
 import com.example.m_commerce.presentation.utils.theme.Primary
 
 
@@ -66,13 +63,11 @@ fun AddressesScreen(
     onBack: () -> Unit,
     onAddClicked: () -> Unit,
     onAddressClick: (Address) -> Unit,
-    navController: NavController,
-
+    onGuestMode: () -> Unit,
     ) {
     val addresses by viewModel.addresses.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val context = LocalContext.current
-    val sharedPrefsHelper = remember { SharedPreferencesHelper(context) }
+    val isGuestMode = remember { viewModel.getCurrentCustomerMode() == "Guest"}
     var showGuestDialog by remember { mutableStateOf(false) }
 
 
@@ -87,19 +82,15 @@ fun AddressesScreen(
             actions = {
                 Text(
                     text = "Add",
-                    color = Primary.copy(alpha = 0.7f),
+                    color = if (isGuestMode) Color.Gray.copy(alpha = 0.5f) else Primary.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
                     modifier = Modifier
-                        .clickable {
-                            if (sharedPrefsHelper.isGuestMode()) {
-                                showGuestDialog = true
-                            } else {
+                        .clickable(enabled = !isGuestMode) {
                                 onAddClicked()
                                 viewModel.resetForAddMode()
-                            }
                         }
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 8.dp),
                 )
                 if (showGuestDialog) {
                     AlertDialog(
@@ -108,12 +99,12 @@ fun AddressesScreen(
                             Text(text = "Sign in Required")
                         },
                         text = {
-                            Text("Guests cannot add addresses. Please sign in or create an account to continue.")
+                            Text("🏠 Create Your Address Book 🏠\n\nUnlock the convenience of saving delivery addresses! Sign in or create your account to enjoy seamless shopping experiences.")
                         },
                         confirmButton = {
                             TextButton(onClick = {
                                 showGuestDialog = false
-                                navController.navigate(ScreensRoute.SignUp)
+                                onGuestMode()
                             }) {
                                 Text("OK")
                             }
@@ -124,7 +115,7 @@ fun AddressesScreen(
                             }) {
                                 Text("Cancel")
                             }
-                        }
+                        },
                     )
                 }
 
@@ -132,6 +123,13 @@ fun AddressesScreen(
         )
 
         when {
+            
+            isGuestMode ->{
+                DefaultGuestScreen(
+                    onLoginClicked = onGuestMode,
+                    description  = "🏠 Your Address Book Awaits 🏠\n\nSign in to unlock your personalized delivery locations and enjoy effortless shopping experiences"
+                )
+            }
             isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -159,12 +157,13 @@ fun AddressesScreen(
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = "Tap 'Add' to create your first address",
+                            text = "✨ Start Your Journey ✨\n\nCreate your first delivery address and experience seamless shopping right to your doorstep",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black,
                             textAlign = TextAlign.Center,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = 24.sp
                         )
                     }
                 }

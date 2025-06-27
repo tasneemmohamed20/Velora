@@ -49,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,10 +57,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.presentation.utils.ResponseState
 import com.example.m_commerce.domain.entities.DraftOrder
 import com.example.m_commerce.presentation.utils.components.CustomTopAppBar
+import com.example.m_commerce.presentation.utils.components.DefaultGuestScreen
 import com.example.m_commerce.presentation.utils.theme.Primary
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -70,7 +69,8 @@ fun CartScreen(
     onBack: () -> Unit,
     onCheckout:(order:DraftOrder, total : Int, subtotal: Double?, estimatedFee: Double?, itemsCount: Int?) -> Unit,
     viewModel: CartViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier.background(Color.White)
+    modifier: Modifier = Modifier.background(Color.White),
+    onLoginClicked: () -> Unit,
 ) {
     var voucherCode by remember { mutableStateOf("") }
     val cartState by viewModel.cartState.collectAsState()
@@ -79,9 +79,7 @@ fun CartScreen(
     var estimatedFee: Double? = null
     var itemsCount: Int? = null
     var totalPrice: Double? = null
-    val context = LocalContext.current
-    val sharedPreferencesHelper = remember { SharedPreferencesHelper(context) }
-    val isAuthenticated = remember { sharedPreferencesHelper.isUserAuthenticated() }
+    val isGuestMode = remember { viewModel.getCurrentUserMode() == "Guest"}
 
     val removeItemRequest = viewModel.removeItemRequest
     var itemToRemove by remember {
@@ -119,9 +117,34 @@ fun CartScreen(
             }
         )
     }
+    
+    when {
+        isGuestMode -> {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                CartHeader(onBack)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        DefaultGuestScreen(
+                            onLoginClicked = onLoginClicked,
+                            description = "🛒 Your Shopping Cart Awaits 🛒\n\nSign in to view your saved items and continue your shopping journey with ease"
+                        )
+                    }
+                }
+            }
+        }
 
-    when (cartState) {
-        is ResponseState.Loading -> {
+        cartState is ResponseState.Loading -> {
             CircularWavyProgressIndicator(
                 stroke = Stroke(width = 4.0f, cap = StrokeCap.Round),
                 modifier = Modifier
@@ -130,7 +153,7 @@ fun CartScreen(
                 color = Primary.copy(alpha = 0.7f)
             )
         }
-        is ResponseState.Failure -> {
+        cartState is ResponseState.Failure -> {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -168,7 +191,7 @@ fun CartScreen(
             }
         }
 
-        is ResponseState.Success -> {
+        cartState is ResponseState.Success -> {
             val draftOrder = (cartState as ResponseState.Success).data
             Column(
                 Modifier
@@ -289,7 +312,6 @@ fun CartScreen(
         }
     }
 }
-
 
 @Composable
 fun CartHeader(onBack: () -> Unit) {
@@ -523,7 +545,6 @@ fun CartItemRow(
 
     }
 }
-
 
 data class CartItem(
     val name: String,
