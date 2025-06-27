@@ -29,6 +29,10 @@ class FakeCustomerDataSource(
         return flowOf(customer)
     }
 
+    override fun getCustomerByEmail(email: String): Flow<Customer> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun updateCustomerData(
         id: String?,
         addresses: List<CustomerAddresses>?
