@@ -183,7 +183,7 @@ class FavoriteViewModel @Inject constructor(
         }
     }
 
-    private fun lineItemToProduct(lineItem: LineItem): Product {
+    fun lineItemToProduct(lineItem: LineItem): Product {
         val isUsd = sharedPreferencesHelper.getCurrencyPreference()
         val usdToEgp = sharedPreferencesHelper.getUsdToEgpValue()
         val originalPrice = lineItem.originalUnitPrice ?: 0.0
