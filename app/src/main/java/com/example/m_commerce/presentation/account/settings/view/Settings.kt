@@ -143,7 +143,11 @@ fun SettingsScreen(
                 value = "",
                 onClick = {
 
-                    viewModel.showLogOutDialog.value = true
+                    if (isGuestMode) {
+                        onLogoutClicked()
+                    }else {
+                        viewModel.showLogOutDialog.value = true
+                    }
                 },
                 icon = SettingsIcon.ARROW_RIGHT
             )
