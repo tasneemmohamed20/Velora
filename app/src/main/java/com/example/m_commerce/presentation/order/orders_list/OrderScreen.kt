@@ -2,6 +2,7 @@
 package com.example.m_commerce.presentation.order.orders_list
 
 import  android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
@@ -58,8 +59,8 @@ fun OrderScreen(
     viewModel: OrderViewModel = hiltViewModel(),
     onOrderClicked: (OrderEntity) -> Unit,
     onExploreProductsClicked: () -> Unit,
+    onLoginClicked: () -> Unit,
     ){
-
 
     LaunchedEffect(Unit){
         viewModel.getOrdersByCustomer()
@@ -70,7 +71,7 @@ fun OrderScreen(
     AnimatedContent(targetState = ordersState) { ordersState ->
         when(ordersState){
             is ResponseState.Failure ->{
-
+                NoOrdersGuest(onLoginClicked)
             }
             is ResponseState.Loading -> {
                 Box(
@@ -82,11 +83,11 @@ fun OrderScreen(
             }
             is ResponseState.Success -> {
                 val ordersData = ordersState.data as List<OrderEntity>
-
+                Log.i("OrderScreen", "OrderScreen: ")
                 if(ordersData.isNotEmpty()){
                     OrderList(ordersData, onOrderClicked)
                 }else{
-                    NoOrderFound(onExploreProductsClicked)
+                    NoOrdersFound(onExploreProductsClicked)
                 }
 
             }
@@ -101,7 +102,9 @@ fun OrderScreen(
 @Composable
 fun OrderList(orders : List<OrderEntity>, onOrderClicked: (OrderEntity) -> Unit){
 
-    LazyColumn {
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .background(color = Color.White)) {
         items(orders.size){
             OrderCard(orders[it], onOrderClicked)
         }
@@ -197,7 +200,7 @@ fun OrderCard(order: OrderEntity, onOrderClicked: (OrderEntity) -> Unit, modifie
 
 
 @Composable
-fun NoOrderFound(onExploreProductsClicked: () -> Unit){
+fun NoOrdersFound(onExploreProductsClicked: () -> Unit){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -232,6 +235,48 @@ fun NoOrderFound(onExploreProductsClicked: () -> Unit){
         ){
             Text(
                 text = "Explore Products",
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
+    }
+}
+
+@Composable
+fun NoOrdersGuest(onLoginClicked: () -> Unit){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(painter = painterResource(id = R.drawable.velora_logo), contentDescription = "No Orders Guest")
+        Spacer(Modifier.height(18.dp))
+        Text(
+            text = "Hey There!",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Black,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Log in or sign up for a more personalized ordering experience",
+            style = MaterialTheme.typography.titleSmall,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 3
+        )
+        Spacer(Modifier.height(20.dp))
+        Button(
+            onClick = onLoginClicked,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Primary,
+                contentColor = Color.White
+            )
+        ){
+            Text(
+                text = "Log in",
                 style = MaterialTheme.typography.titleMedium,
             )
         }

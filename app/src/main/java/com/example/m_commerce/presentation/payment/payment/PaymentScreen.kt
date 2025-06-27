@@ -85,11 +85,8 @@ fun PaymentScreen(
                                         val uri = Uri.parse(url)
                                         val isSuccess = uri.getQueryParameter("success") == "true"
                                         val txnResponse = uri.getQueryParameter("txn_response_code")
-                                        Log.d("PaymentScreen", "isSuccess: $isSuccess")
-                                        Log.d("PaymentScreen", "txnResponse: $txnResponse")
 
                                         if (isSuccess) {
-                                            Log.d("PaymentScreen", "Payment successful")
                                             viewModel.completeDraftOrder()
                                         } else {
                                             onPaymentError("Payment failed: Transaction not approved")

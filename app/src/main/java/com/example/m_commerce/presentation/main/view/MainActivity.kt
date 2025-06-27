@@ -292,6 +292,9 @@ fun MainActivity.NavHostSetup(mainViewModel: MainViewModel, isLogged: Boolean){
             },
                 onExploreProductsClicked = {
                     navHostController.navigate(ScreensRoute.Search)
+                },
+                onLoginClicked = {
+                    navHostController.navigate(ScreensRoute.Start)
                 })
         }
 

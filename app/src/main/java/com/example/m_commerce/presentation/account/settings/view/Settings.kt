@@ -2,6 +2,7 @@ package com.example.m_commerce.presentation.account.settings.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +18,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -135,10 +142,22 @@ fun SettingsScreen(
                 label = if (isGuestMode) "Log in" else "Log out",
                 value = "",
                 onClick = {
-                    onLogoutClicked()
+
+                    viewModel.showLogOutDialog.value = true
                 },
                 icon = SettingsIcon.ARROW_RIGHT
             )
+
+            if (viewModel.showLogOutDialog.value){
+                CustomAlertDialog(
+                    title = "Log out",
+                    onDismiss = {},
+                    message = "Are you sure you want to log out?",
+                    okBtnText = "Log out",
+                    onConfirm = onLogoutClicked,
+                    viewModel = viewModel
+                )
+            }
         }
     }
 
@@ -282,4 +301,70 @@ fun SettingsItemRow(
             )
         }
     }
+}
+
+
+@Composable
+fun CustomAlertDialog(
+    message: String,
+    title: String,
+    okBtnText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    viewModel: SettingsViewModel,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = {
+            viewModel.showLogOutDialog.value = false
+            onDismiss()
+        } ,
+        title = {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+        },
+        text = {
+            Text(message, style = MaterialTheme.typography.bodyMedium)
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    viewModel.showLogOutDialog.value = false
+                    onConfirm()
+                    },
+                colors = ButtonColors(
+                    contentColor = Color.White, containerColor = Primary,
+                    disabledContainerColor = Primary,
+                    disabledContentColor = Color.White,
+                ),
+                shape = RoundedCornerShape(30.dp)
+            ) {
+                Text(okBtnText)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    viewModel.showLogOutDialog.value = false
+                    onDismiss()
+                },
+                modifier = modifier.border(
+                    color = Color.Gray.copy(alpha = 0.1F),
+                    width = 2.dp,
+                    shape = RoundedCornerShape(30.dp),
+                ),
+                shape = RoundedCornerShape(30.dp)
+            ) {
+                Text("Cancel")
+            }
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = "Warning",
+                tint = Primary
+            )
+        },
+        containerColor = Color.White,
+        shape = RoundedCornerShape(20.dp)
+    )
 }

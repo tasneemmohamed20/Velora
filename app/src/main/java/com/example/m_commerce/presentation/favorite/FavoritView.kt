@@ -31,6 +31,7 @@ import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.domain.entities.Product
 import com.example.m_commerce.presentation.utils.theme.Primary
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.ui.text.font.FontWeight
 
 
@@ -151,7 +152,13 @@ fun FavoriteView(
                                 viewModel.toggleProductFavorite(product, variantId)
                                 showDeleteDialog = false
                                 productToRemove = null
-                            }
+                            },
+                            colors = ButtonColors(
+                                contentColor = Color.White, containerColor = Primary,
+                                disabledContainerColor = Primary,
+                                disabledContentColor = Color.White,
+                            ),
+                            shape = RoundedCornerShape(30.dp)
                         ) {
                             Text("Remove")
                         }
@@ -161,7 +168,13 @@ fun FavoriteView(
                             onClick = {
                                 showDeleteDialog = false
                                 productToRemove = null
-                            }
+                            },
+                            modifier = Modifier.border(
+                                color = Color.Gray.copy(alpha = 0.1F),
+                                width = 2.dp,
+                                shape = RoundedCornerShape(30.dp),
+                            ),
+                            shape = RoundedCornerShape(30.dp)
                         ) {
                             Text("Cancel")
                         }

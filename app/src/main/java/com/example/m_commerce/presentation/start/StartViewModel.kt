@@ -89,9 +89,6 @@ class StartViewModel @Inject constructor(
                     val response = client.newCall(request).execute()
                     val responseBody = response.body?.string()
 
-//                    Log.d("ShopifyAPI", "Response Code: ${response.code}")
-//                    Log.d("ShopifyAPI", "Response Body: $responseBody")
-
                     if (response.isSuccessful && responseBody != null) {
                         ResponseState.Success(responseBody)
                     } else if (response.code == 422 && responseBody?.contains("email") == true) {

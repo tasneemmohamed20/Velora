@@ -28,10 +28,8 @@ class OrderViewModel @Inject constructor(
     fun getOrdersByCustomer(){
 
         val customerId = sharedPreferencesHelper.getCustomerId()?.split("/")?.last() ?: ""
-        Log.i("getOrdersByCustomer", "getOrdersByCustomer: $customerId")
         viewModelScope.launch {
            val result = orderRepository.getOrdersByCustomerId(customerId)
-            Log.i("getOrdersByCustomer", "getOrdersByCustomer: $result")
             result.catch {
                 _mutableOrdersList.value = ResponseState.Failure(it)
             }.collect{

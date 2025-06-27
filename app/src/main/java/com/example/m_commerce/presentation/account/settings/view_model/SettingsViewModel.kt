@@ -1,6 +1,10 @@
 package com.example.m_commerce.presentation.account.settings.view_model
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
@@ -20,7 +24,8 @@ class SettingsViewModel @Inject constructor(
 
     private val _currencyExchange = MutableSharedFlow<CurrencyExchangeResponse>()
     val currencyExchange: SharedFlow<CurrencyExchangeResponse> = _currencyExchange
-    
+    var showLogOutDialog =  mutableStateOf(false)
+
     private val _error = MutableSharedFlow<String>()
     val error: SharedFlow<String> = _error
     
