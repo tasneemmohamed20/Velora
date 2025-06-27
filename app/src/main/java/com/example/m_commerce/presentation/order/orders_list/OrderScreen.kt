@@ -2,6 +2,7 @@
 package com.example.m_commerce.presentation.order.orders_list
 
 import  android.os.Build
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
@@ -71,7 +72,10 @@ fun OrderScreen(
     AnimatedContent(targetState = ordersState) { ordersState ->
         when(ordersState){
             is ResponseState.Failure ->{
-                NoOrdersGuest(onLoginClicked)
+                DefaultGuestScreen(
+                    onLoginClicked,
+                    "Log in or sign up for a more personalized ordering experience"
+                    ,)
             }
             is ResponseState.Loading -> {
                 Box(
@@ -242,7 +246,10 @@ fun NoOrdersFound(onExploreProductsClicked: () -> Unit){
 }
 
 @Composable
-fun NoOrdersGuest(onLoginClicked: () -> Unit){
+fun DefaultGuestScreen(
+    onLoginClicked: () -> Unit,
+    description: String
+){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -259,7 +266,7 @@ fun NoOrdersGuest(onLoginClicked: () -> Unit){
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Log in or sign up for a more personalized ordering experience",
+            text = description,
             style = MaterialTheme.typography.titleSmall,
             color = Color.Black,
             textAlign = TextAlign.Center,
