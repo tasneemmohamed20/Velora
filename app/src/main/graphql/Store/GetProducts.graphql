@@ -1,0 +1,37 @@
+query GetProductsByHandle($handle: String!) {
+    collection(handle: $handle) {
+            title
+            products(first: 50) {
+                edges{
+                    node {
+                        id
+                        title
+                        productType
+                        description
+                        priceRange {
+                            minVariantPrice {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        images(first: 1) {
+                            edges {
+                                node {
+                                    url
+                                    altText
+                                }
+                            }
+                        }
+                        variants(first: 1) {
+                            nodes {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+    }
+}
+
+
+

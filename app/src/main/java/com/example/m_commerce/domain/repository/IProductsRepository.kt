@@ -5,6 +5,8 @@ import com.example.m_commerce.domain.entities.Product
 import kotlinx.coroutines.flow.Flow
 
 interface IProductsRepository {
-    suspend fun getProductsByHandle(handle: String): Flow<List<Product>>
-    suspend fun getBrands(): Flow<List<Brand>>
+     fun getProductsByHandle(handle: String): Flow<List<Product>>
+     fun getBrands(): Flow<List<Brand>>
+     fun getAllProducts(): Flow<List<Product>>
+     suspend fun getProductById(productId: String): Product
 }

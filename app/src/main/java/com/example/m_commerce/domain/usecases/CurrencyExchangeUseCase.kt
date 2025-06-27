@@ -1,10 +1,11 @@
 package com.example.m_commerce.domain.usecases
 
+import com.example.m_commerce.data.repository_imp.currency_repo.CurrencyExchangeRepositoryImp
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
-import com.example.m_commerce.domain.repository.RepositoryContract
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class CurrencyExchangeUseCase(private val repository: RepositoryContract) {
+class CurrencyExchangeUseCase @Inject constructor (private val repository: CurrencyExchangeRepositoryImp) {
     suspend operator fun invoke(): Flow<CurrencyExchangeResponse> {
         return repository.getCurrencyExchangeRate()
     }

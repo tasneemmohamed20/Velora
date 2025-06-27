@@ -1,0 +1,29 @@
+query GetAllProducts {
+    products(first: 100) {
+        edges {
+            node {
+                id
+                title
+                description
+                priceRange {
+                    minVariantPrice {
+                        amount
+                        currencyCode
+                    }
+                }
+                images(first: 1) {
+                    edges {
+                        node {
+                            url
+                        }
+                    }
+                }
+                variants(first: 1) {
+                    nodes {
+                        id
+                    }
+                }
+            }
+        }
+    }
+}

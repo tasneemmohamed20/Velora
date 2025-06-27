@@ -2,13 +2,14 @@ package com.example.m_commerce.presentation.utils.components
 
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.m_commerce.presentation.utils.routes.ScreensRoute
+import com.example.m_commerce.presentation.utils.theme.Primary
+import com.example.m_commerce.presentation.utils.theme.Secondary
 
 data class NavigationItem(
     val title: String,
@@ -37,9 +40,9 @@ val navigationItems = listOf(
     ),
 
     NavigationItem(
-        title = "Order",
-        icon = Icons.AutoMirrored.Outlined.List,
-        route = ScreensRoute.Order
+        title = "Favorite",
+        icon = Icons.Outlined.FavoriteBorder,
+        route = ScreensRoute.Favorites
     ),
     NavigationItem(
         title = "Account",
@@ -50,25 +53,34 @@ val navigationItems = listOf(
 
 
 @Composable
-fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
+fun BottomNavigationBar(
+    selectedIndex: Int,
+    onItemSelected: (index: Int, item: NavigationItem) -> Unit
+){
 
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 30.dp,
         modifier = Modifier.shadow(elevation = 8.dp),
+
     ){
-        var selectedNavigationIndex by rememberSaveable {
-            mutableIntStateOf(0)
-        }
 
         navigationItems.forEachIndexed { index, navigationItem ->
 
             NavigationBarItem(
                 alwaysShowLabel = true,
-                selected = selectedNavigationIndex == index,
+                colors = NavigationBarItemColors(
+                    selectedIndicatorColor = Primary.copy(alpha = .1f),
+                    selectedIconColor = Primary,
+                    selectedTextColor = Color.White,
+                    unselectedIconColor = Color.Black,
+                    unselectedTextColor = Color.Black,
+                    disabledIconColor = Secondary,
+                    disabledTextColor = Color.White
+                ),
+                selected = selectedIndex  == index,
                 onClick = {
-                    selectedNavigationIndex = index
-                    onItemSelected(navigationItem)
+                    onItemSelected(index, navigationItem)
                 },
                 icon = {
                     Icon(
@@ -80,7 +92,7 @@ fun BottomNavigationBar(onItemSelected: (NavigationItem) -> Unit){
                     Text(
                         text = navigationItem.title,
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.Black
+                        color = if (selectedIndex  == index) Primary else  Color.Black
                     )
                 },
 

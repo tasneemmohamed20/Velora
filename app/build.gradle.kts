@@ -7,12 +7,20 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
-
+    id("kotlin-parcelize")
 }
 
 apollo {
-    service("service") {
-        packageName.set("com.example.m_commerce")
+    service("service1") {
+        packageName.set("com.example.m_commerce.service1")
+        schemaFile.set(file("src/main/graphql/Admin/AdminSchema.graphqls"))
+        sourceFolder.set("Admin")
+        generateKotlinModels.set(true)
+    }
+    service("service2") {
+        packageName.set("com.example.m_commerce.service2")
+        schemaFile.set(file("src/main/graphql/Store/schema.graphqls"))
+        sourceFolder.set("Store")
         generateKotlinModels.set(true)
     }
 }
@@ -44,12 +52,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+//    buildFeatures { dataBinding = true }
     kotlinOptions {
         jvmTarget = "11"
     }
     buildFeatures {
         compose = true
     }
+
+
 }
 
 dependencies {
@@ -68,6 +79,7 @@ dependencies {
     implementation (libs.maps.compose)
     implementation(libs.places)
     implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,7 +92,6 @@ dependencies {
     implementation (libs.retrofit2.converter.gson)
     implementation(libs.apollo.runtime)
     implementation (libs.material)
-
 
     //nav
     implementation (libs.androidx.navigation.compose.v290)
@@ -111,6 +122,10 @@ dependencies {
     // Hilt Navigation Compose
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // country code picker
+    implementation(libs.compose.country.code.picker)
+
+
     // Firebase
     implementation(libs.google.firebase.analytics)
     implementation(libs.firebase.auth.ktx)
@@ -118,5 +133,43 @@ dependencies {
 
 
     implementation ("com.google.code.gson:gson:2.10.1")
+
+    //slider
+    implementation("androidx.compose.material:material:1.9.0-alpha04")
+
+    implementation ("androidx.compose.foundation:foundation:1.4.3")
+
+
+    // Dependencies for local unit tests
+    testImplementation ("junit:junit:4.13.2")
+    androidTestImplementation ("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
+
+    //MockK
+    testImplementation ("io.mockk:mockk-android:1.13.17")
+    testImplementation ("io.mockk:mockk-agent:1.13.17")
+
+
+    //kotlinx-coroutines
+    val coroutinesVersion = "1.10.1"
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+
+    // InstantTaskExecutorRule
+    testImplementation ("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation ("androidx.arch.core:core-testing:2.1.0")
+
+    testImplementation("app.cash.turbine:turbine:1.2.0")
+
+    // paymob
+
+//    implementation(libs.paymob.sdk)
+//    implementation("com.paymob.sdk:Paymob-SDK:1.6.7")
+
+    implementation (libs.lottie.compose)
+    testImplementation(kotlin("test"))
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
 }

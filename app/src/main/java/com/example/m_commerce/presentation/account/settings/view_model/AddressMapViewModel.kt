@@ -8,9 +8,14 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.example.m_commerce.ResponseState
+import com.example.m_commerce.presentation.utils.ResponseState
+import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.data.services.location.LocationWorker
+import com.example.m_commerce.domain.entities.Address
+import com.example.m_commerce.domain.entities.AddressType
+import com.example.m_commerce.domain.entities.CustomerAddresses
 import com.example.m_commerce.domain.repository.IGeoCodingRepository
+import com.example.m_commerce.domain.usecases.CustomerUseCase
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
@@ -22,7 +27,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -32,10 +39,12 @@ import kotlin.coroutines.suspendCoroutine
 class AddressMapViewModel @Inject constructor (
     @ApplicationContext context: Context,
     private val geoCodingRepository: IGeoCodingRepository,
-    private val placesClient: PlacesClient
+    private val placesClient: PlacesClient,
+    private val sharedPreferencesHelper: SharedPreferencesHelper,
+    private val customerUseCase: CustomerUseCase,
+    private val workManager: WorkManager
 ) : ViewModel() {
     private val TAG = "AddressMapViewModel"
-    private val workManager = WorkManager.getInstance(context)
 
     private val _locationState = MutableStateFlow<ResponseState>(ResponseState.Loading)
     val locationState: StateFlow<ResponseState> = _locationState
@@ -58,16 +67,87 @@ class AddressMapViewModel @Inject constructor (
     private val _selectedLocation = MutableStateFlow<LatLng?>(null)
     val selectedLocation: StateFlow<LatLng?> = _selectedLocation
 
+    private val _addresses = MutableStateFlow<List<Address>>(emptyList())
+    val addresses: StateFlow<List<Address>> = _addresses
 
+    private val _phoneNumber = MutableStateFlow("")
+    val phoneNumber: StateFlow<String> = _phoneNumber
+
+    private val _isPhoneValid = MutableStateFlow(true)
+    val isPhoneValid: StateFlow<Boolean> = _isPhoneValid
+
+    private val _editingAddress = MutableStateFlow<Address?>(null)
+    val editingAddress: StateFlow<Address?> = _editingAddress
+
+    private val _updateAddressState = MutableStateFlow<ResponseState>(ResponseState.Loading)
+
+    private val _isAddMode = MutableStateFlow(true)
+    val isAddMode: StateFlow<Boolean> = _isAddMode
+
+    private val _formState = MutableStateFlow<AddressFormState?>(null)
+
+    val customerId = sharedPreferencesHelper.getCustomerId()
 
     init {
         startLocationUpdates()
         observeLocationUpdates()
+        getCustomerAddresses()
+    }
+
+    fun resetForAddMode() {
+        _isAddMode.value = true
+        _editingAddress.value = null
+        _phoneNumber.value = ""
+    }
+
+    // Setup for edit mode
+    fun setupForEditMode(address: Address) {
+        _isAddMode.value = false
+        _editingAddress.value = address
+        _phoneNumber.value = address.phoneNumber
+        updateCurrentLocation(LatLng(address.latitude, address.longitude))
+        restoreFormState(address)
+    }
+
+    fun deleteAddress(addressToDelete: Address) {
+        viewModelScope.launch {
+            _updateAddressState.value = ResponseState.Loading
+            try {
+                val customer = customerUseCase(customerId.toString()).first()
+                val currentApiAddresses = customer.addresses?.toMutableList() ?: mutableListOf()
+
+                // Find and remove the address by ID
+                val addressIndex = currentApiAddresses.indexOfFirst { it.id == addressToDelete.id }
+                if (addressIndex != -1) {
+                    currentApiAddresses.removeAt(addressIndex)
+                    Log.d(TAG, "Deleting address with ID: ${addressToDelete.id}")
+
+                    // Update customer with the modified addresses list
+                    customerUseCase(id = customerId.toString(), addresses = currentApiAddresses)
+                        .collect { updatedCustomer ->
+                            _updateAddressState.value = ResponseState.Success(updatedCustomer)
+                            getCustomerAddresses() // Refresh the addresses list
+                            Log.d(TAG, "Address deleted successfully")
+                        }
+                } else {
+                    throw Exception("Address with id ${addressToDelete.id} not found for deletion.")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete address: ${e.message}", e)
+                _updateAddressState.value = ResponseState.Failure(e)
+            }
+        }
     }
 
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
+        _selectedLocation.value = latLng
         fetchAddress("${latLng.latitude},${latLng.longitude}")
+    }
+
+    fun confirmSelectedLocation(latLng: LatLng) {
+        _selectedLocation.value = latLng
+        _currentLocation.value = latLng
     }
 
     private fun startLocationUpdates() {
@@ -116,7 +196,7 @@ class AddressMapViewModel @Inject constructor (
                 .collect { address ->
                     _address.value = address
                     _isLoading.value = false
-                    Log.d(TAG, "Address: $address")
+//                    Log.d(TAG, "Address: $address")
                 }
         }
     }
@@ -179,23 +259,198 @@ class AddressMapViewModel @Inject constructor (
         }
     }
 
-
     fun clearQuery() {
         _searchQuery.value = ""
         _searchResults.value = emptyList()
     }
 
-/*    class Factory(
-        private val context: Context,
-        private val geoCodingRepository: IGeoCodingRepository,
-        private val placesClient: PlacesClient
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(AddressMapViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return AddressMapViewModel(context, geoCodingRepository, placesClient) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
+    fun storeFormState(
+        addressType: AddressType,
+        buildingName: String,
+        aptNumber: String,
+        floor: String,
+        street: String,
+        additionalDirections: String,
+        addressLabel: String,
+        formattedAddress: String,
+        selectedCountry: String
+    ) {
+        _formState.value = AddressFormState(
+            addressType,
+            buildingName,
+            aptNumber,
+            floor,
+            street,
+            additionalDirections,
+            addressLabel,
+            formattedAddress,
+            selectedCountry
+        )
+    }
+
+    fun getFormState(): AddressFormState? = _formState.value
+
+    fun clearFormState() {
+        _formState.value = null
+    }
+
+    fun validateAndUpdatePhone(newValue: String) {
+        if (newValue.isEmpty() || (newValue.all { it.isDigit() } && newValue.length <= 11)) {
+            _phoneNumber.value = newValue
+            _isPhoneValid.value = newValue.isEmpty() || newValue.matches("^01[0125][0-9]{8}$".toRegex())
         }
-    }*/
+    }
+
+    fun setEditingAddress(address: Address?) {
+        _editingAddress.value = address
+        address?.let {
+            _currentLocation.value = LatLng(it.latitude, it.longitude)
+        }
+    }
+
+    fun updateSelectedLocation(latLng: LatLng) {
+        _selectedLocation.value = latLng
+        fetchAddress("${latLng.latitude},${latLng.longitude}")
+    }
+
+    fun refreshLocation() {
+        // Force fresh location update by restarting location work
+        startLocationUpdates()
+    }
+
+    fun saveAddressToCustomer(newAddress: Address) {
+        viewModelScope.launch {
+            _updateAddressState.value = ResponseState.Loading
+            try {
+                val customer = customerUseCase(customerId.toString()).first()
+                val currentApiAddresses = customer.addresses?.toMutableList() ?: mutableListOf()
+
+                val address1 = "type:${newAddress.type.name}|building:${newAddress.building}|street:${newAddress.street}|apt:${newAddress.apartment}|floor:${newAddress.floor ?: ""}|area:${newAddress.area}|lat:${newAddress.latitude}|lon:${newAddress.longitude}"
+                val address2 = "label:${newAddress.addressLabel ?: ""}|directions:${newAddress.additionalDirections ?: ""}"
+
+                val editingId = _editingAddress.value?.id
+                Log.d(TAG, "Editing address ID: $editingId")
+                if (editingId != null) {
+                    val index = currentApiAddresses.indexOfFirst { it.id == editingId }
+                    if (index != -1) {
+                        currentApiAddresses[index] = currentApiAddresses[index].copy(
+                            address1 = address1,
+                            address2 = address2,
+                            phone = newAddress.phoneNumber
+                        )
+                    } else {
+                        throw Exception("Address with id $editingId not found for update.")
+                    }
+                } else {
+                    val newApiAddress = CustomerAddresses(
+                        id = UUID.randomUUID().toString(),
+                        address1 = address1,
+                        address2 = address2,
+                        phone = newAddress.phoneNumber,
+                        city = newAddress.area
+                    )
+                    currentApiAddresses.add(newApiAddress)
+                }
+
+                Log.d(TAG, "Updating addresses: $currentApiAddresses")
+
+                customerUseCase(id = customerId.toString(), addresses = currentApiAddresses)
+                    .collect { updatedCustomer ->
+                        _updateAddressState.value = ResponseState.Success(updatedCustomer)
+                        getCustomerAddresses()
+                        _editingAddress.value = null
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save address: ${e.message}", e)
+                _updateAddressState.value = ResponseState.Failure(e)
+            }
+        }
+    }
+
+    fun getCustomerAddresses() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _addresses.value = emptyList()
+            try {
+                customerUseCase(customerId.toString()).collect { customer ->
+                    val uiAddresses = customer.addresses?.mapNotNull { apiAddress ->
+                        try {
+                            val address1Map = apiAddress.address1?.split("|")?.mapNotNull {
+                                val pair = it.split(":", limit = 2)
+                                if (pair.size == 2) pair[0] to pair[1] else null
+                            }?.toMap() ?: emptyMap()
+
+                            val address2Map = apiAddress.address2?.split("|")?.mapNotNull {
+                                val pair = it.split(":", limit = 2)
+                                if (pair.size == 2) pair[0] to pair[1] else null
+                            }?.toMap() ?: emptyMap()
+
+                            val lat = address1Map["lat"]?.toDoubleOrNull()
+                            val lon = address1Map["lon"]?.toDoubleOrNull()
+
+                            if (lat == null || lon == null) {
+                                Log.w(TAG, "Skipping address with invalid lat/lon: ${apiAddress.id}")
+                                return@mapNotNull null
+                            }
+
+                            Address(
+                                id = apiAddress.id,
+                                type = AddressType.valueOf(address1Map["type"] ?: AddressType.HOME.name),
+                                building = address1Map["building"] ?: "",
+                                street = address1Map["street"] ?: "",
+                                apartment = address1Map["apt"] ?: "",
+                                floor = address1Map["floor"] ?: "",
+                                area = address1Map["area"] ?: "",
+                                latitude = lat,
+                                longitude = lon,
+                                addressLabel = address2Map["label"] ?: "",
+                                additionalDirections = address2Map["directions"] ?: "",
+                                phoneNumber = apiAddress.phone ?: ""
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error parsing address ${apiAddress.id}", e)
+                            null
+                        }
+                    } ?: emptyList()
+
+                    _addresses.value = uiAddresses
+                    _isLoading.value = false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get customer addresses", e)
+                _addresses.value = emptyList()
+            }
+        }
+    }
+
+    private fun restoreFormState(address: Address) {
+        _formState.value = AddressFormState(
+            addressType = address.type,
+            buildingName = address.building,
+            aptNumber = address.apartment,
+            floor = address.floor ?: "",
+            street = address.street,
+            additionalDirections = address.additionalDirections ?: "",
+            addressLabel = address.addressLabel ?: "",
+            formattedAddress = "",
+            selectedCountry = ""
+        )
+    }
+
+    fun getCurrentCustomerMode()  : String{
+        return sharedPreferencesHelper.getCurrentUserMode()
+    }
+
 }
+
+data class AddressFormState(
+    val addressType: AddressType,
+    val buildingName: String,
+    val aptNumber: String,
+    val floor: String,
+    val street: String,
+    val additionalDirections: String,
+    val addressLabel: String,
+    val formattedAddress: String,
+    val selectedCountry: String
+)
