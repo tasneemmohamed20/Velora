@@ -13,6 +13,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.After
+import org.junit.Assert
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -53,6 +55,7 @@ class PaymentViewModelTest {
         paymentUseCase = mockk(relaxed = true)
         completeDraftOrder = mockk(relaxed = true)
         sharedPreferencesHelper = mockk(relaxed = true)
+        paymentViewModel = PaymentViewModel(paymentUseCase, completeDraftOrder, sharedPreferencesHelper)
     }
 
     @After
@@ -139,5 +142,36 @@ class PaymentViewModelTest {
 
         // Then
         assertTrue(paymentViewModel.showSuccessDialog.value)
+    }
+
+
+//    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `completeDraftOrder should show success dialog when completeDraftOrder returns true`() = runTest {
+        // Arrange
+        every { sharedPreferencesHelper.getCartDraftOrderId() } returns "12345"
+        coEvery { completeDraftOrder("12345") } returns true
+
+        // Act
+        paymentViewModel.completeDraftOrder()
+        advanceUntilIdle()
+
+        // Assert
+        Assert.assertTrue(paymentViewModel.showSuccessDialog.value)
+    }
+
+//    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `completeDraftOrder should show err dialog when completeDraftOrder returns false`() = runTest {
+        // Arrange
+        every { sharedPreferencesHelper.getCartDraftOrderId() } returns "12345"
+        coEvery { completeDraftOrder("12345") } returns false
+
+        // Act
+        paymentViewModel.completeDraftOrder()
+        advanceUntilIdle()
+
+        // Assert
+        assertFalse(paymentViewModel.showSuccessDialog.value)
     }
 }

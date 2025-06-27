@@ -1,10 +1,10 @@
 package com.example.m_commerce.presentation.account
 
 import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
-import com.example.m_commerce.domain.usecases.CustomerUseCase
-import io.mockk.mockk
-import org.junit.Before
 import com.example.m_commerce.domain.entities.Customer
+import com.example.m_commerce.domain.usecases.CustomerUseCase
+import com.example.m_commerce.presentation.utils.ResponseState
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import io.mockk.coEvery
 import io.mockk.every
@@ -41,6 +42,8 @@ class AccountViewModelTest {
         Dispatchers.setMain(testDispatcher)
         useCase = mockk(relaxed = true)
         sharedPreferencesHelper = mockk(relaxed = true)
+        every { sharedPreferencesHelper.getCurrentUserMode() } returns "Customer"
+        every { sharedPreferencesHelper.getCustomerId() } returns "1"
         viewModel = AccountViewModel(
             useCase,
             sharedPreferencesHelper,
@@ -53,35 +56,43 @@ class AccountViewModelTest {
     }
 
     @Test
-    fun `getCustomerData should update customerState and isLoading`() = runTest {
+    fun `getCustomerData should update customerState to Success`() = runTest {
         coEvery { useCase.invoke(any()) } returns flowOf(customer)
         viewModel.getCustomerData("1")
         testDispatcher.scheduler.advanceUntilIdle()
         val state = viewModel.customerState.first()
-        val loading = viewModel.isLoading.first()
-        assertEquals(customer, state)
-        assertFalse(loading)
+        assertTrue(state is ResponseState.Success)
+        assertEquals(customer, (state as ResponseState.Success).data)
     }
 
     @Test
     fun `getCustomerData should set error on exception`() = runTest {
-        val errorMsg = "Network error"
-        coEvery { useCase.invoke(any()) } returns flow { throw Exception(errorMsg) }
+        val exception = Exception("Network error")
+        coEvery { useCase.invoke(any()) } returns flow { throw exception }
         viewModel.getCustomerData("1")
         testDispatcher.scheduler.advanceUntilIdle()
-        val error = viewModel.error.first()
-        val loading = viewModel.isLoading.first()
-        assertEquals(errorMsg, error)
-        assertFalse(loading)
+        val state = viewModel.customerState.first()
+        assertTrue(state is ResponseState.Failure)
+        assertEquals(exception, (state as ResponseState.Failure).err)
     }
 
     @Test
     fun `init should call getCustomerData with id from SharedPreferencesHelper`() = runTest {
         coEvery { useCase.invoke(any()) } returns flowOf(customer)
-        every { sharedPreferencesHelper.getCustomerId() } returns 1L.toString()
+        every { sharedPreferencesHelper.getCustomerId() } returns "1"
         val vm = AccountViewModel(useCase, sharedPreferencesHelper)
         testDispatcher.scheduler.advanceUntilIdle()
         val state = vm.customerState.first()
-        assertEquals("1", state?.id)
+        assertTrue(state is ResponseState.Success)
+        assertEquals(customer, (state as ResponseState.Success).data)
+    }
+
+    @Test
+    fun `init should set Success state for Guest user`() = runTest {
+        every { sharedPreferencesHelper.getCurrentUserMode() } returns "Guest"
+        val vm = AccountViewModel(useCase, sharedPreferencesHelper)
+        testDispatcher.scheduler.advanceUntilIdle()
+        val state = vm.customerState.first()
+        assertTrue(state is ResponseState.Success)
     }
 }

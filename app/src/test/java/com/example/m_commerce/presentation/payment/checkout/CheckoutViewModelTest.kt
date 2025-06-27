@@ -12,8 +12,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -55,5 +58,35 @@ class CheckoutViewModelTest {
         checkoutViewModel.completeDraftOrder()
         testDispatcher.scheduler.advanceUntilIdle()
         assert(checkoutViewModel.showSuccessDialog.value)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `completeDraftOrder should show success dialog when completeDraftOrder returns true`() = runTest {
+        // Arrange
+        every { sharedPreferencesHelper.getCartDraftOrderId() } returns "12345"
+        coEvery { completeDraftOrder("12345") } returns true
+
+        // Act
+        checkoutViewModel.completeDraftOrder()
+        advanceUntilIdle()
+
+        // Assert
+        assertTrue(checkoutViewModel.showSuccessDialog.value)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `completeDraftOrder should show err dialog when completeDraftOrder returns false`() = runTest {
+        // Arrange
+        every { sharedPreferencesHelper.getCartDraftOrderId() } returns "12345"
+        coEvery { completeDraftOrder("12345") } returns false
+
+        // Act
+        checkoutViewModel.completeDraftOrder()
+        advanceUntilIdle()
+
+        // Assert
+        assertFalse(checkoutViewModel.showSuccessDialog.value)
     }
 }
