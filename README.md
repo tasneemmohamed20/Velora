@@ -1,7 +1,7 @@
 # Velora - Modern E-commerce Android App
 
 <p align="center">
-  <img src="app/src/main/res/drawable/logo_name.png" alt="Velora Logo" width="120" height="120"/>
+  <img src="app/src/main/res/drawable/logo_name.png" alt="Velora Logo" width="400" height="120"/>
 </p>
 
 <p align="center">
@@ -46,7 +46,6 @@ Velora is a modern, feature-rich e-commerce Android application built with cutti
 
 ### 🎨 User Experience
 - **Modern UI/UX**: Built with Jetpack Compose for smooth, native performance
-- **Dark/Light Theme**: Adaptive theming for comfortable viewing
 - **Onboarding**: Intuitive first-time user experience
 - **Offline Support**: Core features available without internet connection
 
@@ -90,8 +89,6 @@ Velora is a modern, feature-rich e-commerce Android application built with cutti
 ### Testing
 - **[JUnit](https://junit.org/junit4/)** - Unit testing framework
 - **[MockK](https://mockk.io/)** - Mocking library for Kotlin
-- **[Turbine](https://github.com/cashapp/turbine)** - Testing utilities for Flow
-- **[Espresso](https://developer.android.com/training/testing/espresso)** - UI testing framework
 
 ## 🚀 Getting Started
 
