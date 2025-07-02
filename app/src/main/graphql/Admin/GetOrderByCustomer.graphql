@@ -1,5 +1,5 @@
 query GetOrdersByCustomer($customerId: String!) {
-    orders(first: 10, query: $customerId) {
+    orders(first: 50, query: $customerId) {
         edges {
             node {
                 id

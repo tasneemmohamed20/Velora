@@ -4,6 +4,7 @@ import com.example.m_commerce.data.datasource.local.SharedPreferencesHelper
 import com.example.m_commerce.data.datasource.remote.restful.currency_exchange.ICurrencyExchangeRemoteDataSource
 import com.example.m_commerce.domain.entities.CurrencyExchangeResponse
 import com.example.m_commerce.domain.repository.ICurrencyExchangeRepository
+import com.example.m_commerce.presentation.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -14,10 +15,8 @@ class CurrencyExchangeRepositoryImp @Inject constructor(
     private val sharedPreferencesHelper: SharedPreferencesHelper
 ) : ICurrencyExchangeRepository {
 
-    private val currencyKey = "602456e1708f4ae9b5958fc4dbe404e6"
-
     override suspend fun getCurrencyExchangeRate(): Flow<CurrencyExchangeResponse> {
-        return remoteDataSource.getCurrencyExchangeRate(currencyKey)
+        return remoteDataSource.getCurrencyExchangeRate(Constants.CURRENCY_KEY)
     }
 
     override suspend fun getCurrencyPreference(): Boolean = withContext(Dispatchers.IO) {

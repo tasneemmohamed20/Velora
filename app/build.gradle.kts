@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -47,16 +49,51 @@ android {
                 "proguard-rules.pro"
             )
         }
+        all{
+            val keystoreFile = project.rootProject.file("api_key.properties")
+            val properties = Properties()
+            properties.load(keystoreFile.inputStream())
+
+            val adminUrl = properties.getProperty("ADMIN_URL") ?: ""
+            val storeUrl = properties.getProperty("STOREFRONT_URL") ?: ""
+            val adminToken = properties.getProperty("ADMIN_ACCESS_TOKEN") ?: ""
+            val storeToken = properties.getProperty("STOREFRONT_ACCESS_TOKEN") ?: ""
+
+            val publicKey = properties.getProperty("PUBLIC_KEY") ?: ""
+            val secretKey = properties.getProperty("SECRET_KEY") ?: ""
+            val apiKey = properties.getProperty("API_KEY") ?: ""
+            val baseUrl = properties.getProperty("BASE_URL") ?: ""
+            val onlineCardPaymentMethod = properties.getProperty("ONLINE_CARD_PAYMENT_METHOD_ID") ?: ""
+
+            val webClientId = properties.getProperty("WEB_CLIENT_ID") ?: ""
+            val mapsApiKey = properties.getProperty("MAPS_API_KEY") ?: ""
+            val currencyKey = properties.getProperty("CURRENCY_KEY") ?: ""
+
+            buildConfigField("String", "ADMIN_URL", "\"${properties.getProperty("ADMIN_URL")}\"")
+            buildConfigField("String", "STOREFRONT_URL", "\"${properties.getProperty("STOREFRONT_URL")}\"")
+            buildConfigField("String", "ADMIN_ACCESS_TOKEN", "\"${properties.getProperty("ADMIN_ACCESS_TOKEN")}\"")
+            buildConfigField("String", "STOREFRONT_ACCESS_TOKEN", "\"${properties.getProperty("STOREFRONT_ACCESS_TOKEN")}\"")
+            buildConfigField("String", "PUBLIC_KEY", "\"${properties.getProperty("PUBLIC_KEY")}\"")
+            buildConfigField("String", "SECRET_KEY", "\"${properties.getProperty("SECRET_KEY")}\"")
+            buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+            buildConfigField("String", "BASE_URL", "\"${properties.getProperty("BASE_URL")}\"")
+            buildConfigField("String", "ONLINE_CARD_PAYMENT_METHOD_ID", "\"${properties.getProperty("ONLINE_CARD_PAYMENT_METHOD_ID")}\"")
+            buildConfigField("String", "WEB_CLIENT_ID", "\"${properties.getProperty("WEB_CLIENT_ID")}\"")
+            buildConfigField("String", "MAPS_API_KEY", "\"${properties.getProperty("MAPS_API_KEY")}\"")
+            buildConfigField("String", "CURRENCY_KEY", "\"${properties.getProperty("CURRENCY_KEY")}\"")
+        }
+
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-//    buildFeatures { dataBinding = true }
     kotlinOptions {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -132,35 +169,35 @@ dependencies {
     implementation(libs.play.services.auth)
 
 
-    implementation ("com.google.code.gson:gson:2.10.1")
+    implementation (libs.gson)
 
     //slider
-    implementation("androidx.compose.material:material:1.9.0-alpha04")
+    implementation(libs.androidx.material)
 
-    implementation ("androidx.compose.foundation:foundation:1.4.3")
+    implementation (libs.androidx.foundation)
 
 
     // Dependencies for local unit tests
-    testImplementation ("junit:junit:4.13.2")
-    androidTestImplementation ("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation ("androidx.test.espresso:espresso-core:3.6.1")
+    testImplementation (libs.junit)
+    androidTestImplementation (libs.androidx.junit)
+    androidTestImplementation (libs.androidx.espresso.core)
 
     //MockK
-    testImplementation ("io.mockk:mockk-android:1.13.17")
-    testImplementation ("io.mockk:mockk-agent:1.13.17")
+    testImplementation (libs.mockk.android)
+    testImplementation (libs.mockk.agent)
 
 
     //kotlinx-coroutines
     val coroutinesVersion = "1.10.1"
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
-    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+    implementation (libs.kotlinx.coroutines.android)
+    testImplementation (libs.kotlinx.coroutines.test)
+    androidTestImplementation (libs.jetbrains.kotlinx.coroutines.test)
 
     // InstantTaskExecutorRule
-    testImplementation ("androidx.arch.core:core-testing:2.1.0")
-    androidTestImplementation ("androidx.arch.core:core-testing:2.1.0")
+    testImplementation (libs.androidx.core.testing)
+    androidTestImplementation (libs.androidx.core.testing)
 
-    testImplementation("app.cash.turbine:turbine:1.2.0")
+    testImplementation(libs.turbine)
 
     // paymob
 
@@ -170,6 +207,6 @@ dependencies {
     implementation (libs.lottie.compose)
     testImplementation(kotlin("test"))
 
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
 
 }
